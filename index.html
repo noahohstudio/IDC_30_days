@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>30 days | Noah Oh</title>
+<meta name="description" content="Thirty days of making, one thing a day, for Interactive Design Concepts. Shown in the language of noaoh.com.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='9' r='7' fill='%235b77e8'/%3E%3Ccircle cx='8.5' cy='22' r='7' fill='%23e8604f'/%3E%3Ccircle cx='23.5' cy='22' r='7' fill='%23f2c94c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.add("js");setTimeout(function(){var r=document.documentElement;if(!("ready" in r.dataset))r.classList.remove("js")},4000)</script>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js", "opentype.js": "./vendor/opentype.module.js" } }</script>
+<script type="module" src="main.js"></script>
+</head>
+<body>
+
+<!-- The site's loader: the glass's three circles pop in, fade in the same order, then the page is there -->
+<div class="loader" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Under 1100px: the frosted bar that hangs from the top -->
+<header class="nav" data-nav>
+  <div class="nav-inner">
+    <a class="nav-name" href="#top" data-flip data-link>30 days</a>
+    <p class="nav-at" aria-live="off"><span data-nav-at>week one</span></p>
+  </div>
+</header>
+
+<!-- 1100px and up: the index down the left -->
+<div class="rail">
+  <p class="crumb"><a href="#top" data-flip data-link>noah oh</a><span class="here"> / 30 days</span></p>
+  <nav class="side" aria-label="Index">
+    <ul class="pages">
+      <li data-path>
+        <a href="#top" data-flip data-link>week one</a>
+        <ul class="days drop" style="--rows: 8">
+          <li style="--i: 0"><a href="#d1" data-flip data-link>boomloom</a></li>
+          <li style="--i: 1"><a href="#d2" data-flip data-link>kino workflow</a></li>
+          <li style="--i: 2"><a href="#d3" data-flip data-link>the desk</a></li>
+          <li style="--i: 3"><a href="#d4" data-flip data-link>kino vote</a></li>
+          <li style="--i: 4"><a href="#d5" data-flip data-link>palit</a></li>
+          <li style="--i: 5"><a href="#d6" data-flip data-link>konami code</a></li>
+          <li style="--i: 6"><a href="#d7" data-flip data-link>copy editor</a></li>
+          <li style="--i: 7"><a href="#d8" data-flip data-link>this page</a></li>
+        </ul>
+      </li>
+      <li data-soon><span>week two</span></li>
+      <li data-soon><span>week three</span></li>
+      <li data-soon><span>week four</span></li>
+    </ul>
+  </nav>
+</div>
+
+<main id="main">
+
+  <section class="lander" id="top">
+    <h1 class="name" data-flip data-link data-exact data-fit>30 days</h1>
+    <p class="sentence" data-flip data-link>of making, one thing a day. Week one: two case studies, the tools behind them, and a few surprises on my site.</p>
+    <dl class="facts">
+      <div><dt>Course</dt><dd>Interactive Design Concepts</dd></div>
+      <div><dt>Week one</dt><dd>Oct 23 to Oct 30</dd></div>
+      <div><dt>Today</dt><dd>Day 8 of 30</dd></div>
+    </dl>
+  </section>
+
+  <!-- Day 1 -->
+  <section class="day" id="d1" data-day="d1, boomloom">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 1</h2>
+      <p class="day-date">Fri, Oct 23</p>
+    </header>
+
+    <div class="piece" data-reveal>
+      <div class="zine"><div class="zine-stage" data-zine></div></div>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">BoomLoom case study · The zine</p>
+      <h3 class="headline"><span data-flip>The manual teaches you to walk; the zine teaches you to fly.</span><span class="mark" data-mark="Click a page, swipe, or press the arrow keys to turn it."></span></h3>
+      <p class="body">The zine, ready to page through: click or swipe a page and it rolls over from the spine, lit from the upper left. Click fast and it riffles.</p>
+      <p class="credit">The page-turn is inspired by <a href="https://paper.design/mono">Paper Mono</a> by <a href="https://paper.design">Paper</a>.</p>
+    </div>
+
+    <div class="piece piece-glyphs" data-reveal>
+      <div class="glyphs" data-glyphs></div>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">BoomLoom case study · The typeface</p>
+      <h3 class="headline"><span data-flip>An interactive specimen for BoomLoom Display.</span><span class="mark" data-mark="Pick a letter. In Outline, pull a point with the pen and let go; Fill shows the finished letter."></span></h3>
+      <p class="body">Pick a letter to see the rings it was drawn on. In Outline, pull a point with the pen and it springs back; Fill shows the finished letter.</p>
+    </div>
+  </section>
+
+  <!-- Day 2 -->
+  <section class="day" id="d2" data-day="d2, kino workflow">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 2</h2>
+      <p class="day-date">Sat, Oct 24</p>
+    </header>
+    <div class="piece" data-reveal>
+      <figure class="loop loop-wide" data-loop data-once-row>
+        <video muted loop playsinline preload="none" poster="assets/kino/one-change-r6-poster.webp"
+          data-mov="assets/kino/one-change-r6.mov" data-webm="assets/kino/one-change-r6.webm" data-mp4="assets/kino/one-change-r6-preview.mp4"
+          aria-label="One change, start to finish: the web Home's top bar lifts away piece by piece, the page's pieces move into place, a left rail slides in, then it goes live"></video>
+      </figure>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">Kino case study · How we worked</p>
+      <h3 class="headline"><span data-flip>Our workflow, animated: one change, start to finish.</span></h3>
+      <p class="body">A note on the web Home, then the change itself: the top bar lifts away piece by piece, the page moves into its new places, and a left rail slides in. Then it goes live on the prototype, and the founder ports it to the real app.</p>
+    </div>
+  </section>
+
+  <!-- Day 3 -->
+  <section class="day" id="d3" data-day="d3, the desk">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 3</h2>
+      <p class="day-date">Sun, Oct 25</p>
+    </header>
+    <div class="piece" data-reveal>
+      <div class="desk-piece" data-desk-piece>
+        <!-- The command and its format -->
+        <div class="skill">
+          <div class="term">
+            <p class="term-line"><span class="term-caret">›</span> /desk</p>
+            <p class="term-reply">A desk at /desk, local only. Areas: Site, Case studies, System, Process. Building the core now.</p>
+          </div>
+          <div class="file">
+            <p class="file-path">~/.claude/skills/desk/SKILL.md</p>
+            <div class="file-body">
+              <p class="fm">---<br>name: desk<br>description: Set up or run a Desk, a local-only dashboard inside a project…<br>---</p>
+              <p class="h1"># Desk</p>
+              <p class="h2"># # When this runs</p>
+              <p class="h2"># # Setup</p>
+              <p class="h2"># # The desk</p>
+              <p class="h3" data-part="now"><span># # #</span> Now</p>
+              <p class="h3" data-part="review"><span># # #</span> Review</p>
+              <p class="h3" data-part="feedback"><span># # #</span> Feedback</p>
+              <p class="h3" data-part="logs"><span># # #</span> Logs</p>
+              <p class="h3" data-part="grows"><span># # #</span> Grows into</p>
+              <p class="h3" data-part="data"><span># # #</span> Data</p>
+              <p class="h2"># # Working agreement</p>
+              <p class="h2"># # Language</p>
+              <p class="h2" data-part="look"># # Look</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- The desk it built -->
+        <div class="desk" aria-label="The desk built from the format">
+          <div class="desk-head">
+            <p class="desk-title">Desk</p>
+            <p class="desk-pages"><span aria-current="page">Desk</span><span data-zone="logs">Logs</span><span data-zone="grows">Copy</span></p>
+          </div>
+          <dl class="desk-slate" data-zone="data">
+            <div><dt>Waiting on you</dt><dd>2</dd></div>
+            <div><dt>In progress</dt><dd>1</dd></div>
+            <div><dt>Changes planned</dt><dd>6</dd></div>
+            <div><dt>Open feedback</dt><dd>3</dd></div>
+          </dl>
+          <div class="desk-block" data-zone="now">
+            <p class="desk-h">Now</p>
+            <div class="board">
+              <div class="col"><p class="col-t">Waiting on you <span>2</span></p>
+                <div class="card"><p class="meta"><b>P5</b> Kino · Oct 25</p><p class="t">Pick the hero loop</p></div>
+                <div class="card"><p class="meta"><b>P4.5</b> Copy · Oct 25</p><p class="t">Approve the vote's headline</p></div>
+              </div>
+              <div class="col"><p class="col-t">In progress <span>1</span></p>
+                <div class="card"><p class="meta"><b>P5</b> BoomLoom · Oct 25</p><p class="t">Zine: slower page-turn <i class="new" title="New since you last looked"></i></p></div>
+              </div>
+              <div class="col"><p class="col-t">Next <span>2</span></p>
+                <div class="card"><p class="meta"><b>P4</b> Site · Oct 24</p><p class="t">About page photos</p></div>
+                <div class="card"><p class="meta"><b>P3</b> System · Oct 24</p><p class="t">Four sizes, one typeface</p></div>
+              </div>
+              <div class="col"><p class="col-t">Done lately <span>2</span></p>
+                <div class="card"><p class="meta">Site · Oct 25</p><p class="t">Glass nav</p></div>
+                <div class="card"><p class="meta">Kino · Oct 24</p><p class="t">Seamless loops</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="desk-block" data-zone="review">
+            <p class="desk-h">Review</p>
+            <div class="review">
+              <div class="shot">
+                <img src="assets/kino/vote-tile-03-edge-poster.webp" alt="" loading="lazy">
+                <span class="pin" style="left: 46%; top: 38%">1</span>
+                <span class="pin" style="left: 62%; top: 70%">2</span>
+              </div>
+              <div class="review-words">
+                <p class="t">Kino: the vote</p>
+                <p class="meta">Round 2 · 2 notes · Push</p>
+                <p class="note"><span class="pin pin-s">1</span> The dots could sit on the edge.</p>
+                <p class="note"><span class="pin pin-s">2</span> A little more room under the poster.</p>
+              </div>
+            </div>
+          </div>
+          <div class="desk-block" data-zone="feedback">
+            <p class="desk-h">Feedback</p>
+            <p class="row"><span class="meta">Oct 25 · Polish</span><span>Loops should loop seamlessly.</span><span class="meta">Applied</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">My site · /desk</p>
+      <h3 class="headline"><span data-flip>One command sets up a working record: the format, then the desk built from it.</span><span class="mark" data-mark="Point at a part of the format to find it on the desk."></span></h3>
+      <p class="body">I wrote /desk as a Claude Code skill. Typed in any project, it reads the work and builds a local-only dashboard: tasks on Now, screens to pin notes on in Review, dated feedback, and logs of every decision. Point at a part of the format to find it on the desk.</p>
+    </div>
+  </section>
+
+  <!-- Day 4 -->
+  <section class="day" id="d4" data-day="d4, kino vote">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 4</h2>
+      <p class="day-date">Mon, Oct 26</p>
+    </header>
+    <div class="piece" data-reveal>
+      <ul class="steps" data-row style="--count: 3" data-turns="0.7,3.7;3.7,6.7;6.7,9.7">
+        <li class="step">
+          <figure class="loop loop-tall"><video muted loop playsinline preload="none" poster="assets/kino/vote-tile-01-under-poster.webp"
+            data-mov="assets/kino/vote-tile-01-under.mov" data-webm="assets/kino/vote-tile-01-under.webm" data-mp4="assets/kino/vote-tile-01-under-preview.mp4"
+            aria-label="A vote on an iPhone, voters' dots under each poster"></video></figure>
+          <p class="step-t">Under the poster</p><p class="step-b">Felt disconnected.</p>
+        </li>
+        <li class="step">
+          <figure class="loop loop-tall"><video muted loop playsinline preload="none" poster="assets/kino/vote-tile-02-on-poster.webp"
+            data-mov="assets/kino/vote-tile-02-on.mov" data-webm="assets/kino/vote-tile-02-on.webm" data-mp4="assets/kino/vote-tile-02-on-preview.mp4"
+            aria-label="The same vote with voters' dots on each poster, over the art"></video></figure>
+          <p class="step-t">On the poster</p><p class="step-b">Felt cluttered.</p>
+        </li>
+        <li class="step">
+          <figure class="loop loop-tall"><video muted loop playsinline preload="none" poster="assets/kino/vote-tile-03-edge-poster.webp"
+            data-mov="assets/kino/vote-tile-03-edge.mov" data-webm="assets/kino/vote-tile-03-edge.webm" data-mp4="assets/kino/vote-tile-03-edge-preview.mp4"
+            aria-label="The same vote with voters' dots on each poster's bottom edge"></video></figure>
+          <p class="step-t">On the edge</p><p class="step-b">Touches the poster, never covers it.</p>
+        </li>
+        <li class="turn-dot" aria-hidden="true"></li>
+      </ul>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">Kino mockups · The vote</p>
+      <h3 class="headline"><span data-flip>Small decisions were tested like big ones.</span></h3>
+      <p class="body">People are dots in Kino, so a vote is dots on posters. Three iterations on one real vote, each playing in turn while the signature dot slides under it: under the poster, on it, and on its edge, where they stayed.</p>
+    </div>
+  </section>
+
+  <!-- Day 5 -->
+  <section class="day" id="d5" data-day="d5, palit">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 5</h2>
+      <p class="day-date">Tue, Oct 27</p>
+    </header>
+    <div class="piece" data-reveal>
+      <div class="frame" data-frame data-w="1440" data-h="900">
+        <div class="frame-inner">
+          <iframe src="https://noahohstudio.github.io/Palit/" title="The Palit overview site, live" loading="lazy"></iframe>
+        </div>
+        <a class="frame-open" href="https://noahohstudio.github.io/Palit/" target="_blank" rel="noopener">Open ↗</a>
+      </div>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">Palit · Overview site</p>
+      <h3 class="headline"><span data-flip>An overview site anyone can see, with the dashboard locked behind Admin.</span><span class="mark" data-mark="The live site, framed. Scroll it, or try Admin."></span></h3>
+      <p class="body">The public overview shows the preview. Everything behind Admin, the dashboard, its tables and where its pages lead, ships encrypted with the password, so nothing can be read or followed before it's entered.</p>
+    </div>
+  </section>
+
+  <!-- Day 6 -->
+  <section class="day" id="d6" data-day="d6, konami code">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 6</h2>
+      <p class="day-date">Wed, Oct 28</p>
+    </header>
+    <div class="piece" data-reveal>
+      <div class="konami" data-hint>
+        <p class="konami-ask" data-flip>Do you know the Konami code?</p>
+        <div class="konami-keys" role="group" aria-label="The Konami code; press the keys in order">
+          <button type="button" data-key="arrowup" aria-label="Up">↑</button>
+          <button type="button" data-key="arrowup" aria-label="Up">↑</button>
+          <button type="button" data-key="arrowdown" aria-label="Down">↓</button>
+          <button type="button" data-key="arrowdown" aria-label="Down">↓</button>
+          <button type="button" data-key="arrowleft" aria-label="Left">←</button>
+          <button type="button" data-key="arrowright" aria-label="Right">→</button>
+          <button type="button" data-key="arrowleft" aria-label="Left">←</button>
+          <button type="button" data-key="arrowright" aria-label="Right">→</button>
+          <button type="button" data-key="b">B</button>
+          <button type="button" data-key="a">A</button>
+        </div>
+        <p class="konami-how">Type it anywhere on the page, or press the keys.</p>
+      </div>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">My site · Easter eggs</p>
+      <h3 class="headline"><span data-flip>The Konami code turns the whole page over.</span><span class="mark" data-mark="Type up, up, down, down, left, right, left, right, B, A."></span></h3>
+      <p class="body">The letters on screen turn over in a loose wave, the white page blushes pink, one soft gradient flows across from periwinkle to gold, and the glass's shapes burst up from the bottom and fall away. Pictures never change.</p>
+    </div>
+  </section>
+
+  <!-- Day 7 -->
+  <section class="day" id="d7" data-day="d7, copy editor">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 7</h2>
+      <p class="day-date">Thu, Oct 29</p>
+    </header>
+    <div class="piece" data-reveal>
+      <div class="copy" data-copy>
+        <nav class="copy-index" aria-label="Copy index">
+          <p class="copy-crumb">desk / copy</p>
+          <ul>
+            <li data-at><a href="#copy-vote">the vote</a></li>
+            <li><a href="#copy-web">the web</a></li>
+            <li data-soon><span>the rest of kino</span></li>
+            <li data-soon><span>how we worked</span></li>
+          </ul>
+        </nav>
+        <div class="copy-lines">
+          <div class="copy-part" id="copy-vote">
+            <p class="copy-part-t">Kino · The vote</p>
+            <div class="line" tabindex="0"><span class="role">Label</span><span class="text">The vote</span></div>
+            <div class="line" tabindex="0"><span class="role">Headline</span><span class="text">Small decisions were tested like big ones: no feature was unconsidered.</span></div>
+            <div class="line" tabindex="0" data-changed="Was: “Every decision was tested.” Shorter, and it names the feature."><span class="role">Body</span><span class="text">People are dots in Kino, so a vote is dots on posters, and they have to show who wants what without hiding the films.</span></div>
+            <div class="line" tabindex="0"><span class="role">Tile</span><span class="text">Under the poster. Felt disconnected.</span></div>
+            <div class="line" tabindex="0"><span class="role">Tile</span><span class="text">On the edge. Touches the poster, never covers it.</span></div>
+          </div>
+          <div class="copy-part" id="copy-web">
+            <p class="copy-part-t">Kino · The web</p>
+            <div class="line" tabindex="0"><span class="role">Headline</span><span class="text">The web isn't a stretched phone.</span></div>
+            <div class="line" tabindex="0" data-open><span class="role">Body</span><span class="text">A cursor can do what a thumb can't. Explore became piles of [?] movies that burst as you hover.</span></div>
+          </div>
+        </div>
+        <div class="copy-thumbs" aria-hidden="true">
+          <div class="copy-sticky">
+            <img src="assets/kino/vote-tile-01-under-poster.webp" alt="" loading="lazy">
+            <img src="assets/kino/vote-tile-03-edge-poster.webp" alt="" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="words" data-reveal>
+      <p class="label">My site · Copy, and the index</p>
+      <h3 class="headline"><span data-flip>Every line of a case study, in reading order, each taking a note.</span><span class="mark" data-mark="Click a line to leave a note on it. Command or Control and Return saves."></span></h3>
+      <p class="body">The copy editor lays out every line beside the pictures it sits with, so I can see what I'm writing about. Click a line to leave a note; a changed line carries a dot with what it was. The same day, the index down the left became my site's nav, as it is on this page.</p>
+    </div>
+  </section>
+
+  <!-- Day 8 -->
+  <section class="day" id="d8" data-day="d8, this page">
+    <header class="day-head" data-reveal>
+      <h2 class="day-n" data-flip>Day 8</h2>
+      <p class="day-date">Fri, Oct 30</p>
+    </header>
+    <div class="words" data-reveal>
+      <p class="label">This page</p>
+      <h3 class="headline"><span data-flip>A day-by-day record of the month, built from my site's own pieces.</span></h3>
+      <p class="body">One page, one week so far: the glass nav and the index, the mirrored letters, the grain, the loops and the count below, each lifted from noaoh.com.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="count" data-count>
+    <p class="number" aria-hidden="true" data-exact data-count-number><span class="zeros" data-flip></span><span data-flip data-count-digits>08</span></p>
+    <p class="caption"><span class="visually-hidden">8 </span>days of 30 so far.</p>
+  </div>
+  <div class="small">
+    <p class="since"><span data-flip>© 2026 Noah Oh</span></p>
+    <p class="links"><span>Interactive Design Concepts</span></p>
+    <div class="hint" data-hint>
+      <p class="hint-text"><span class="hint-size" aria-hidden="true">Do you know the Konami code?</span><span data-hint-text data-flip>Do you know the Konami code?</span></p>
+      <div class="keys" aria-hidden="true"><kbd>↑</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd><kbd>←</kbd><kbd>→</kbd><kbd>B</kbd><kbd>A</kbd></div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
