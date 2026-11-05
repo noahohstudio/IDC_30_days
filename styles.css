@@ -1037,18 +1037,17 @@ html[data-bands] :is(.seq-frames, .compare, .comps, .film img, .stats) { positio
 .compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
 .compare:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
 
-/* ---------- Day 12: the title rises to the middle of the screen and holds there while the film passes it ----------
-   A sticky line with no height, so the prints run on under it. The title is white, blended by difference: black on the
-   page, and the inverse of whatever print is passing behind it. */
+/* ---------- Day 12: the title rises to the middle of the screen and holds there while the film passes over it ----------
+   A sticky line with no height, so the prints run on past it. The prints sit above the title and hide it as they pass;
+   it shows only in the gaps between them. */
 
 .film-stage { position: relative; }
 .film-hold {
-  position: sticky; top: 50svh; z-index: 3;
+  position: sticky; top: 50svh; z-index: 0;
   height: 0;
-  color: #fff;
-  mix-blend-mode: difference;
   pointer-events: none;
 }
+.film { position: relative; z-index: 1; }
 .film-head { translate: 0 -50%; text-align: center; }
 .film-n {
   font-size: clamp(3.5rem, 12vw, 10rem);
