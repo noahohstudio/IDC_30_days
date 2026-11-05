@@ -205,12 +205,14 @@ run("side scroll", () => {
     }
   };
 
-  // Day 14's slides in two lanes: the top lane bigger and faster, the bottom smaller and slower, both quicker than the
-  // page, so they fly past the held title. `u` is how far the panel has come in from the right edge. Each lane's first
-  // slide waits just off the right edge as the panel pins, the bottom lane a little later (`after`, a share of the screen).
+  // Day 14's slides in two lanes, both quicker than the page, so they fly past the held title and over it: the top lane
+  // hangs from near the top, the bottom one stands near the bottom, and the bigger slides reach into the title and its
+  // words. `u` is how far the panel has come in from the right edge. Each lane's first slide waits just off the right
+  // edge as the panel pins, the bottom lane a little later (`after`, a share of the screen). Sizes and drops are shares of
+  // the screen's height, one per slide in the lane, so no two neighbours match.
   const LANES = [
-    { top: 0.03, size: 0.3, speed: 1.6, gap: 0.25, after: 0.05 },
-    { top: 0.69, size: 0.22, speed: 1.25, gap: 0.25, after: 0.3 },
+    { edge: "top", at: 0.05, speed: 1.6, gap: 0.22, after: 0.05, sizes: [0.36, 0.22, 0.42, 0.27, 0.33, 0.2, 0.4, 0.26], drops: [0, 0.05, 0.01, 0.08, 0.03, 0.1, 0, 0.05] },
+    { edge: "bottom", at: 0.05, speed: 1.25, gap: 0.22, after: 0.3, sizes: [0.22, 0.36, 0.26, 0.4, 0.19, 0.32, 0.24, 0.38], drops: [0.06, 0, 0.09, 0.02, 0.04, 0.01, 0.07, 0] },
   ];
   const layFly = () => {
     if (!flyPanel) return;
@@ -223,16 +225,21 @@ run("side scroll", () => {
     const H = pin.clientHeight - (parseFloat(getComputedStyle(pin).paddingTop) || 0);
     const pad = parseFloat(getComputedStyle(track).paddingRight) || 0;
     let reach = 0;
+    const next = LANES.map((lane) => lane.speed * (vw - pad) + lane.after * vw); // where each lane's next slide starts
     cards.forEach((card, i) => {
-      const lane = LANES[i % 2];
-      const k = Math.floor(i / 2);
-      const h = lane.size * H;
+      const l = i % 2;
+      const lane = LANES[l];
+      const k = Math.floor(i / 2) % lane.sizes.length;
+      const h = lane.sizes[k] * H;
       const w = (h * 16) / 9;
-      const x = lane.speed * (vw - pad) + lane.after * vw + k * w * (1 + lane.gap);
+      const x = next[l];
+      next[l] += w * (1 + lane.gap);
+      const y = lane.edge === "top" ? (lane.at + lane.drops[k]) * H : H - (lane.at + lane.drops[k]) * H - h;
       card.dataset.speed = lane.speed;
       card.style.width = `${w}px`;
       card.style.left = `${x}px`;
-      card.style.top = `${lane.top * H}px`;
+      card.style.top = `${y}px`;
+      card.style.zIndex = Math.round(lane.sizes[k] * 100); // the bigger the slide, the nearer
       reach = Math.max(reach, (x + vw + w) / lane.speed); // when the last of the lane has left on the left
     });
     flyPanel.style.height = `${H}px`;
