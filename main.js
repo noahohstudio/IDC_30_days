@@ -206,10 +206,11 @@ run("side scroll", () => {
   };
 
   // Day 14's slides in two lanes: the top lane bigger and faster, the bottom smaller and slower, both quicker than the
-  // page, so they fly past the held title. `u` is how far the panel has come in from the right edge.
+  // page, so they fly past the held title. `u` is how far the panel has come in from the right edge. Each lane's first
+  // slide waits just off the right edge as the panel pins, the bottom lane a little later (`after`, a share of the screen).
   const LANES = [
-    { top: 0.03, size: 0.3, speed: 1.6, gap: 0.35, start: 0.35 },
-    { top: 0.69, size: 0.22, speed: 1.25, gap: 0.3, start: 0.5 },
+    { top: 0.03, size: 0.3, speed: 1.6, gap: 0.25, after: 0.05 },
+    { top: 0.69, size: 0.22, speed: 1.25, gap: 0.25, after: 0.3 },
   ];
   const layFly = () => {
     if (!flyPanel) return;
@@ -227,7 +228,7 @@ run("side scroll", () => {
       const k = Math.floor(i / 2);
       const h = lane.size * H;
       const w = (h * 16) / 9;
-      const x = lane.speed * vw * lane.start + k * w * (1 + lane.gap);
+      const x = lane.speed * (vw - pad) + lane.after * vw + k * w * (1 + lane.gap);
       card.dataset.speed = lane.speed;
       card.style.width = `${w}px`;
       card.style.left = `${x}px`;
@@ -307,7 +308,6 @@ run("anchors", () => {
 run("index", () => {
   const days = [...document.querySelectorAll("[data-day]")];
   const links = new Map([...document.querySelectorAll('.side a[href^="#d"]')].map((a) => [a.getAttribute("href").slice(1), a.parentElement]));
-  const marks = new Map([...document.querySelectorAll(".hs-days a")].map((a) => [a.getAttribute("href").slice(1), a.parentElement]));
   const weeks = [...document.querySelectorAll(".side [data-week]")];
   const at = document.querySelector("[data-nav-at]");
   let current = null;
@@ -325,7 +325,6 @@ run("index", () => {
     if (id === current) return;
     current = id;
     links.forEach((li, key) => li.toggleAttribute("data-at", key === id));
-    marks.forEach((li, key) => li.toggleAttribute("data-at", key === id));
     const week = here?.closest("#week-two") ? "week-two" : "week-one";
     weeks.forEach((li) => li.toggleAttribute("data-path", li.dataset.week === week));
     if (at) {

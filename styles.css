@@ -908,13 +908,12 @@ html[data-konami-run] .keys kbd { opacity: 1; }
   line-height: 0.9;
 }
 .week-dates { color: var(--muted); font-size: var(--size-title); font-weight: var(--weight-medium); letter-spacing: var(--tracking-tight); }
-.week-cue { display: inline-block; margin-left: var(--space-2); color: var(--ink); }
 .week { padding-top: var(--space-10); }
 .week > .week-head { padding-top: 0; }
 
-/* ---------- Week two: a side scroll ----------
-   Stacked like week one by default (phones, reduced motion). On wide screens main.js turns it on: the track pins to the
-   screen and the page's scroll carries it sideways, one pixel across for each pixel down. */
+/* ---------- Day 14: a side scroll ----------
+   Stacked by default (phones, reduced motion). On wide screens main.js turns it on: the panel pins to the screen and the
+   page's scroll carries it sideways, a pixel across for each pixel down, while the slides fly past its held title. */
 
 .hs { position: relative; margin-inline: calc(-1 * var(--gutter)); }
 .hs-track { display: flex; flex-direction: column; padding-inline: var(--gutter); }
@@ -927,9 +926,7 @@ html[data-konami-run] .keys kbd { opacity: 1; }
   line-height: 0.95;
 }
 .panel-words { max-width: min(var(--column), 100%); padding-top: var(--space-5); position: relative; z-index: 1; }
-.hs-days { display: none; }
 
-.hs[data-on] { --vis-h: clamp(240px, calc(100svh - 340px), 640px); }
 .hs[data-on] .hs-pin {
   position: sticky; top: 0;
   height: 100svh;
@@ -937,48 +934,20 @@ html[data-konami-run] .keys kbd { opacity: 1; }
   display: flex; flex-direction: column; justify-content: center;
   padding-top: var(--nav-h);
 }
-.hs[data-on] .hs-track {
-  flex-direction: row; align-items: flex-start;
-  gap: var(--space-9);
-  width: max-content;
-  will-change: transform;
-}
-.hs[data-on] .panel {
-  flex: none;
-  width: calc((var(--vis-h) - var(--below, 0px)) * var(--ar, 1.778));
-  padding-top: 0;
-}
-.hs[data-on] .panel-film { width: max-content; }
-.hs[data-on] .panel-head { padding-bottom: var(--space-4); }
-.hs[data-on] .panel-n { font-size: clamp(2rem, 3vw, 2.75rem); }
-.hs[data-on] .panel-words { padding-top: var(--space-4); max-width: min(var(--column), 100%); }
-.hs[data-on] .panel-words .body { padding-top: var(--space-2); }
-
-/* The days, along the bottom: where you are in ink */
-.hs[data-on] .hs-days {
-  position: absolute; left: var(--gutter); bottom: var(--space-5);
-  display: flex; gap: var(--space-4);
-  padding: 0; list-style: none;
-  font-size: var(--size-small); font-weight: var(--weight-medium);
-  font-variant-numeric: tabular-nums;
-}
-.hs-days a { color: rgb(0 0 0 / 0.24); text-decoration: none; transition: color var(--dur-fast) ease; }
-.hs-days li[data-at] a, .hs-days a:hover { color: var(--ink); }
+.hs[data-on] .hs-track { flex-direction: row; align-items: center; width: max-content; will-change: transform; }
+.hs[data-on] .panel { flex: none; padding-top: 0; }
+.hs[data-on] [data-hold] { will-change: transform; }
 
 @media (min-width: 1100px) {
   .hs[data-on] .hs-pin { padding-top: 0; clip-path: inset(0 0 0 calc(var(--gutter) - 40px)); }
 }
 
-/* While the Konami code runs, the pinned week sits above its colors, so its pictures never change */
+/* While the Konami code runs, pictures sit above its colors, so they never change */
 html[data-bands] .hs[data-on] .hs-pin { z-index: 61; }
-html[data-bands] :is(.seq-frames, .compare, .deck-frame, .comps, .film, .stats) { position: relative; z-index: 61; }
-
-/* A soft lift for the work, as on the cards */
-.lift { box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 40px rgb(0 0 0 / 0.07); }
+html[data-bands] :is(.seq-frames, .compare, .comps, .film img, .stats) { position: relative; z-index: 61; }
 
 /* ---------- A sequence of slides that take turns, with the dot under the step ---------- */
 
-.panel:has(.seq) { --below: 40px; }
 .seq-frames {
   position: relative;
   width: 100%;
@@ -1013,16 +982,12 @@ html[data-bands] :is(.seq-frames, .compare, .deck-frame, .comps, .film, .stats) 
   cursor: default;
 }
 
-/* ---------- Day 10: a loop beside three of the survey's slides ---------- */
+/* ---------- Day 10: the loop, then three of the survey's slides ---------- */
 
 .panel-split { display: flex; flex-direction: column; gap: var(--space-3); }
 .panel-split .loop { width: 100%; }
-.stats { display: flex; gap: var(--space-2); }
-.stats img { width: calc((100% - 2 * var(--space-2)) / 3); aspect-ratio: 16 / 9; object-fit: cover; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06); }
-.hs[data-on] .panel-split { flex-direction: row; height: var(--vis-h); }
-.hs[data-on] .panel-split .loop { width: auto; height: 100%; aspect-ratio: 16 / 9; flex: none; }
-.hs[data-on] .stats { flex-direction: column; height: 100%; }
-.hs[data-on] .stats img { width: auto; height: calc((100% - 2 * var(--space-2)) / 3); }
+.stats { display: flex; gap: var(--space-3); }
+.stats img { width: calc((100% - 2 * var(--space-3)) / 3); aspect-ratio: 16 / 9; object-fit: cover; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06); }
 
 /* ---------- Day 11: before and after ---------- */
 
@@ -1072,22 +1037,46 @@ html[data-bands] :is(.seq-frames, .compare, .deck-frame, .comps, .film, .stats) 
 .compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
 .compare:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
 
-/* ---------- Day 12: the film, at one height ---------- */
+/* ---------- Day 12: the title rises to the middle of the screen and holds there while the film passes it ----------
+   A sticky line with no height, so the prints run on under it. The title is white, blended by difference: black on the
+   page, and the inverse of whatever print is passing behind it. */
 
-.film {
-  display: flex; gap: var(--space-3);
-  height: clamp(220px, 50vw, 520px);
-  overflow-x: auto;
-  scrollbar-width: none;
+.film-stage { position: relative; }
+.film-hold {
+  position: sticky; top: 50svh; z-index: 3;
+  height: 0;
+  color: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
 }
-.film img { flex: none; height: 100%; width: auto; aspect-ratio: var(--ar); object-fit: cover; }
-.hs[data-on] .film { height: var(--vis-h); overflow: visible; }
+.film-head { translate: 0 -50%; text-align: center; }
+.film-n {
+  font-size: clamp(3.5rem, 12vw, 10rem);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tight);
+  line-height: 0.88;
+}
+.film-date { padding-top: var(--space-2); font-size: var(--size-title); font-weight: var(--weight-medium); letter-spacing: var(--tracking-tight); }
+.film {
+  display: flex; flex-direction: column;
+  gap: clamp(64px, 16svh, 180px);
+  padding-block: 40svh 30svh;
+}
+/* Large, but never the whole screen */
+.film { container-type: inline-size; }
+.film img { aspect-ratio: var(--ar); width: auto; height: min(78svh, min(80cqw, 1000px) / var(--ar)); object-fit: cover; }
+.film img[data-side="left"] { align-self: flex-start; }
+.film img[data-side="right"] { align-self: flex-end; }
+.film img[data-side="center"] { align-self: center; }
+@media (max-width: 719px) {
+  .film img { height: min(78svh, 100cqw / var(--ar)); align-self: center !important; }
+}
 
-/* ---------- Day 13: the tools, side by side; point at one for its name ---------- */
+/* ---------- Day 13: a bigger grid of the tools; point at one for its name ---------- */
 
 .comps {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-2);
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
   padding: 0; list-style: none;
 }
 .comps li { position: relative; aspect-ratio: 1.6; overflow: hidden; background: #f4f4f4; transition: opacity 300ms ease; }
@@ -1100,38 +1089,7 @@ html[data-bands] :is(.seq-frames, .compare, .deck-frame, .comps, .film, .stats) 
   transition: opacity 200ms linear, translate 200ms var(--ease);
 }
 .comps li:hover .glass-card { opacity: 1; translate: 0 0; }
-@media (max-width: 719px) { .comps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-/* ---------- Held at the center: a day's title stops in the middle of the screen while its pictures pass (main.js) ---------- */
-
-.hs[data-on] .hs-track { align-items: center; }
-.hs[data-on] [data-hold] { will-change: transform; }
-
-/* Day 12: the film, large, passing under its title */
-.hs[data-on] .panel-film .panel-head { width: max-content; justify-content: flex-start; gap: var(--space-5); }
-.hs[data-on] .panel-film .panel-n,
-.hs[data-on] .fly-title .panel-n { font-size: clamp(2.5rem, 4.5vw, 4rem); }
-.hs[data-on] .panel-film .panel-words { width: min(var(--column), 80vw); text-align: center; }
-.hs[data-on] .panel-film .film { height: clamp(280px, calc(100svh - 300px), 820px); gap: var(--space-6); }
-
-/* Day 13: a bigger grid, its words beside it */
-.hs[data-on] .panel-grid {
-  width: max-content;
-  display: grid;
-  grid-template-columns: 280px auto;
-  grid-template-rows: auto 1fr;
-  column-gap: var(--space-7);
-}
-.hs[data-on] .panel-grid .panel-head { grid-column: 1; grid-row: 1; }
-.hs[data-on] .panel-grid .panel-words { grid-column: 1; grid-row: 2; padding-top: 0; }
-.hs[data-on] .panel-grid .panel-visual { grid-column: 2; grid-row: 1 / span 2; }
-.hs[data-on] .panel-grid .comps {
-  --gh: clamp(300px, calc(100svh - 150px), 900px);
-  height: var(--gh);
-  width: calc((var(--gh) - 2 * var(--space-3)) / 3 * 1.6 * 5 + 4 * var(--space-3));
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-}
+@media (max-width: 719px) { .comps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); } }
 
 /* ---------- Day 14: the deck's slides fly by, its title held in the middle ---------- */
 
@@ -1147,6 +1105,7 @@ html[data-bands] :is(.seq-frames, .compare, .deck-frame, .comps, .film, .stats) 
   text-align: center;
 }
 .hs[data-on] .fly-title .panel-head { justify-content: center; padding-bottom: var(--space-3); }
+.hs[data-on] .fly-title .panel-n { font-size: clamp(2.5rem, 4.5vw, 4rem); }
 
 @media (max-width: 719px) {
   .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
