@@ -894,3 +894,267 @@ html[data-konami-run] .keys kbd { opacity: 1; }
 .k-chip[data-shape="circle"] { border-radius: 50%; }
 .k-chip[data-shape="square"] { border-radius: 14%; }
 .k-chip[data-shape="triangle"] { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+
+/* ---------- Weeks ---------- */
+
+.week-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-5);
+  padding-top: var(--space-9);
+}
+.week-n {
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tight);
+  line-height: 0.9;
+}
+.week-dates { color: var(--muted); font-size: var(--size-title); font-weight: var(--weight-medium); letter-spacing: var(--tracking-tight); }
+.week-cue { display: inline-block; margin-left: var(--space-2); color: var(--ink); }
+.week { padding-top: var(--space-10); }
+.week > .week-head { padding-top: 0; }
+
+/* ---------- Week two: a side scroll ----------
+   Stacked like week one by default (phones, reduced motion). On wide screens main.js turns it on: the track pins to the
+   screen and the page's scroll carries it sideways, one pixel across for each pixel down. */
+
+.hs { position: relative; margin-inline: calc(-1 * var(--gutter)); }
+.hs-track { display: flex; flex-direction: column; padding-inline: var(--gutter); }
+.panel { padding-top: var(--space-10); }
+.panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-5); padding-bottom: var(--space-7); }
+.panel-n {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tight);
+  line-height: 0.95;
+}
+.panel-words { max-width: min(var(--column), 100%); padding-top: var(--space-5); position: relative; z-index: 1; }
+.hs-days { display: none; }
+
+.hs[data-on] { --vis-h: clamp(240px, calc(100svh - 340px), 640px); }
+.hs[data-on] .hs-pin {
+  position: sticky; top: 0;
+  height: 100svh;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-top: var(--nav-h);
+}
+.hs[data-on] .hs-track {
+  flex-direction: row; align-items: flex-start;
+  gap: var(--space-9);
+  width: max-content;
+  will-change: transform;
+}
+.hs[data-on] .panel {
+  flex: none;
+  width: calc((var(--vis-h) - var(--below, 0px)) * var(--ar, 1.778));
+  padding-top: 0;
+}
+.hs[data-on] .panel-film { width: max-content; }
+.hs[data-on] .panel-head { padding-bottom: var(--space-4); }
+.hs[data-on] .panel-n { font-size: clamp(2rem, 3vw, 2.75rem); }
+.hs[data-on] .panel-words { padding-top: var(--space-4); max-width: min(var(--column), 100%); }
+.hs[data-on] .panel-words .body { padding-top: var(--space-2); }
+
+/* The days, along the bottom: where you are in ink */
+.hs[data-on] .hs-days {
+  position: absolute; left: var(--gutter); bottom: var(--space-5);
+  display: flex; gap: var(--space-4);
+  padding: 0; list-style: none;
+  font-size: var(--size-small); font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+.hs-days a { color: rgb(0 0 0 / 0.24); text-decoration: none; transition: color var(--dur-fast) ease; }
+.hs-days li[data-at] a, .hs-days a:hover { color: var(--ink); }
+
+@media (min-width: 1100px) {
+  .hs[data-on] .hs-pin { padding-top: 0; clip-path: inset(0 0 0 calc(var(--gutter) - 40px)); }
+}
+
+/* While the Konami code runs, the pinned week sits above its colors, so its pictures never change */
+html[data-bands] .hs[data-on] .hs-pin { z-index: 61; }
+html[data-bands] :is(.seq-frames, .compare, .deck-frame, .comps, .film, .stats) { position: relative; z-index: 61; }
+
+/* A soft lift for the work, as on the cards */
+.lift { box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 40px rgb(0 0 0 / 0.07); }
+
+/* ---------- A sequence of slides that take turns, with the dot under the step ---------- */
+
+.panel:has(.seq) { --below: 40px; }
+.seq-frames {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 40px rgb(0 0 0 / 0.07);
+}
+.seq-frames img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity var(--fade, 700ms) var(--ease); }
+.seq-frames[data-cut] img { transition: none; }
+.seq-frames img[data-on] { opacity: 1; }
+.seq-frames img:first-child { opacity: 1; }
+.seq[data-ready] .seq-frames img:first-child:not([data-on]) { opacity: 0; }
+.seq-steps {
+  position: relative;
+  display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr));
+  padding: 18px 0 0; list-style: none;
+  color: rgb(0 0 0 / 0.32);
+  font-size: var(--size-small); font-weight: var(--weight-medium);
+  text-align: center;
+}
+.seq-steps li { cursor: pointer; transition: color var(--dur-fast) ease; }
+.seq-steps li[data-at], .seq-steps li:hover { color: var(--ink); }
+.seq-dot {
+  position: absolute; top: 4px;
+  left: calc((var(--i, 0) + 0.5) * 100% / var(--n, 2) - 4px);
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #c4582f;
+  transition: left 650ms cubic-bezier(0.34, 1.3, 0.64, 1);
+  cursor: default;
+}
+
+/* ---------- Day 10: a loop beside three of the survey's slides ---------- */
+
+.panel-split { display: flex; flex-direction: column; gap: var(--space-3); }
+.panel-split .loop { width: 100%; }
+.stats { display: flex; gap: var(--space-2); }
+.stats img { width: calc((100% - 2 * var(--space-2)) / 3); aspect-ratio: 16 / 9; object-fit: cover; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06); }
+.hs[data-on] .panel-split { flex-direction: row; height: var(--vis-h); }
+.hs[data-on] .panel-split .loop { width: auto; height: 100%; aspect-ratio: 16 / 9; flex: none; }
+.hs[data-on] .stats { flex-direction: column; height: 100%; }
+.hs[data-on] .stats img { width: auto; height: calc((100% - 2 * var(--space-2)) / 3); }
+
+/* ---------- Day 11: before and after ---------- */
+
+.compare {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.6;
+  overflow: hidden;
+  background: #111;
+  user-select: none;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 40px rgb(0 0 0 / 0.07);
+}
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.compare-before { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--at)) 0 0); }
+.compare-line {
+  position: absolute; top: 0; bottom: 0; left: var(--at);
+  width: 2px; margin-left: -1px;
+  background: rgb(255 255 255 / 0.85);
+  pointer-events: none;
+}
+.compare-knob {
+  position: absolute; top: 50%; left: 50%;
+  display: grid; place-items: center;
+  width: 34px; height: 34px;
+  translate: -50% -50%;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-pill);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  font-size: 15px; line-height: 1;
+}
+.compare-tag {
+  position: absolute; top: var(--space-3);
+  padding: 5px 10px;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-pill);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  font-size: var(--size-small); font-weight: var(--weight-medium); line-height: 1;
+  pointer-events: none;
+}
+.compare-tag[data-side="before"] { left: var(--space-3); }
+.compare-tag[data-side="after"] { right: var(--space-3); }
+.compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+/* ---------- Day 12: the film, at one height ---------- */
+
+.film {
+  display: flex; gap: var(--space-3);
+  height: clamp(220px, 50vw, 520px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.film img { flex: none; height: 100%; width: auto; aspect-ratio: var(--ar); object-fit: cover; }
+.hs[data-on] .film { height: var(--vis-h); overflow: visible; }
+
+/* ---------- Day 13: the tools, side by side; point at one for its name ---------- */
+
+.comps {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: 0; list-style: none;
+}
+.comps li { position: relative; aspect-ratio: 1.6; overflow: hidden; background: #f4f4f4; transition: opacity 300ms ease; }
+.comps img { width: 100%; height: 100%; object-fit: cover; }
+.comps:hover li:not(:hover) { opacity: 0.35; }
+.comps .glass-card {
+  position: absolute; left: var(--space-2); bottom: var(--space-2);
+  opacity: 0; translate: 0 4px;
+  pointer-events: none;
+  transition: opacity 200ms linear, translate 200ms var(--ease);
+}
+.comps li:hover .glass-card { opacity: 1; translate: 0 0; }
+@media (max-width: 719px) { .comps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* ---------- Held at the center: a day's title stops in the middle of the screen while its pictures pass (main.js) ---------- */
+
+.hs[data-on] .hs-track { align-items: center; }
+.hs[data-on] [data-hold] { will-change: transform; }
+
+/* Day 12: the film, large, passing under its title */
+.hs[data-on] .panel-film .panel-head { width: max-content; justify-content: flex-start; gap: var(--space-5); }
+.hs[data-on] .panel-film .panel-n,
+.hs[data-on] .fly-title .panel-n { font-size: clamp(2.5rem, 4.5vw, 4rem); }
+.hs[data-on] .panel-film .panel-words { width: min(var(--column), 80vw); text-align: center; }
+.hs[data-on] .panel-film .film { height: clamp(280px, calc(100svh - 300px), 820px); gap: var(--space-6); }
+
+/* Day 13: a bigger grid, its words beside it */
+.hs[data-on] .panel-grid {
+  width: max-content;
+  display: grid;
+  grid-template-columns: 280px auto;
+  grid-template-rows: auto 1fr;
+  column-gap: var(--space-7);
+}
+.hs[data-on] .panel-grid .panel-head { grid-column: 1; grid-row: 1; }
+.hs[data-on] .panel-grid .panel-words { grid-column: 1; grid-row: 2; padding-top: 0; }
+.hs[data-on] .panel-grid .panel-visual { grid-column: 2; grid-row: 1 / span 2; }
+.hs[data-on] .panel-grid .comps {
+  --gh: clamp(300px, calc(100svh - 150px), 900px);
+  height: var(--gh);
+  width: calc((var(--gh) - 2 * var(--space-3)) / 3 * 1.6 * 5 + 4 * var(--space-3));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+/* ---------- Day 14: the deck's slides fly by, its title held in the middle ---------- */
+
+.fly { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); padding-top: var(--space-6); }
+.fly-card { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 40px rgb(0 0 0 / 0.08); }
+.hs[data-on] .panel-fly { position: relative; }
+.hs[data-on] .fly { position: absolute; inset: 0; display: block; padding: 0; }
+.hs[data-on] .fly-card { position: absolute; will-change: transform; }
+.hs[data-on] .fly-title {
+  position: absolute; top: 50%; left: 0; z-index: 2;
+  width: min(var(--column), 80vw);
+  translate: 0 -50%;
+  text-align: center;
+}
+.hs[data-on] .fly-title .panel-head { justify-content: center; padding-bottom: var(--space-3); }
+
+@media (max-width: 719px) {
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* On phones, hover cards open above their icon and wrap, so nothing reaches past the screen's edge */
+.comps .glass-card { max-width: calc(100% - 2 * var(--space-2)); white-space: normal; line-height: 1.2; }
+@media (max-width: 719px) {
+  .mark-card { left: auto; right: 0; top: auto; bottom: 100%; translate: 0 0; }
+  .mark:hover .mark-card, .mark:focus-within .mark-card { translate: 0 -4px; }
+}

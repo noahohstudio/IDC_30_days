@@ -135,8 +135,8 @@ run("fit", () => {
   if (name) fit(name, name.parentElement);
   const number = document.querySelector("[data-count-number]");
   if (number) {
-    // Day 8 of 30: two places, the one it hasn't reached barely there
-    const digits = "8";
+    // The day of 30: two places, any it hasn't reached barely there
+    const digits = "14";
     setFlip(number.querySelector(".zeros"), "0".repeat(2 - digits.length));
     setFlip(number.querySelector("[data-count-digits]"), digits);
     fit(number, number.parentElement);
@@ -178,29 +178,241 @@ run("selection", () => {
 
 /* ---------- Where you are: the index and the nav (IndexRail.tsx, Nav.tsx) ---------- */
 
+/* ---------- Week two's side scroll: the page's scroll carries the track sideways, a pixel across for each pixel down ---------- */
+
+const side = { on: false, section: null, max: 0, top: 0 };
+
+run("side scroll", () => {
+  const hs = document.querySelector("[data-hs]");
+  if (!hs) return;
+  const pin = hs.querySelector(".hs-pin");
+  const track = hs.querySelector(".hs-track");
+  const wide = matchMedia("(min-width: 900px)");
+  side.section = hs;
+  const held = [...hs.querySelectorAll("[data-hold]")];
+  const flyPanel = hs.querySelector("[data-fly-panel]");
+  const cards = flyPanel ? [...flyPanel.querySelectorAll(".fly-card")] : [];
+
+  // A held title rides in with its panel until it reaches the middle of the screen, stays there while the panel passes
+  // under it, and leaves with the panel's end
+  const hold = () => {
+    const mid = pin.clientWidth / 2;
+    for (const el of held) {
+      const box = el.closest(".panel").getBoundingClientRect();
+      const w = el.offsetWidth;
+      const off = Math.min(Math.max(0, mid - w / 2 - box.left), Math.max(0, box.width - w));
+      el.style.transform = `translate3d(${off}px, 0, 0)`;
+    }
+  };
+
+  // Day 14's slides in two lanes: the top lane bigger and faster, the bottom smaller and slower, both quicker than the
+  // page, so they fly past the held title. `u` is how far the panel has come in from the right edge.
+  const LANES = [
+    { top: 0.03, size: 0.3, speed: 1.6, gap: 0.35, start: 0.35 },
+    { top: 0.69, size: 0.22, speed: 1.25, gap: 0.3, start: 0.5 },
+  ];
+  const layFly = () => {
+    if (!flyPanel) return;
+    if (!side.on) {
+      flyPanel.style.width = flyPanel.style.height = "";
+      cards.forEach((c) => c.removeAttribute("style"));
+      return;
+    }
+    const vw = pin.clientWidth;
+    const H = pin.clientHeight - (parseFloat(getComputedStyle(pin).paddingTop) || 0);
+    const pad = parseFloat(getComputedStyle(track).paddingRight) || 0;
+    let reach = 0;
+    cards.forEach((card, i) => {
+      const lane = LANES[i % 2];
+      const k = Math.floor(i / 2);
+      const h = lane.size * H;
+      const w = (h * 16) / 9;
+      const x = lane.speed * vw * lane.start + k * w * (1 + lane.gap);
+      card.dataset.speed = lane.speed;
+      card.style.width = `${w}px`;
+      card.style.left = `${x}px`;
+      card.style.top = `${lane.top * H}px`;
+      reach = Math.max(reach, (x + vw + w) / lane.speed); // when the last of the lane has left on the left
+    });
+    flyPanel.style.height = `${H}px`;
+    flyPanel.style.width = `${Math.round(reach - pad)}px`;
+  };
+  const fly = () => {
+    if (!flyPanel) return;
+    const u = pin.clientWidth - flyPanel.getBoundingClientRect().left;
+    for (const card of cards) card.style.transform = `translate3d(${-(card.dataset.speed - 1) * u}px, 0, 0)`;
+  };
+
+  const update = () => {
+    if (!side.on) return;
+    const x = Math.min(side.max, Math.max(0, -hs.getBoundingClientRect().top));
+    track.style.transform = `translate3d(${-x}px, 0, 0)`;
+    hold();
+    fly();
+  };
+  const layout = () => {
+    side.on = wide.matches && !calm.matches;
+    hs.toggleAttribute("data-on", side.on);
+    layFly();
+    if (!side.on) {
+      hs.style.height = "";
+      track.style.transform = "";
+      held.forEach((el) => (el.style.transform = ""));
+      return;
+    }
+    // The track's own width; scrollWidth would count the flying cards that reach past it
+    side.max = Math.max(0, track.offsetWidth - pin.clientWidth);
+    hs.style.height = `${side.max + innerHeight}px`;
+    side.top = hs.getBoundingClientRect().top + scrollY;
+    update();
+  };
+  layout();
+  addEventListener("scroll", update, { passive: true });
+  addEventListener("resize", layout);
+  wide.addEventListener("change", layout);
+  calm.addEventListener("change", layout);
+  new ResizeObserver(layout).observe(track);
+});
+
+// Where a day is: in the side scroll, the point down the page that brings its panel in from the left
+function goTo(id) {
+  const el = document.getElementById(id);
+  if (!el) return false;
+  if (side.on && side.section.contains(el) && el !== side.section) {
+    const track = side.section.querySelector(".hs-track");
+    const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    const top = side.section.getBoundingClientRect().top + scrollY;
+    scrollTo({ top: top + Math.min(side.max, Math.max(0, el.offsetLeft - pad)), behavior: calm.matches ? "auto" : "smooth" });
+    return true;
+  }
+  el.scrollIntoView({ behavior: calm.matches ? "auto" : "smooth", block: "start" });
+  return true;
+}
+
+run("anchors", () => {
+  document.addEventListener("click", (event) => {
+    const a = event.target.closest('a[href^="#"]');
+    if (!a || a.closest("[data-copy]")) return;
+    const id = a.getAttribute("href").slice(1);
+    if (!id || id === "main") return;
+    if (id === "top") {
+      event.preventDefault();
+      scrollTo({ top: 0, behavior: calm.matches ? "auto" : "smooth" });
+      return;
+    }
+    if (goTo(id)) event.preventDefault();
+  });
+});
+
 run("index", () => {
-  const days = [...document.querySelectorAll(".day")];
+  const days = [...document.querySelectorAll("[data-day]")];
   const links = new Map([...document.querySelectorAll('.side a[href^="#d"]')].map((a) => [a.getAttribute("href").slice(1), a.parentElement]));
+  const marks = new Map([...document.querySelectorAll(".hs-days a")].map((a) => [a.getAttribute("href").slice(1), a.parentElement]));
+  const weeks = [...document.querySelectorAll(".side [data-week]")];
   const at = document.querySelector("[data-nav-at]");
   let current = null;
   let frame = 0;
   const pick = () => {
     frame = 0;
     const line = innerHeight * 0.4;
+    const mid = innerWidth * 0.5;
     let here = null;
-    for (const day of days) if (day.getBoundingClientRect().top <= line) here = day;
+    for (const day of days) {
+      const box = day.getBoundingClientRect();
+      if (box.top <= line && box.left <= mid) here = day;
+    }
     const id = here?.id ?? null;
     if (id === current) return;
     current = id;
     links.forEach((li, key) => li.toggleAttribute("data-at", key === id));
+    marks.forEach((li, key) => li.toggleAttribute("data-at", key === id));
+    const week = here?.closest("#week-two") ? "week-two" : "week-one";
+    weeks.forEach((li) => li.toggleAttribute("data-path", li.dataset.week === week));
     if (at) {
-      at.textContent = here ? here.dataset.day : "week one";
+      at.textContent = here ? here.dataset.day : "30 days";
       turn(at.parentElement);
     }
   };
   pick();
   addEventListener("scroll", () => (frame ||= requestAnimationFrame(pick)), { passive: true });
+  addEventListener("resize", pick);
 });
+
+/* ---------- Slides that take turns, the dot sliding under the step that's showing ---------- */
+
+run("sequences", () => {
+  document.querySelectorAll("[data-seq]").forEach((seq) => {
+    const frames = [...seq.querySelectorAll(".seq-frames img")];
+    const steps = [...seq.querySelectorAll(".seq-steps li:not(.seq-dot)")];
+    const dot = seq.querySelector(".seq-dot");
+    const list = seq.querySelector(".seq-steps");
+    const every = Number(seq.dataset.every) || 2000;
+    list.style.setProperty("--n", steps.length);
+    let i = 0;
+    let timer = 0;
+    let seen = false;
+    const box = seq.querySelector(".seq-frames");
+    const show = (n) => {
+      i = (n + frames.length) % frames.length;
+      seq.dataset.ready = "";
+      // A frame marked data-cut comes in at once, with no fade (Day 8's colored wordmarks)
+      const cut = frames[i].hasAttribute("data-cut");
+      box.toggleAttribute("data-cut", cut);
+      frames.forEach((f, k) => f.toggleAttribute("data-on", k === i));
+      if (cut) {
+        void getComputedStyle(frames[i]).opacity;
+        requestAnimationFrame(() => box.removeAttribute("data-cut"));
+      }
+      const label = Number(frames[i].dataset.label ?? i);
+      steps.forEach((s, k) => s.toggleAttribute("data-at", k === label));
+      dot?.style.setProperty("--i", label);
+    };
+    const tick = () => {
+      clearTimeout(timer);
+      if (!seen || calm.matches) return;
+      const hold = Number(frames[i].dataset.hold) || 1;
+      timer = setTimeout(() => {
+        show(i + 1);
+        tick();
+      }, every * hold);
+    };
+    steps.forEach((s, k) =>
+      s.addEventListener("click", () => {
+        show(frames.findIndex((f) => Number(f.dataset.label ?? -1) === k));
+        tick();
+      }),
+    );
+    box.addEventListener("click", () => {
+      show(i + 1);
+      tick();
+    });
+    show(0);
+    new IntersectionObserver(([entry]) => {
+      seen = entry.isIntersecting;
+      tick();
+    }, { threshold: 0.3 }).observe(seq);
+  });
+});
+
+/* ---------- Before and after: drag, or just move across it ---------- */
+
+run("compare", () => {
+  document.querySelectorAll("[data-compare]").forEach((box) => {
+    const input = box.querySelector("input");
+    const set = (v) => box.style.setProperty("--at", `${v}%`);
+    input.addEventListener("input", () => set(input.value));
+    if (matchMedia("(hover: hover)").matches) {
+      box.addEventListener("pointermove", (event) => {
+        if (event.buttons) return;
+        const r = box.getBoundingClientRect();
+        const v = Math.min(100, Math.max(0, ((event.clientX - r.left) / r.width) * 100));
+        input.value = v;
+        set(v);
+      });
+    }
+  });
+});
+
 
 /* ---------- The Interactive mark (InteractiveMark.tsx) ---------- */
 

@@ -35,9 +35,9 @@
   <p class="crumb"><a href="#top" data-flip data-link>noah oh</a><span class="here"> / 30 days</span></p>
   <nav class="side" aria-label="Index">
     <ul class="pages">
-      <li data-path>
-        <a href="#top" data-flip data-link>week one</a>
-        <ul class="days drop" style="--rows: 8">
+      <li data-week="week-one">
+        <a href="#week-one" data-flip data-link>week one</a>
+        <ul class="days drop" style="--rows: 7">
           <li style="--i: 0"><a href="#d1" data-flip data-link>boomloom</a></li>
           <li style="--i: 1"><a href="#d2" data-flip data-link>kino workflow</a></li>
           <li style="--i: 2"><a href="#d3" data-flip data-link>the desk</a></li>
@@ -45,10 +45,20 @@
           <li style="--i: 4"><a href="#d5" data-flip data-link>palit</a></li>
           <li style="--i: 5"><a href="#d6" data-flip data-link>konami code</a></li>
           <li style="--i: 6"><a href="#d7" data-flip data-link>copy editor</a></li>
-          <li style="--i: 7"><a href="#d8" data-flip data-link>this page</a></li>
         </ul>
       </li>
-      <li data-soon><span>week two</span></li>
+      <li data-week="week-two">
+        <a href="#week-two" data-flip data-link>week two</a>
+        <ul class="days drop" style="--rows: 7">
+          <li style="--i: 7"><a href="#d8" data-flip data-link>palit rebrand</a></li>
+          <li style="--i: 8"><a href="#d9" data-flip data-link>the timeline</a></li>
+          <li style="--i: 9"><a href="#d10" data-flip data-link>card animation</a></li>
+          <li style="--i: 10"><a href="#d11" data-flip data-link>rfc editor</a></li>
+          <li style="--i: 11"><a href="#d12" data-flip data-link>film</a></li>
+          <li style="--i: 12"><a href="#d13" data-flip data-link>competitors</a></li>
+          <li style="--i: 13"><a href="#d14" data-flip data-link>the deck</a></li>
+        </ul>
+      </li>
       <li data-soon><span>week three</span></li>
       <li data-soon><span>week four</span></li>
     </ul>
@@ -59,13 +69,19 @@
 
   <section class="lander" id="top">
     <h1 class="name" data-flip data-link data-exact data-fit>30 days</h1>
-    <p class="sentence" data-flip data-link>of making, one thing a day. Week one: two case studies, the tools behind them, and a few surprises on my site.</p>
+    <p class="sentence" data-flip data-link>of making, one thing a day. Week one: two case studies and the tools behind them. Week two: Palit, from a new mark to its deck.</p>
     <dl class="facts">
       <div><dt>Course</dt><dd>Interactive Design Concepts</dd></div>
-      <div><dt>Week one</dt><dd>Oct 23 to Oct 30</dd></div>
-      <div><dt>Today</dt><dd>Day 8 of 30</dd></div>
+      <div><dt>Week one</dt><dd>Oct 23 to Oct 29</dd></div>
+      <div><dt>Week two</dt><dd>Oct 30 to Nov 5</dd></div>
+      <div><dt>Today</dt><dd>Day 14 of 30</dd></div>
     </dl>
   </section>
+
+  <header class="week-head" id="week-one" data-reveal>
+    <h2 class="week-n" data-flip>Week one</h2>
+    <p class="week-dates">Oct 23 to Oct 29</p>
+  </header>
 
   <!-- Day 1 -->
   <section class="day" id="d1" data-day="d1, boomloom">
@@ -346,16 +362,206 @@
     </div>
   </section>
 
-  <!-- Day 8 -->
-  <section class="day" id="d8" data-day="d8, this page">
-    <header class="day-head" data-reveal>
-      <h2 class="day-n" data-flip>Day 8</h2>
-      <p class="day-date">Fri, Oct 30</p>
+  <!-- Week two: a side scroll. On wide screens the page's scroll carries the days sideways. -->
+  <section class="week" id="week-two">
+    <header class="week-head" data-reveal>
+      <h2 class="week-n" data-flip>Week two</h2>
+      <p class="week-dates">Oct 30 to Nov 5 <span class="week-cue" aria-hidden="true">→</span></p>
     </header>
-    <div class="words" data-reveal>
-      <p class="label">This page</p>
-      <h3 class="headline"><span data-flip>A day-by-day record of the month, built from my site's own pieces.</span></h3>
-      <p class="body">One page, one week so far: the glass nav and the index, the mirrored letters, the grain, the loops and the count below, each lifted from noaoh.com.</p>
+
+    <div class="hs" data-hs>
+      <div class="hs-pin">
+        <div class="hs-track">
+
+          <!-- Day 8 -->
+          <article class="panel" id="d8" data-day="d8, palit rebrand" style="--ar: 1.778">
+            <header class="panel-head">
+              <h3 class="panel-n" data-flip>Day 8</h3>
+              <p class="day-date">Fri, Oct 30</p>
+            </header>
+            <div class="panel-visual">
+              <div class="seq" data-seq data-every="1500">
+                <div class="seq-frames">
+                  <img src="assets/week2/slides/s094.jpg" alt="Palit's old mark: two offset squares, their overlap open" data-label="0" data-hold="2">
+                  <img src="assets/week2/slides/s095.jpg" alt="Palit's new lockup: one card in orange beside the wordmark" data-label="1" loading="lazy">
+                  <img src="assets/week2/slides/s096.jpg" alt="The same lockup, the card in rust" data-label="1" data-cut>
+                  <img src="assets/week2/slides/s097.jpg" alt="The same lockup, the card in teal" data-label="1" data-cut>
+                </div>
+                <ol class="seq-steps"><li>The old mark</li><li>The new mark</li><li class="seq-dot" aria-hidden="true"></li></ol>
+              </div>
+            </div>
+            <div class="panel-words">
+              <p class="label">Palit · The rebrand</p>
+              <h4 class="headline"><span data-flip>Two offset squares became one card, filled with the last color you kept.</span></h4>
+              <p class="body">After our color cards and the honesty of the product: one rectangle beside Palit, set light. The same day: a freelance contract.</p>
+            </div>
+          </article>
+
+          <!-- Day 9 -->
+          <article class="panel" id="d9" data-day="d9, the timeline" style="--ar: 1.778">
+            <header class="panel-head">
+              <h3 class="panel-n" data-flip>Day 9</h3>
+              <p class="day-date">Sat, Oct 31</p>
+            </header>
+            <div class="panel-visual">
+              <div class="seq" data-seq data-every="1500" style="--fade: 250ms">
+                <div class="seq-frames">
+                  <img src="assets/week2/slides/s043.jpg" alt="Slide: One designer, over four years, on a timeline from day one to year four" data-label="0" loading="lazy">
+                  <img src="assets/week2/slides/s063.jpg" alt="Slide: Day one, an empty archive" data-label="1" loading="lazy">
+                  <img src="assets/week2/slides/s066.jpg" alt="Slide: A few weeks in, the first rows of colors" data-label="2" loading="lazy">
+                  <img src="assets/week2/slides/s069.jpg" alt="Slide: Year four, years of colors" data-label="3" loading="lazy">
+                </div>
+                <ol class="seq-steps"><li>Four years</li><li>Day one</li><li>A few weeks in</li><li>Year four</li><li class="seq-dot" aria-hidden="true"></li></ol>
+              </div>
+            </div>
+            <div class="panel-words">
+              <p class="label">Palit · The animated deck</p>
+              <h4 class="headline"><span data-flip>The story as a timeline: day one, a few weeks in, year four.</span><span class="mark" data-mark="Click a step to go to it."></span></h4>
+              <p class="body">The deck follows one designer over four years of keeping colors, from an empty archive to a wall of them. Alongside it, the new logos.</p>
+            </div>
+          </article>
+
+          <!-- Day 10 -->
+          <article class="panel" id="d10" data-day="d10, card animation" style="--ar: 2.42">
+            <header class="panel-head">
+              <h3 class="panel-n" data-flip>Day 10</h3>
+              <p class="day-date">Sun, Nov 1</p>
+            </header>
+            <div class="panel-visual panel-split">
+              <figure class="loop loop-wide" data-loop>
+                <video muted loop playsinline preload="none" poster="assets/week2/palit/palit-card-r3-poster.jpg"
+                  data-webm="assets/week2/palit/palit-card-r3.webm" data-mp4="assets/week2/palit/palit-card-r3.mp4"
+                  aria-label="Palit's wordmark, a rust-colored card beside the name, slides into a fan of colors; the fan spins once through every hue and comes back to Tenmoku rust"></video>
+              </figure>
+              <div class="stats">
+                <img src="assets/week2/slides/s036.jpg" alt="Survey slide: 82%" loading="lazy">
+                <img src="assets/week2/slides/s037.jpg" alt="Survey slide: 94%" loading="lazy">
+                <img src="assets/week2/slides/s039.jpg" alt="Survey slide: 65%" loading="lazy">
+              </div>
+            </div>
+            <div class="panel-words">
+              <p class="label">Palit · Card animation, and the survey</p>
+              <h4 class="headline"><span data-flip>The card fans out through every hue and lands on a color with a name.</span></h4>
+              <p class="body">Palit's card for my site, resting on Tenmoku rust. The same day our survey went out on Google Forms; three of its findings sit beside it. Then a polish of my portfolio before sending it out.</p>
+            </div>
+          </article>
+
+          <!-- Day 11 -->
+          <article class="panel" id="d11" data-day="d11, rfc editor" style="--ar: 1.6">
+            <header class="panel-head">
+              <h3 class="panel-n" data-flip>Day 11</h3>
+              <p class="day-date">Mon, Nov 2</p>
+            </header>
+            <div class="panel-visual">
+              <div class="compare" data-compare style="--at: 50%">
+                <img src="assets/week2/rfc/jump-after.jpg" alt="After: Jump to a year, each decade newest first in columns by the year's last digit" loading="lazy">
+                <div class="compare-before"><img src="assets/week2/rfc/jump-before.jpg" alt="Before: Jump to a year, oldest first, with a line between decades" loading="lazy"></div>
+                <div class="compare-line" aria-hidden="true"><span class="compare-knob">⇆</span></div>
+                <span class="compare-tag" data-side="before">Before</span>
+                <span class="compare-tag" data-side="after">After</span>
+                <input type="range" min="0" max="100" value="50" aria-label="Before and after: drag to compare">
+              </div>
+            </div>
+            <div class="panel-words">
+              <p class="label">RFC editor · Fixes, in progress</p>
+              <h4 class="headline"><span data-flip>Jump to a year runs newest first, and the years line up without dividers.</span><span class="mark" data-mark="Drag across the picture to compare before and after."></span></h4>
+              <p class="body">Each decade runs from its highest year down, in ten columns by the year's last digit, so the years line up from decade to decade. The big years went light, and the eyebrow over each era came out.</p>
+            </div>
+          </article>
+
+          <!-- Day 12 -->
+          <article class="panel panel-film" id="d12" data-day="d12, film">
+            <header class="panel-head" data-hold>
+              <h3 class="panel-n" data-flip>Day 12</h3>
+              <p class="day-date">Tue, Nov 3</p>
+            </header>
+            <div class="panel-visual">
+              <div class="film">
+                <img src="assets/week2/film/film-2.jpg" alt="An alley between brick walls, a light leak across the top" style="--ar: 0.563" loading="lazy">
+                <img src="assets/week2/film/film-3.jpg" alt="A red brick corner building with fire escapes, graffiti on the wall beyond" style="--ar: 1.535" loading="lazy">
+                <img src="assets/week2/film/film-4.jpg" alt="A street seen from under a bridge, the far blocks in sun" style="--ar: 1.538" loading="lazy">
+                <img src="assets/week2/film/film-5.jpg" alt="A friend sitting on a Citi Bike at a dock under trees" style="--ar: 1.398" loading="lazy">
+                <img src="assets/week2/film/film-6.jpg" alt="A stall at night, out of focus, its lights in soft circles" style="--ar: 1.508" loading="lazy">
+                <img src="assets/week2/film/film-1.jpg" alt="Clouds over buildings, an orange light leak along the bottom" style="--ar: 1.559" loading="lazy">
+              </div>
+            </div>
+            <div class="panel-words" data-hold>
+              <p class="label">Photography · Color film</p>
+              <h4 class="headline"><span data-flip>Scans from a roll of color film.</span></h4>
+              <p class="body">An alley, a brick corner, a street under a bridge, a Citi Bike dock, a stall at night and a light leak over the sky.</p>
+            </div>
+          </article>
+
+          <!-- Day 13 -->
+          <article class="panel panel-grid" id="d13" data-day="d13, competitors">
+            <header class="panel-head">
+              <h3 class="panel-n" data-flip>Day 13</h3>
+              <p class="day-date">Wed, Nov 4</p>
+            </header>
+            <div class="panel-visual">
+              <ul class="comps">
+                <li><img src="assets/week2/comp/comp-coolors-generate.jpg" alt="" loading="lazy"><span class="glass-card">Coolors</span></li>
+                <li><img src="assets/week2/comp/comp-adobecolor.jpg" alt="" loading="lazy"><span class="glass-card">Adobe Color</span></li>
+                <li><img src="assets/week2/comp/comp-colorhunt.jpg" alt="" loading="lazy"><span class="glass-card">Color Hunt</span></li>
+                <li><img src="assets/week2/comp/comp-khroma.jpg" alt="" loading="lazy"><span class="glass-card">Khroma</span></li>
+                <li><img src="assets/week2/comp/comp-huemint.jpg" alt="" loading="lazy"><span class="glass-card">Huemint</span></li>
+                <li><img src="assets/week2/comp/comp-colormind.jpg" alt="" loading="lazy"><span class="glass-card">Colormind</span></li>
+                <li><img src="assets/week2/comp/comp-paletton.jpg" alt="" loading="lazy"><span class="glass-card">Paletton</span></li>
+                <li><img src="assets/week2/comp/comp-colorhexa.jpg" alt="" loading="lazy"><span class="glass-card">ColorHexa</span></li>
+                <li><img src="assets/week2/comp/comp-coolors-color.jpg" alt="" loading="lazy"><span class="glass-card">Coolors, a color</span></li>
+                <li><img src="assets/week2/comp/comp-colorzilla.jpg" alt="" loading="lazy"><span class="glass-card">ColorZilla</span></li>
+                <li><img src="assets/week2/comp/comp-pika.jpg" alt="" loading="lazy"><span class="glass-card">Pika</span></li>
+                <li><img src="assets/week2/comp/comp-colorslurp.jpg" alt="" loading="lazy"><span class="glass-card">ColorSlurp</span></li>
+                <li><img src="assets/week2/comp/comp-pastel.jpg" alt="" loading="lazy"><span class="glass-card">Pastel</span></li>
+                <li><img src="assets/week2/comp/comp-eagle.jpg" alt="" loading="lazy"><span class="glass-card">Eagle</span></li>
+                <li><img src="assets/week2/slides/s116.jpg" alt="" loading="lazy"><span class="glass-card">The 23 tools we studied</span></li>
+              </ul>
+            </div>
+            <div class="panel-words">
+              <p class="label">Palit · Competitor research</p>
+              <h4 class="headline"><span data-flip>The color tools we studied, side by side.</span><span class="mark" data-mark="Point at a tool to see its name."></span></h4>
+              <p class="body">Pickers, generators and libraries, each captured as it is today. Most make a palette for you; few keep where a color came from, which is what Palit is for.</p>
+            </div>
+          </article>
+
+          <!-- Day 14 -->
+          <article class="panel panel-fly" id="d14" data-day="d14, the deck" data-fly-panel>
+            <div class="fly-title" data-hold>
+              <header class="panel-head">
+                <h3 class="panel-n" data-flip>Day 14</h3>
+                <p class="day-date">Thu, Nov 5</p>
+              </header>
+              <div class="panel-words">
+                <p class="label">Palit · The slide deck</p>
+                <h4 class="headline"><span data-flip>The deck for Saturday's presentation, built in code on one system.</span></h4>
+                <p class="body">Every size, gap and position on a slide comes from one sheet of rules, at 1920 by 1080. Sixteen of its slides, as they stand today.</p>
+              </div>
+            </div>
+            <div class="fly" data-fly>
+              <img class="fly-card" src="assets/week2/slides/s002.jpg" alt="Slide: Palit">
+              <img class="fly-card" src="assets/week2/slides/s004.jpg" alt="Slide: Who we are">
+              <img class="fly-card" src="assets/week2/slides/s011.jpg" alt="Slide: A palette for a tool that collects color">
+              <img class="fly-card" src="assets/week2/slides/s018.jpg" alt="Slide: The system, condensed">
+              <img class="fly-card" src="assets/week2/slides/s021.jpg" alt="Slide: Our workflow">
+              <img class="fly-card" src="assets/week2/slides/s028.jpg" alt="Slide: Do designers already keep the colors they find?">
+              <img class="fly-card" src="assets/week2/slides/s041.jpg" alt="Slide: What they told us, and what Palit does">
+              <img class="fly-card" src="assets/week2/slides/s046.jpg" alt="Slide: Palit is not algorithmic">
+              <img class="fly-card" src="assets/week2/slides/s052.jpg" alt="Slide: What does Palit do differently?">
+              <img class="fly-card" src="assets/week2/slides/s055.jpg" alt="Slide: So much around the color">
+              <img class="fly-card" src="assets/week2/slides/s061.jpg" alt="Slide: Building a timeless tool">
+              <img class="fly-card" src="assets/week2/slides/s072.jpg" alt="Slide: Years in, you can't scroll back through it all">
+              <img class="fly-card" src="assets/week2/slides/s087.jpg" alt="Slide: From a submission to a working app">
+              <img class="fly-card" src="assets/week2/slides/s088.jpg" alt="Slide: In the film, Palit was a mockup on a timeline">
+              <img class="fly-card" src="assets/week2/slides/s095.jpg" alt="Slide: Palit's lockup">
+              <img class="fly-card" src="assets/week2/slides/s098.jpg" alt="Slide: Where Palit could live next">
+            </div>
+          </article>
+
+        </div>
+        <ol class="hs-days" aria-label="Week two">
+          <li><a href="#d8">8</a></li><li><a href="#d9">9</a></li><li><a href="#d10">10</a></li><li><a href="#d11">11</a></li><li><a href="#d12">12</a></li><li><a href="#d13">13</a></li><li><a href="#d14">14</a></li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -363,8 +569,8 @@
 
 <footer class="footer">
   <div class="count" data-count>
-    <p class="number" aria-hidden="true" data-exact data-count-number><span class="zeros" data-flip></span><span data-flip data-count-digits>08</span></p>
-    <p class="caption"><span class="visually-hidden">8 </span>days of 30 so far.</p>
+    <p class="number" aria-hidden="true" data-exact data-count-number><span class="zeros" data-flip></span><span data-flip data-count-digits>14</span></p>
+    <p class="caption"><span class="visually-hidden">14 </span>days of 30 so far.</p>
   </div>
   <div class="small">
     <p class="since"><span data-flip>© 2026 Noah Oh</span></p>
