@@ -286,9 +286,12 @@ html[data-bands] .nav { z-index: 62; }
 .pages > li + li { margin-top: var(--space-2); }
 .days { padding-left: var(--space-3) !important; margin: var(--space-1) 0; }
 
+/* Only the week you're in stays open; on the lander, none. A week that opens drops down, its days a beat apart. */
+.side li[data-week]:not([data-path]) > .days { display: none; }
+
 @media (prefers-reduced-motion: no-preference) {
-  .drop { display: grid; overflow: hidden; animation: drop 420ms var(--ease-flip) 1.5s backwards; }
-  .drop > li { animation: item-in 360ms var(--ease) backwards; animation-delay: calc(1.64s + var(--i, 0) * 35ms); }
+  .drop { display: grid; overflow: hidden; animation: drop 420ms var(--ease-flip) backwards; }
+  .drop > li { animation: item-in 360ms var(--ease) backwards; animation-delay: calc(140ms + var(--i, 0) * 35ms); }
 }
 @keyframes drop { from { max-height: 0; } to { max-height: calc(var(--rows, 10) * 1.6em + 0.75em); } }
 @keyframes item-in { from { opacity: 0; translate: -6px -4px; } }

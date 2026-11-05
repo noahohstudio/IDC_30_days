@@ -316,13 +316,22 @@ run("index", () => {
   const days = [...document.querySelectorAll("[data-day]")];
   const links = new Map([...document.querySelectorAll('.side a[href^="#d"]')].map((a) => [a.getAttribute("href").slice(1), a.parentElement]));
   const weeks = [...document.querySelectorAll(".side [data-week]")];
+  const starts = weeks.map((li) => document.getElementById(li.dataset.week)).filter(Boolean);
   const at = document.querySelector("[data-nav-at]");
   let current = null;
+  let open = null;
   let frame = 0;
   const pick = () => {
     frame = 0;
     const line = innerHeight * 0.4;
     const mid = innerWidth * 0.5;
+    // The week you're in opens in the index once its heading passes the reading line; the others close
+    let week = null;
+    for (const start of starts) if (start.getBoundingClientRect().top <= line) week = start.id;
+    if (week !== open) {
+      open = week;
+      weeks.forEach((li) => li.toggleAttribute("data-path", li.dataset.week === week));
+    }
     let here = null;
     for (const day of days) {
       const box = day.getBoundingClientRect();
@@ -332,8 +341,6 @@ run("index", () => {
     if (id === current) return;
     current = id;
     links.forEach((li, key) => li.toggleAttribute("data-at", key === id));
-    const week = here?.closest("#week-two") ? "week-two" : "week-one";
-    weeks.forEach((li) => li.toggleAttribute("data-path", li.dataset.week === week));
     if (at) {
       at.textContent = here ? here.dataset.day : "30 days";
       turn(at.parentElement);
