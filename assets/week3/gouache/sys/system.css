@@ -1,0 +1,242 @@
+/* The system: one set of type sizes, colors and parts for the whole flow. Noah, Nov 10, in chat:
+     "I'm focusing on making all of our design system very consistent throughout the entire experience and user flow
+      using the tool and having consistent font sizes, cutting down to just maybe a handful of them. Colors too. And
+      having a very coherent user flow that is very easily understandable and functional. And also really, really
+      placing emphasis on readability and easy tracking."
+   Before this the screens used eight sizes (10.5 to 16px) and each panel was built its own way.
+   Load after ../wc/kit.css (paper, Figtree, canvas.wc). Screens 1 to 4 and the dashboard all use this file and nothing
+   else for the extension's look. Your page keeps its own styles.
+
+   TYPE   three sizes, two weights (400, 500), nothing smaller than 11px
+     --t-1  11/16  quiet: times, counts, small actions, key hints
+     --t-2  13/19  reading: what a helper says, names, labels
+     --t-3  15/22  speaking: what an agent tells you, and what you ask
+   TEXT   three tones, all at least 3.5:1 on the paper
+     --c-text  what you read      --c-soft  what supports it      --c-quiet  what's there if you look
+   WORDS FROM AN AGENT are in that agent's one deep color (ours is purple). Droplets carry the hues; words don't.
+   SPACE  4, 8, 12, 16, 24, 32      CORNERS  12 for sheets and fields, round for pills      LINES  pencil, 0.9px
+
+   ROOM, so it's easy to follow (Noah, Nov 10: "there's not enough visual hierarchy. The text is very close to the
+   titles ... And then it's also very close to the icons ... It needs to be much more spaced out, it needs to be much
+   more readable and easier to follow. That's the entire build of this tool.")
+     a droplet and its words    16px apart, and every line of words starts on the same left edge (48px in)
+     a name and what's said     6px
+     an agent and its helpers   24px          one helper and the next   24px
+     a line and what's under it (the line before, small actions, a fact)   6px
+     one agent and the next     32px
+   The same parts with the same room are used in the rail, in the dashboard's slips and in its technical view. */
+:root {
+  --t-1: 11px; --l-1: 16px;
+  --t-2: 13px; --l-2: 19px;
+  --t-3: 15px; --l-3: 22px;
+  --c-text: #1b1b1a; --c-soft: #5c5a56; --c-quiet: #7f7d78;
+  --c-ctl: #e0deda; --c-ctl-on: #b4b1ac;
+  --c-own: #6b56a8; --c-claude: #b5432b; --c-codex: #2a4192; --c-gemini: #2f7a55; --c-cursor: #1f7482;
+  --c-pencil: #2b2723;
+  /* waiting on you has a color of its own: amber, for pencil and for words (Noah, Nov 11, on Dashboard v18: "needing
+     you input could have a signature color to itself. A yellow? something that signifies input needded"). Cursor's
+     placeholder was a yellow too close to it, so Cursor is now a teal placeholder */
+  --c-you: #c98a12; --c-you-deep: #8a5a00;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px;
+  --r-1: 12px;
+  --shadow-1: 0 0 0 1px var(--k-hair), 0 10px 26px rgba(40, 38, 35, .08);
+  --flash: #8a6fe0;
+  /* the names older files use land on the same values */
+  --k-text: var(--c-text); --k-muted: var(--c-soft); --k-faint: var(--c-quiet);
+  --k-claude-deep: var(--c-claude); --k-codex-deep: var(--c-codex); --k-own-deep: var(--c-own);
+}
+
+/* ------------------------------------------------------------------ paper, and your page beside the rail */
+/* the shadow is gentler since Nov 11 (Noah, on screen 1 v8: "the shadow of the rail is a little much right now - can we
+   make it gentler?"). It was 0 2px 4px at .05 and 0 18px 48px at .12 */
+.k-paper { background-color: var(--k-paper); background-image: var(--k-grain); background-size: 220px; color: var(--c-text);
+  box-shadow: 0 0 0 1px rgba(40, 38, 35, .07), 0 1px 2px rgba(40, 38, 35, .03), 0 8px 24px rgba(40, 38, 35, .05); }
+.k-sheet { background: var(--k-sheet); border-radius: var(--r-1); box-shadow: 0 0 0 1px var(--k-hair); }
+.page.k-beside { left: 324px; }
+.k-paper button { font: inherit; }
+
+/* ------------------------------------------------------------------ the rail: the same parts in the same places on every screen
+   top left: the way to the dashboard. Then one group per agent: its droplet, its name, what it's telling you, and a
+   line for each helper. At the bottom: where you ask. */
+.rail { position: fixed; left: 12px; top: 12px; bottom: 12px; width: 300px; z-index: 5; border-radius: 18px; padding: 60px 20px var(--s-4);
+  display: flex; flex-direction: column; font-size: var(--t-2); line-height: var(--l-2); }
+/* the top: two pencil marks, no words. Arrows opening outward open the dashboard; the cross puts the rail away to the
+   puck in the corner until you need it */
+.rail-top { position: absolute; left: 20px; right: 20px; top: 16px; display: flex; justify-content: space-between; align-items: center; }
+.rail-btn { display: inline-flex; align-items: center; gap: 6px; border: 0; padding: 4px; margin: -4px; background: none; font-size: var(--t-1); line-height: var(--l-1); color: var(--c-quiet); cursor: pointer; transition: color .2s; }
+.rail-btn:hover, .rail-btn:focus-visible { color: var(--c-text); }
+.rail-btn svg { display: block; width: 14px; height: 14px; overflow: visible; }
+/* the dashboard mark: two arrows opening outward. On the dashboard the same mark has both arrows turned inward (.in),
+   in the same corner. Clicking one turns its arrows to the other before the view changes, so one becomes the other */
+.mark-size g { transform-box: fill-box; transform-origin: center; transition: transform .32s cubic-bezier(.4, 0, .2, 1); }
+.mark-size.in g { transform: rotate(180deg); }
+/* open and closed */
+.rail { transition: opacity .3s, transform .4s cubic-bezier(.3,.7,.2,1); }
+.rail.shut { opacity: 0; transform: translateX(-10px); pointer-events: none; }
+.page { transition: left .4s cubic-bezier(.4,0,.2,1); }
+body.open .launch { opacity: 0; transform: translateY(6px); pointer-events: none; }
+body:not(.open) .overlay { visibility: hidden; }
+/* before you ask: our droplet, centered and bigger, over one friendly line */
+.rail-body { position: relative; }
+.rail-hello { --c: var(--c-own); position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s-6); padding-bottom: 48px; text-align: center; }
+.hello-drop { position: relative; width: 84px; height: 84px; display: grid; place-items: center; }
+.hello-drop .wdrop { grid-area: 1 / 1; }
+.hello-say { font-size: var(--t-3); line-height: var(--l-3); color: var(--c); opacity: 0; transform: translateY(4px); transition: opacity .45s ease, transform .45s ease, color .5s; }
+.rail-hello.in .hello-say { opacity: 1; transform: none; }
+.who.away { display: none; }
+.rail-body { flex: 1; min-height: 0; overflow: hidden auto; scrollbar-width: none; display: flex; flex-direction: column; gap: var(--s-6); }
+.rail-body::-webkit-scrollbar { display: none; }
+
+/* an agent: droplet, name, what it's telling you */
+.who { --c: var(--c-own); }
+.who-head { display: flex; align-items: flex-start; gap: var(--s-4); width: 100%; border: 0; padding: 0; background: none; text-align: left; color: inherit; cursor: default; }
+.who.folds .who-head { cursor: pointer; }
+.who-drop { flex: none; width: 32px; height: 32px; display: grid; place-items: center; }
+.who-text { min-width: 0; flex: 1; padding-top: 6px; }
+.who-top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); min-height: var(--l-2); }
+.who-name { font-size: var(--t-2); line-height: var(--l-2); font-weight: 500; color: var(--c); transition: color .5s; }
+.who-meta { flex: none; font-size: var(--t-1); line-height: var(--l-1); color: var(--c-quiet); font-variant-numeric: tabular-nums; }
+.who-say { display: block; font-size: var(--t-3); line-height: var(--l-3); color: var(--c); margin-top: 6px; transition: opacity .3s, color .5s; }
+.who-say:empty, .who-name:empty, .who-meta:empty { display: none; }
+
+/* a helper: its droplet, and what it's saying. The line before steps back above it */
+.who-lines { position: relative; margin: var(--s-5) 0 0 6px; display: flex; flex-direction: column; gap: var(--s-5); }
+.who-drop, .line-drop { position: relative; }
+/* a droplet's own pencil ring, drawn as far as its work has gone (sys/rail.js). No line joins one to the next */
+.ring { position: absolute; left: 50%; top: 50%; overflow: visible; pointer-events: none; transition: opacity .5s; }
+.ring path { transition: stroke-dasharray 1.4s cubic-bezier(.4, 0, .2, 1); }
+/* folded, an agent keeps its helpers in view: their droplets and rings in a row, without their words */
+.who.shut .who-lines { display: flex; flex-direction: row; gap: 22px; margin: 18px 0 0 54px; }
+.who.shut .line { min-height: 0; }
+.who.shut .line-body { display: none; }
+/* the row never fades: only its words do, and its droplet is painted in (a faded row showed the droplet's sheet as a box) */
+.line { display: flex; align-items: flex-start; gap: 22px; min-height: 20px; color: var(--c); }
+.line-body { opacity: 0; transform: translateY(3px); transition: opacity .5s ease, transform .5s ease; }
+.line.in .line-body { opacity: 1; transform: none; }
+.line-drop { flex: none; width: 20px; height: 20px; display: grid; place-items: center; }
+.line-body { min-width: 0; flex: 1; }
+.line-thing { display: block; margin-bottom: 4px; font-size: var(--t-2); line-height: var(--l-2); font-weight: 500; }
+.line-thing:empty { display: none; }
+.line-old { display: block; margin-bottom: 6px; font-size: var(--t-1); line-height: var(--l-1); opacity: .6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .35s; }
+.line-old:empty { display: none; }
+.line-now { display: block; font-size: var(--t-2); line-height: var(--l-2); transition: opacity .3s; }
+.line.wait .line-now { opacity: .62; }
+.line.undone .line-now { color: var(--c-quiet); }
+.line-acts { display: flex; gap: var(--s-4); margin-top: 6px; }
+.line-acts:empty { display: none; }
+.line-acts button { border: 0; padding: 0; background: none; font-size: var(--t-1); line-height: var(--l-1); color: var(--c-quiet); cursor: pointer; transition: color .2s; }
+.line-acts button:hover, .line-acts button:focus-visible { color: var(--c); }
+.line-acts button[hidden] { display: none; }
+
+/* where you ask. Quiet until you use it: a hairline, a gray toggle */
+.ask-wrap { width: 100%; margin-top: var(--s-4); }
+.ask { position: relative; border-radius: var(--r-1); padding: 12px 42px 12px 14px; min-height: 46px; background: var(--k-sheet); box-shadow: 0 0 0 1px var(--k-hair); transition: box-shadow .15s ease; }
+.ask-wrap.press .ask { box-shadow: 0 0 0 1px rgba(40, 38, 35, .34); }
+.front { font-size: var(--t-3); line-height: var(--l-3); min-height: var(--l-3); color: var(--c-text); }
+.front .ph { color: var(--c-quiet); }
+.front .old { transition: opacity .22s ease, filter .22s ease; }
+.front .old.out { opacity: 0; filter: blur(1px); }
+.front .add { color: var(--c-text); transition: opacity .5s ease, filter .5s ease, color .7s ease; }
+.front .add.pre { opacity: 0; filter: blur(1.5px); color: var(--flash); }
+.front .add.flash { color: var(--flash); transition: opacity .5s ease, filter .5s ease, color .1s ease; }
+.front .add.to-claude { color: var(--c-claude); }
+.front .add.to-codex { color: var(--c-codex); }
+.front .about { color: var(--c); }
+.front.sending { opacity: 0; transition: opacity .35s ease; }
+.caret { height: 17px; background: var(--c-text); }
+/* the ask field as a real field that names its agent with @ (rail.target in rail.js). Who it's for sits in the same
+   line as what you ask, in that agent's color, with nothing round it */
+.ask.tgt { cursor: text; }
+.ask.tgt .front { display: none; }
+.tgt-row { display: flex; align-items: baseline; gap: 6px; font-size: var(--t-3); line-height: var(--l-3); }
+.tgt-who { flex: none; border: 0; padding: 0; background: none; font: inherit; color: var(--c); cursor: pointer; transition: opacity .2s; }
+.tgt-who[hidden] { display: none; }
+button.tgt-who:hover, button.tgt-who:focus-visible { opacity: .7; outline: 0; }
+span.tgt-who { cursor: text; }
+.tgt-in { position: relative; flex: 1; min-width: 0; }
+.tgt-in input { display: block; width: 100%; border: 0; outline: 0; padding: 0; background: none; font: inherit; color: var(--c-text); caret-color: var(--c-text); }
+.tgt-in input::placeholder { color: var(--c-quiet); opacity: 1; }
+.tgt-ghost { position: absolute; left: 0; top: 0; white-space: pre; pointer-events: none; color: var(--c-quiet); }
+.tgt-ghost i { font-style: normal; visibility: hidden; }
+.tgt-list { position: absolute; left: 14px; right: 14px; bottom: calc(100% + 10px); display: flex; flex-wrap: wrap; gap: 2px var(--s-3); font-size: var(--t-2); line-height: var(--l-2); opacity: 0; transform: translateY(3px); pointer-events: none; transition: opacity .2s ease, transform .24s ease; }
+.tgt-list.in { opacity: 1; transform: none; pointer-events: auto; }
+.tgt-list button { border: 0; padding: 0; background: none; font: inherit; color: var(--c); opacity: .5; cursor: pointer; transition: opacity .2s; }
+.tgt-list button:hover, .tgt-list button.on { opacity: 1; }
+
+/* the meta-prompting switch: no label, just its state, in the paper's own grays */
+.mp { position: absolute; right: 12px; top: 16px; width: 22px; height: 13px; border-radius: 999px; border: 0; padding: 0; background: var(--c-ctl); cursor: pointer; transition: background .3s; }
+.mp::after { content: ""; position: absolute; left: 2px; top: 2px; width: 9px; height: 9px; border-radius: 50%; background: var(--k-sheet); transition: transform .3s; }
+.ask-wrap.on .mp { background: var(--c-ctl-on); }
+.ask-wrap.on .mp::after { transform: translateX(9px); }
+
+/* a design word, and its meaning while you point at it. A thin solid line, never dotted */
+.term { background: none; color: inherit; border-bottom: 1px solid color-mix(in srgb, currentColor 38%, transparent); cursor: help; padding-bottom: 0; }
+.def { position: fixed; z-index: 9; width: 220px; border-radius: var(--r-1); padding: 10px 12px; font-size: var(--t-2); line-height: var(--l-2); color: var(--c-soft);
+  pointer-events: none; opacity: 0; transition: opacity .2s; background: var(--k-sheet); box-shadow: var(--shadow-1); }
+.def b { font-weight: 500; display: block; color: var(--c-text); }
+
+/* buttons: a pill, and a quiet one */
+.btn { border: 0; border-radius: 999px; padding: 6px 14px; font-size: var(--t-2); line-height: var(--l-2); background: var(--c, var(--c-text)); color: var(--k-sheet); cursor: pointer; }
+.btn.quiet { background: none; color: var(--c-soft); padding: 6px 10px; }
+
+/* closed, in the corner: our droplet on a small round of paper */
+.launch { position: fixed; right: 26px; bottom: 26px; z-index: 5; transition: opacity .25s, transform .35s cubic-bezier(.3,.7,.2,1); }
+.puck { display: block; position: relative; width: 56px; height: 56px; border-radius: 50%; border: 0; padding: 0; overflow: hidden; isolation: isolate; cursor: pointer; transition: transform .3s cubic-bezier(.3,.7,.2,1); }
+.puck:hover { transform: translateY(-1px); }
+.puck:focus-visible, .who-head:focus-visible, .rail-btn:focus-visible { outline: 1.5px solid rgba(40, 38, 35, .5); outline-offset: 3px; }
+.launch-key { position: absolute; right: 68px; top: 50%; transform: translateY(-50%); white-space: nowrap; font-size: var(--t-1); line-height: var(--l-1); color: var(--c-soft); opacity: 0; transition: opacity .2s; pointer-events: none; }
+.launch:hover .launch-key, .puck:focus-visible + .launch-key { opacity: 1; transition: opacity .3s 1s; }
+
+/* a droplet's own small sheet is larger than the droplet; kit.drop pulls it in with negative margins so it takes
+   only the droplet's room, and its slot centers it. Don't override those margins: the droplet lands off-center */
+@media (prefers-reduced-motion: reduce) { .line-body, .who-say, .line-now, .line-old, .hello-say, .rail, .page { transition: none; } }
+
+/* the pile: what an ask becomes after you send it (sys/pile.js). It hangs off the ask field's wrap, in the rail and on
+   the dashboard alike. A droplet with a ring over the field's left end is the icon for everything you've asked; its
+   small arrow pulls the pile up and puts it away */
+.pile-job { position: absolute; width: 0; height: 0; }
+.pile-job .ring path { transition: stroke-dasharray 1.2s cubic-bezier(.4, 0, .2, 1), stroke .5s, opacity .5s; }
+.pile-job.mine .ring path { stroke: var(--c); opacity: .8; }
+.pile-job.needs .ring path { stroke: var(--c-you); opacity: .95; stroke-width: 1.3; }
+.pile-ic { left: 14px; top: -20px; }
+.ask-wrap .pile-pull { position: absolute; left: 26px; top: -34px; }      /* two classes: note.css loads later and gives a mark position: relative */
+.pile-pull[hidden], .pile-hit[hidden] { display: none; }
+.pile-pull svg.ico { transition: opacity .2s ease, transform .32s cubic-bezier(.3, 1.5, .5, 1); }
+.pile-pull.is-down svg.ico, .pile-pull.is-down:hover svg.ico { transform: rotate(180deg); }
+.pile-hit { position: absolute; left: -2px; top: -36px; width: 32px; height: 32px; border: 0; padding: 0; background: none; border-radius: 14px; cursor: pointer; }
+.pile-hit:focus-visible { outline: 1px solid color-mix(in srgb, var(--c-pencil) 40%, transparent); }
+/* while you're choosing an agent, its names take that line and the icon steps back (its parts, never a wrapper) */
+.ask-wrap:has(.tgt-list.in) .pile-ic canvas, .ask-wrap:has(.tgt-list.in) .pile-ic .ring, .ask-wrap:has(.tgt-list.in) .pile-pull { opacity: 0 !important; transition: opacity .2s ease; }
+.pile-note { transition: bottom .34s cubic-bezier(.3, .8, .3, 1); cursor: default; }
+.pile-note .pile-job { left: 22px; top: 25px; }
+.pile-note .pile-job canvas, .pile-note .pile-job .ring { transition: opacity .25s ease; }
+.pile-note:not(.open) .pile-job canvas { opacity: 0; }
+.pile-note:not(.open) .pile-job .ring { opacity: 0 !important; }
+.pile-note .note-body { padding-left: 44px; }
+.pile-you { display: block; font-size: var(--t-2); line-height: var(--l-2); color: var(--c-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 14px; }
+.pile-it { display: block; margin-top: 2px; }
+.pile-it:empty { display: none; }
+/* the reply line sits beside a note's marks, on their row, so pointing at a note doesn't push its marks out from under
+   the pointer (it did when the line came in under them: a click on Yes could miss) */
+.pile-note .note-body { display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; }
+.pile-note .note-say { flex: 0 0 100%; }
+.pile-re { display: none; flex: 1 1 90px; min-width: 0; margin-top: 6px; border: 0; outline: 0; padding: 0; background: none; font: inherit; font-size: var(--t-2); line-height: var(--l-2); color: var(--c-text); }
+.pile-re::placeholder { color: var(--c-quiet); opacity: 1; }
+.pile-note.open:hover .pile-re, .pile-note:focus-within .pile-re { display: block; }
+.pile-note .note-acts:not([hidden]) + .pile-re { margin-top: 6px; margin-bottom: -5px; }
+.pile-note .pile-x { position: absolute; top: 2px; right: 4px; opacity: 0; transition: opacity .2s ease; }
+.pile-x svg.ico { width: 11px; height: 11px; }
+.pile-note.open.can-x:hover .pile-x, .pile-note.open.can-x:focus-within .pile-x { opacity: 1; }
+.pile-note:not(.can-x) .pile-x { display: none; }
+/* an older note in the pile is one line until you point at it */
+.pile-note.slim:not(:hover):not(:focus-within) .pile-it, .pile-note.slim:not(:hover):not(:focus-within) .note-acts { display: none; }
+.pile-note.slim:not(:hover):not(:focus-within) .note-body { padding-top: 8px; padding-bottom: 9px; }
+.pile-note.slim:not(:hover):not(:focus-within) .pile-job { top: 18px; }
+/* the meta-prompting toggle is not in a real field any more: it's a setting (Noah, Nov 11, in chat: "I think we could
+   remove the meta prompting toggle. from the chat box itself and just put it into settings") */
+.ask.tgt .mp { display: none; }
+.ask.tgt { padding-right: 14px; }
+.pile-more { position: absolute; left: 10px; right: 10px; height: 14px; border: 0; padding: 0; background: none; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .25s ease, bottom .34s cubic-bezier(.3, .8, .3, 1); }
+.pile-more.in { opacity: 1; pointer-events: auto; }
+.pile-more svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.pile-more path { fill: none; stroke: var(--c-pencil); stroke-opacity: .4; stroke-width: .9; stroke-linecap: round; vector-effect: non-scaling-stroke; }

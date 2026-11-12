@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>The sidebar, working</title>
+<script>
+  // ?still=1: as if the system asked for reduced motion, so that path can be looked at without changing a setting
+  if (new URLSearchParams(location.search).get('still')) { const mm = window.matchMedia.bind(window); window.matchMedia = (q) => (/prefers-reduced-motion/.test(q) ? { matches: true, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} } : mm(q)); }
+</script>
+<link rel="stylesheet" href="../boarddash.css">
+<link rel="stylesheet" href="../wc/kit.css">
+<link rel="stylesheet" href="../sys/system.css">
+<link rel="stylesheet" href="../sys/note.css">
+<style>
+/* the rail's body is paint: each agent's droplet with its helpers' droplets round it, each in its own pencil ring */
+.paint { position: relative; flex: none; }
+.slot { position: absolute; display: grid; place-items: center; }
+.slot .ring path { transition: stroke-dasharray 1.4s cubic-bezier(.4, 0, .2, 1), stroke .5s, opacity .5s; }
+.slot.done .ring path { stroke: var(--c); opacity: .8; }      /* dried: its ring is closed, in its agent's color */
+.slot.needs .ring path { stroke: var(--c-you); opacity: .95; stroke-width: 1.3; }      /* held until you answer */
+/* a droplet is a canvas you can't click, so each has a round button over it, with nothing drawn */
+.hit { position: absolute; inset: -9px; border: 0; padding: 0; background: none; border-radius: 50%; cursor: pointer; }
+.hit:disabled { cursor: default; pointer-events: none; }
+.hit:focus-visible { outline: 1.5px solid rgba(40, 38, 35, .5); outline-offset: 2px; }
+.paint-name { position: absolute; transform: translateX(-50%); font-size: var(--t-1); line-height: var(--l-1); color: var(--c); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .6s ease; }
+.paint.in .paint-name { opacity: 1; }
+.note-mark[aria-label="Redo"] svg.ico, .note-mark[aria-label="Redo"]:hover svg.ico { transform: scaleX(-1); }      /* Redo is Undo's mark, turned the other way */
+/* a workshop aid, not part of the product (as in views.html): play a scene, slow it, change how many agents */
+.aid { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 9; display: flex; align-items: center; gap: 14px; padding: 6px 14px; border-radius: 999px; background: var(--k-sheet); box-shadow: 0 0 0 1px var(--k-hair); font-family: var(--k-font); font-size: var(--t-1); line-height: var(--l-1); color: var(--c-quiet); white-space: nowrap; }
+.aid button, .aid a { border: 0; padding: 0; background: none; font: inherit; color: var(--c-quiet); cursor: pointer; text-decoration: none; transition: color .2s; }
+.aid button:hover, .aid a:hover { color: var(--c-soft); }
+.aid [aria-pressed="true"], .aid [aria-current="true"] { color: var(--c-text); font-weight: 500; }
+.aid i { font-style: normal; opacity: .6; }
+.aid .sw { position: relative; width: 22px; height: 13px; border-radius: 999px; background: var(--c-ctl); transition: background .3s; }
+.aid .sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 9px; height: 9px; border-radius: 50%; background: var(--k-sheet); transition: transform .3s; }
+.aid .sw[aria-pressed="true"] { background: var(--c-ctl-on); }
+.aid .sw[aria-pressed="true"]::after { transform: translateX(9px); }
+.aid label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .slot .ring path, .paint-name { transition: none; } }
+.film .aid { visibility: hidden; }      /* filmed: the judging strip is out of sight, but still there to be clicked by script */
+</style>
+</head>
+<body>
+<!-- Nov 11, late: the words made real. Noah, in chat: "make sure that all the prototyping placeholder stuff ... is
+     more so ironed out and made to look much more realistic. Now we just have to really nail the impression that this
+     is a functioning app that already exists. Now it's just a demo reel for what it does." So the pile's lines follow
+     each ask and agree with what its helpers really change on the page (reply, below), an agent's own note says what
+     it's on, the third button change is no longer Gouache's purple, and the judging strip is hidden in the film: when
+     this page is in a frame, or with ?film=1 (it stays in the page, so #play can still be clicked by script).
+     Before that: -->
+<!-- The sidebar, working: a demo. Noah, Nov 11, in chat, about the side rail:
+       "Like, everything is working how it should be working. I just want to see maybe kind of a demo. Like, that's
+        really going to help us pin down what's not going right and then what we could be fixing with that."
+       "I'm curious to see what the kind of leaving looks like for agents after they're finished whatever they're
+        working on, and then you start prompting new ones. But I think that's just for the demo reel, like showing how
+        they disappear and then different ones take its place as you continue prompting and as you continue building."
+       "I would like to see another edge case with multiple LLMs, maybe like 3, playing around with that."
+     One page, the sidebar on Juniper, where what's been decided so far happens as you use it, not as a played scene.
+     It starts closed, with the puck. The puck or Option Space opens it on the welcome (screen 1); the cross or Esc
+     closes it. You type a real ask after the @ and send it. Then:
+       the ask goes up as a note in the pile (../sys/pile.js);
+       the welcome goes, and each agent present is its own droplet with its name once under it (screen 4 v12: paint
+         only). ?agents=1|2|3: Claude, then Codex, then Gemini, each its own bundle, set loosely down the rail;
+       the agent you asked gets one to three helper droplets round its own, painted in where there's room. Each is on a
+         part of your page, taken from the words of the ask where it can be ("headline", "button", "form", "corners",
+         "color", "reminders" ...), and otherwise the next part in turn;
+       on your page each helper's part gets its thin pencil line and small droplet (screen 3);
+       the helpers work at their own pace, and as each finishes its change really lands on your page, its droplet
+         dries and its ring closes in the agent's color;
+       an ask that comes back with a question ("This touches your signup form too. Go ahead?") holds a helper on the
+         form, its ring amber, until you answer: yes and it does the form, no and it lifts;
+       Undo on the pile's note takes that ask's changes back off your page and its helpers lift;
+       click a helper's droplet for its pencil note (one line), with Change this and Undo for that one change.
+     Leaving: when you send an agent a new ask, the helpers it had already dried lift, one after another, as the new
+     ones are painted in, so a bundle never fills up; and an agent with nothing going on for a while settles back to
+     its own droplet. Paint never slides: it lifts where it is and comes up where it's needed.
+     What the agents say and what they change are canned: every change is one of a few written below (PARTS) that
+     take turns, so asking again changes the same part again. Nothing is really asked of anyone.
+     The strip at the bottom of the page is only for judging: Play types and sends a few asks for you, Slow halves
+     its pace, and One · Two · Three changes how many agents there are. -->
+<div class="page"><main class="site" data-state="before"></main></div>
+<aside id="rail"></aside>
+<div class="overlay"></div>
+<div class="aid" role="group" aria-label="Workshop aid"><i>For judging</i><button id="play" aria-pressed="false">Play</button><label><button class="sw" id="slow" aria-pressed="false" aria-label="Slow: half speed"></button>Slow</label><span id="count"></span></div>
+<script>if (window.top !== window || new URLSearchParams(location.search).get('film')) document.documentElement.classList.add('film');</script>
+<script src="../site.js"></script>
+<script src="../v2/ask.js"></script>
+<script src="../wc/wc.js"></script>
+<script src="../wc/kit.js"></script>
+<script src="../sys/rail.js"></script>
+<script src="../sys/note.js"></script>
+<script src="../sys/pile.js"></script>
+<script>
+  const Q = new URLSearchParams(location.search), N = Math.max(1, Math.min(3, +(Q.get('agents') || 1))), WHO = ['claude', 'codex', 'gemini'].slice(0, N);
+  let hi, started = false;
+  // the rail without its own field, so this page can hear each step of each ask (the pile's `on`), as the dashboard does
+  const r = rail.mount(document.getElementById('rail'), { shut: true, home: '../dash23/05-dashboard.html?agents=' + N, onopen: (on) => { if (!hi || started) return; if (on) hi.show(); else hi.hide(); } });
+  hi = r.hello('What are we painting?');
+  const pl = pile.mount(r.ask, Object.assign({ on: heard, reply }, N === 1 ? { pig: rail.HUES[WHO[0]][1], c: `var(--c-${WHO[0]})` } : {}));
+  const field = rail.target(r.ask, WHO, { send: (t, who) => pl.add(t, who) });
+  const ov = document.querySelector('.overlay'), pen = kit.lines(ov);
+  const paint = document.createElement('div'); paint.className = 'paint'; r.body.appendChild(paint);
+  const NOTE_W = 236, clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  // ---- your page: the parts a helper can be on, and the few canned changes each takes in turn. put() really changes
+  // the page; with nothing given it puts the part back as it was
+  const site = document.querySelector('main.site');
+  const words = (node, t) => { if (node.textContent === t) return; node.style.transition = 'opacity .3s'; node.style.opacity = 0; setTimeout(() => { node.textContent = t; node.style.opacity = ''; }, topo.still ? 0 : 300); };
+  const card = (on, name) => ({ thing: name + ' card', about: `your ${name} card`, pad: 8, rx: 14, turns: ['tint', 'line'],
+    put: (v) => Object.assign(bd.el(on).style, v === 'tint' ? { background: '#f7f1e6', borderColor: '#dccba6', boxShadow: '' } : v === 'line' ? { background: '', borderColor: '#2f5fd0', boxShadow: 'inset 0 0 0 1px #2f5fd0' } : { background: '', borderColor: '', boxShadow: '' }),
+    now: `Making your ${name} card stand out.`, then: () => `I made your ${name} card stand out.`, back: `Your ${name} card is back as it was.` });
+  const PARTS = {
+    headline: { thing: 'Your headline', about: 'your headline', pad: 10, rx: 10, turns: ['Small steps, every day.', 'One habit at a time.', 'Start small. Keep going.'],
+      put: (v) => words(bd.el('headline'), v || 'Track habits. Build streaks.'),
+      now: 'Rewriting your headline.', then: (v) => `I rewrote your headline in ${term('warmer copy')}: “${v}”`, back: 'Your headline is back as it was.' },
+    sub: { thing: 'The line under your headline', about: 'the line under your headline', pad: 8, rx: 10, turns: ['Pick one habit to start. Juniper cheers you on and keeps your streak going.', 'Start with one habit. Juniper keeps count for you.'],
+      put: (v) => words(bd.el('sub'), v || 'Juniper logs your daily habits and shows your progress over time.'),
+      now: 'Rewriting the line under your headline.', then: () => 'I rewrote the line under your headline.', back: 'That line is back as it was.' },
+    form: { thing: 'Signup form', about: 'your signup form', pad: 10, rx: 16, turns: ['14px', '22px', '10px'],
+      put: (v) => bd.el('form').style.setProperty('--s-radius', v || '6px'),
+      now: 'Softening your signup form’s corners.', then: (v) => `I set your form’s ${term('corner radius')} to ${v}.`, back: 'Your form’s corners are back as they were.' },
+    button: { thing: 'Signup button', about: 'your signup button', pad: 6, rx: 12, turns: [['#e8715a', 'Start my first habit'], ['#d9663f', 'Start today'], ['#c4532f', 'Start my streak']],
+      put: (v) => { bd.el('button').style.setProperty('--s-accent', v ? v[0] : '#2f5fd0'); words(bd.el('button'), v ? v[1] : 'Create account'); },
+      now: `Getting your signup button its ${term('accent color')}.`, then: (v) => `I gave your button a new ${term('accent color')} and ${term('button label')}: “${v[1]}”`, back: 'Your button is back as it was.' },
+    reminders: card('reminders', 'Reminders'), streaks: card('streaks', 'Streaks'), checkins: card('checkins', 'Daily check-ins'),
+  };
+  // which parts an ask is about, from its words; otherwise the next part or two in turn
+  const SAID = [['headline', /headline|heading|title|hero|friendl|warm(er)? (word|copy)|wording/], ['sub', /tagline|under (the|your) headline|sub-?head|description|intro/], ['form', /form|corner|round|radius|soft|field/], ['button', /button|colou?r|accent|label|cta/], ['reminders', /remind|nudge|notif/], ['streaks', /streak/], ['checkins', /check-?in|daily/]];
+  const TURN = ['headline', 'form', 'button', 'reminders', 'sub', 'streaks', 'checkins']; let turn = 0, asked = 0;
+  function about(text) {
+    let said = SAID.filter(([, re]) => re.test(text.toLowerCase())).map(([p]) => p);
+    if (/under (the|your) headline/.test(text.toLowerCase())) said = said.filter((p) => p !== 'headline');      // "the line under the headline" is that line, not the headline
+    said = said.slice(0, 3);
+    if (/card|feature/.test(text.toLowerCase()) && !said.some((p) => PARTS[p].turns[0] === 'tint')) said.push('reminders', 'streaks', 'checkins');
+    if (said.length) return said.slice(0, 3);
+    return Array.from({ length: 1 + (asked % 2) }, () => TURN[turn++ % TURN.length]);
+  }
+  // what's on each part of the page: the changes laid on it, newest last. The page shows the newest; undo one and it
+  // shows the one before, or the part as it was
+  const laid = {}, went = {};
+  const show = (part) => { const s = laid[part] || []; PARTS[part].put(s.length ? s[s.length - 1].v : null); };
+  const land = (h) => { (laid[h.part] = laid[h.part] || []).push(h); show(h.part); };
+  const lift = (h) => { const s = laid[h.part] || [], i = s.indexOf(h); if (i >= 0) { s.splice(i, 1); show(h.part); } };
+
+  // ---- paint. In reduced motion a state is one still frame, and paint that leaves is just gone. (The engine only
+  // runs a still stage once, when it's made; paint laid later has to be stepped by hand to show)
+  const stills = (s) => { for (let i = 0; i < 120; i++) s.stage.step(); };
+  const P = {
+    come(s, state) { if (topo.still) { s.state = state; s.stage.param(s); s.lay(); stills(s); s.el.style.visibility = ''; } else { s.set(state); s.spread(); } },
+    set(s, state) { if (!topo.still) s.set(state); else if (s.alive) { s.set(state); stills(s); } else P.come(s, state); },
+    go(s) { if (topo.still) s.el.style.visibility = 'hidden'; else s.leave(); },
+  };
+  // a droplet in the rail: its paint, its ring, and a button over it. The slot is never faded or moved, so no box
+  // shows round the paint
+  function spot(who, pig, size, [x, y], seed, label) {
+    const slot = document.createElement('span'), rr = size / 2 + (size > 30 ? 9 : 8); slot.className = 'slot'; slot.style.setProperty('--c', `var(--c-${who})`);
+    Object.assign(slot.style, { left: x - size / 2 + 'px', top: y - size / 2 + 'px', width: size + 'px', height: size + 'px' });
+    paint.appendChild(slot);
+    const s = kit.drop(slot, pig, size, 'ready', { hidden: true }); s.stage.lively = 1.7; s.stage.tide = 1.5;
+    const ring = rail.ring(slot, rr, seed), hit = document.createElement('button');
+    hit.type = 'button'; hit.className = 'hit'; hit.setAttribute('aria-label', label); slot.appendChild(hit);
+    return { slot, s, ring, hit, x, y, r: rr };
+  }
+  // every agent: its own droplet, its name once, and six places round it where a helper can be painted. With two or
+  // three agents the bundles are smaller and set loosely down the rail, not in a column
+  const SC = [1, 0.84, 0.72][N - 1], AT = [[[130, 146]], [[112, 122], [158, 356]], [[108, 104], [162, 286], [104, 462]]][N - 1];
+  const OFF = [[-62, -54], [77, -38], [11, 80], [-76, 44], [84, 48], [10, -88]];
+  paint.style.height = AT[N - 1][1] + 150 * SC + 'px';
+  const AG = {};
+  WHO.forEach((who, i) => {
+    const [cx, cy] = AT[i], ag = (AG[who] = { who, cx, cy, hs: [], rest: 0, inside: false });
+    ag.me = spot(who, who, Math.round(44 * SC), [cx, cy], i + 2, rail.NAME[who]); ag.me.hit.disabled = true;
+    ag.me.hit.onclick = () => openNote(ag);
+    const name = document.createElement('span'); name.className = 'paint-name'; name.textContent = rail.NAME[who]; name.style.setProperty('--c', `var(--c-${who})`);
+    Object.assign(name.style, { left: cx + 'px', top: cy + 118 * SC + 'px' }); paint.appendChild(name);
+    ag.places = OFF.map(([dx, dy]) => ({ at: [cx + dx * SC, cy + dy * SC], by: null, left: 0 }));
+  });
+  // the first ask: the welcome goes, and the agents are painted in
+  function begin() {
+    if (started) return; started = true; hi.hide(); paint.classList.add('in');
+    WHO.forEach((who, i) => setTimeout(() => { P.come(AG[who].me.s, 'ready'); AG[who].me.hit.disabled = false; }, topo.still ? 0 : 250 + i * 220));
+  }
+
+  // ---- a helper: one droplet by its agent, on one part of your page, for one ask
+  let seed = 9;
+  function helper(ag, x, part, held) {
+    // where: a place nobody's in, the one left longest ago first, so new paint comes up beside the old, not on it
+    const free = ag.places.filter((p) => !p.by).sort((a, b) => a.left - b.left)[0];
+    if (!free) return null;      // six at work for one agent is the most the bundle holds
+    const i = ag.places.indexOf(free), pig = rail.HUES[ag.who][i % 3], m = PARTS[part], n = (went[part] = (went[part] || 0) + 1);
+    const h = { ag, x, part, held, state: 'off', place: free, v: m.turns[(n - 1) % m.turns.length], timers: [] };
+    free.by = h;
+    h.p = spot(ag.who, pig, Math.round(25 * SC), free.at, seed++, m.thing); h.p.hit.disabled = true;
+    h.t = kit.thing(ov, pen, kit.rect(bd.el(part)), m.pad, m.rx, pig);
+    h.p.hit.onclick = () => openNote(h);
+    // point at a finished helper: its droplet wets again, with a thin pencil line round what changed
+    h.p.hit.onmouseenter = h.p.hit.onfocus = () => { if (h.state === 'done' && !topo.still) { h.t.lit(true); h.p.s.set('lit'); } };
+    h.p.hit.onmouseleave = h.p.hit.onblur = () => { if (h.state === 'done' && !topo.still) { h.t.lit(false); h.p.s.set('done'); } };
+    ag.hs.push(h);
+    return h;
+  }
+  const after = (h, s, fn) => h.timers.push(setTimeout(fn, s * 1000));
+  const says = (h) => { const m = PARTS[h.part]; return h.state === 'done' ? m.then(h.v) : h.state === 'undone' ? m.back : h.state === 'held' ? 'I need your yes before I touch your signup form.' : m.now; };
+  function start(h, fin) {      // it's painted in, looks at its part, then gets on with it at its own pace
+    if (h.state !== 'off') return;
+    h.state = 'working'; h.p.hit.disabled = false; P.come(h.p.s, 'working'); h.p.ring.set(0.28); if (!topo.still) h.t.look(); tally(h.ag);
+    after(h, 0.8, () => { if (h.state === 'working') { if (!topo.still) h.t.change(); h.p.ring.set(h.held ? 0.5 : 0.62); tally(h.ag); } });
+    if (h.held) return;      // it waits for the question, and your answer
+    after(h, fin * 0.7, () => { if (h.state === 'working') { h.p.ring.set(0.84); tally(h.ag); } });
+    after(h, fin, () => finish(h));
+  }
+  function finish(h) {      // its change lands on your page; it dries, and its ring closes in its agent's color
+    if (h.state !== 'working' && h.state !== 'held') return;
+    h.state = 'done'; land(h); P.set(h.p.s, 'done'); h.p.ring.set(1); h.p.slot.classList.remove('needs'); h.p.slot.classList.add('done');
+    if (topo.still) { h.t.mark(); stills(h.t.s); } else h.t.done();
+    fresh(h); tally(h.ag);
+  }
+  function hold(h) {      // the ask came back with a question: it stops where it is, ring amber, until you answer
+    if (h.state !== 'working') return;
+    h.state = 'held'; P.set(h.p.s, 'waiting'); h.p.slot.classList.add('needs'); if (!topo.still) h.t.wait(); fresh(h); tally(h.ag);
+  }
+  function leave(h) {      // it lifts, as paint does, and its place is free for the next
+    if (h.state === 'gone') return;
+    h.timers.forEach(clearTimeout); const was = h.state; h.state = 'gone';
+    if (open && open.of === h) shut();
+    h.p.hit.disabled = true; h.p.ring.set(0); h.p.slot.classList.remove('done', 'needs');
+    if (was !== 'off' && was !== 'undone') P.go(h.p.s);
+    if (topo.still) h.t.s.el.style.visibility = 'hidden'; else h.t.clear();
+    h.place.by = null; h.place.left = Date.now(); h.ag.hs.splice(h.ag.hs.indexOf(h), 1);
+    setTimeout(() => { h.p.s.stage.remove(); h.p.slot.remove(); h.t.s.stage.remove(); h.t.s.el.remove(); h.t.r.remove(); }, topo.still ? 0 : 2400);
+    tally(h.ag);
+  }
+  function undo(h) {      // one change off your page: its paint lifts, its ring goes back to pencil. Redo paints it back
+    if (h.state === 'done') { h.state = 'undone'; lift(h); if (topo.still) h.t.s.el.style.visibility = 'hidden'; else { h.t.lit(false); h.t.clear(); } P.go(h.p.s); h.p.slot.classList.remove('done'); }
+    else if (h.state === 'undone') { h.state = 'done'; land(h); if (topo.still) h.t.s.el.style.visibility = ''; else h.t.mark(); P.come(h.p.s, 'done'); h.p.slot.classList.add('done'); }
+    fresh(h); tally(h.ag);
+  }
+  // an agent's own ring: how far its helpers have got, taken together. With none it's just its droplet. Left alone
+  // for a while with nothing going on, its dried helpers lift and it settles back to that
+  function tally(ag) {
+    const live = ag.hs, busy = live.some((h) => h.state === 'working' || h.state === 'held' || h.state === 'off'), dried = live.filter((h) => h.state === 'done' || h.state === 'undone');
+    ag.me.ring.set(live.length ? live.reduce((n, h) => n + h.p.ring.part, 0) / live.length : 0);
+    const st = busy ? 'working' : dried.length ? 'done' : 'ready';
+    if (started && ag.st !== st) { ag.st = st; P.set(ag.me.s, st); }
+    ag.me.slot.classList.toggle('done', !busy && dried.length > 0);
+    clearTimeout(ag.rest);
+    if (!busy && dried.length) ag.rest = setTimeout(function settle() {
+      if (ag.inside || (open && (open.of === ag || open.of.ag === ag))) { ag.rest = setTimeout(settle, 4000); return; }
+      ag.hs.filter((h) => h.state === 'done' || h.state === 'undone').forEach((h, i) => setTimeout(() => leave(h), topo.still ? 0 : i * 260));
+    }, 24000);
+    fresh(ag);
+  }
+  paint.onmousemove = (e) => { const b = paint.getBoundingClientRect(), y = e.clientY - b.top; WHO.forEach((w) => { AG[w].inside = Math.abs(y - AG[w].cy) < 130 * SC; }); };
+  paint.onmouseleave = () => WHO.forEach((w) => { AG[w].inside = false; });
+
+  // ---- what the pile tells this page about each ask (../sys/pile.js, `on`)
+  const jobs = new Map();
+  function heard(what, x) {
+    const ag = AG[x.who] || AG[WHO[0]], job = jobs.get(x);
+    if (what === 'sent') {
+      begin();
+      if (job) job.forEach(leave);      // a reply sends the same ask round again: its own helpers make way
+      // leaving: what this agent had already dried lifts, one after another, as the new ones are painted in
+      ag.hs.filter((h) => h.state === 'done' || h.state === 'undone').forEach((h, i) => setTimeout(() => leave(h), topo.still ? 0 : i * 260));
+      const parts = about(x.text); asked++;
+      if (x.asks && !parts.includes('form')) parts.push('form');      // the question is about your signup form, so a helper stands by on it
+      const hs = parts.map((p) => helper(ag, x, p, x.asks && p === 'form')).filter(Boolean);
+      jobs.set(x, hs);
+      hs.forEach((h, i) => after(h, topo.still ? 0 : 0.45 + i * 0.55, () => start(h, 2.0 + i * 0.7)));      // each at its own pace, all done before the agent says so
+    }
+    if (what === 'ask' && job) job.filter((h) => h.held).forEach(hold);
+    if (what === 'done' && job) {
+      const no = x.answer === 'no';
+      job.forEach((h) => {
+        if (h.state === 'held' || (h.held && h.state === 'working')) { if (no) leave(h); else { h.state = 'working'; h.p.slot.classList.remove('needs'); P.set(h.p.s, 'working'); h.p.ring.set(0.8); if (!topo.still) h.t.change(); fresh(h); after(h, topo.still ? 0 : 0.9, () => finish(h)); } }
+        else if (h.state === 'working' || h.state === 'off') { h.timers.forEach(clearTimeout); if (h.state === 'off') { h.state = 'working'; h.p.hit.disabled = false; P.come(h.p.s, 'working'); } finish(h); }
+      });
+    }
+    if (what === 'back' && job) { job.slice().forEach((h) => { lift(h); leave(h); }); jobs.delete(x); }      // Undo on the pile's note: the ask's changes come off your page and its helpers lift
+    if (what === 'ask' && playing) setTimeout(() => { const y = x.nt.el.querySelector('.note-mark[aria-label="Yes"]'); if (y && playing) y.click(); }, pace(1800));
+  }
+
+  // ---- what the agent says in the pile about an ask (../sys/pile.js asks for it once the ask is sent, after its
+  // helpers are set going), so its lines say what really changes on the page
+  const plain = (t) => t.replace(/<[^>]+>/g, '');
+  const listed = (a) => (a.length < 2 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+  const capped = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+  const RES = {      // what's true once a helper's change has landed: in full, and short for a list
+    headline: (v) => [`Your headline now says “${v}”`, 'a new headline'],
+    sub: () => ['The line under your headline is rewritten.', 'a new line under it'],
+    form: (v) => [`Your signup form has ${v} corners now.`, `${v} corners on your form`],
+    button: (v) => [`Your button has a warmer color and says “${v[1]}”.`, 'a warmer button'],
+  };
+  const res = (h) => (RES[h.part] || ((v) => [`${capped(PARTS[h.part].about)} stands out now.`, `${PARTS[h.part].about} standing out`]))(h.v);
+  function reply(text, who, x) {
+    const hs = jobs.get(x) || []; if (!hs.length) return null;
+    const main = hs.filter((h) => !h.held), held = hs.find((h) => h.held), all = main.length ? main : hs;
+    const done = all.length === 1 ? 'Done. ' + res(all[0])[0] : `Done. ${capped(listed(all.map((h) => res(h)[1])))}.`;
+    const only = held && !main.length;      // the ask was about the form itself
+    return {
+      look: `Looking at ${listed([...new Set(all.map((h) => PARTS[h.part].about))])}.`,
+      doing: plain(PARTS[all[0].part].now),
+      done,
+      q: only ? `I’d round your signup form’s corners to ${held.v}. Go ahead?` : 'This touches your signup form too. Go ahead?',
+      yes: only ? 'Done. ' + res(held)[0] : 'Done, your signup form included.',
+      no: only ? 'Okay. I left your signup form as it was.' : 'Done. I left your signup form as it was.',
+      back: all.length === 1 ? `Undone. ${capped(PARTS[all[0].part].about)} is back as it was.` : 'Undone. Your page is back as it was.',
+    };
+  }
+
+  // ---- the note: one at a time, one line, and pencil marks for what you can do about a finished change
+  let open = null;
+  // an agent's own note: what it's on, by name; "That's done." once its helpers have all dried
+  const busyOn = (of) => listed([...new Set(of.hs.filter((h) => h.state === 'working' || h.state === 'off').map((h) => PARTS[h.part].about))]);
+  const line = (of) => of.me ? (of.hs.some((h) => h.state === 'held') ? 'I need your yes on your signup form.' : of.hs.some((h) => h.state === 'working' || h.state === 'off') ? `I’m on ${busyOn(of)}.` : of.hs.length ? 'That’s done.' : 'Ready when you are.') : says(of);
+  const marks = (of) => of.me || (of.state !== 'done' && of.state !== 'undone') ? [] : [
+    { mark: 'edit', label: 'Change this', on: () => { shut(); field.lock(of.ag.who); field.say(`About ${PARTS[of.part].about}: `); } },      // the words go in the real field, after the @, and it's yours to finish
+    { mark: 'undo', label: of.state === 'undone' ? 'Redo' : 'Undo', on: () => undo(of) },
+  ];
+  function shut() {
+    if (!open) return;
+    const o = open; open = null;
+    o.n.open(false); o.lead.classList.remove('open');
+    setTimeout(() => { o.n.el.remove(); o.lead.remove(); }, 600);
+  }
+  function openNote(of) {      // of: a helper, or an agent itself
+    if (open && open.of === of) return shut();
+    shut();
+    const p = of.me || of.p, who = of.who || of.ag.who, top = p.y + p.r + 16, left = clamp(p.x - 60, 2, paint.clientWidth - NOTE_W - 2), tx = clamp(p.x, left + 22, left + NOTE_W - 22), y0 = p.y + p.r + 3;
+    const n = note.make(paint, { at: [left, top], w: NOTE_W, c: `var(--c-${who})` });
+    const lead = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); lead.setAttribute('class', 'note-lead'); lead.setAttribute('aria-hidden', 'true');
+    lead.innerHTML = `<path pathLength="1" d="M${p.x} ${y0}C${p.x} ${y0 + 5} ${tx} ${top - 5} ${tx} ${top + 1}"/>`;
+    paint.appendChild(lead); paint.appendChild(p.slot);      // the droplet you clicked stays in front of the note's blur
+    const text = line(of); n.say(text, true).acts(marks(of), true);
+    open = { n, lead, of, text, state: of.state };
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (open && open.n === n) { n.open(); lead.classList.add('open'); } }));
+  }
+  function fresh(of) {      // the note that's up keeps to what its droplet is doing now
+    if (!open || open.of !== of) return;
+    const text = line(of);
+    if (text !== open.text) open.n.say(text);
+    if (of.state !== open.state) open.n.acts(marks(of));
+    open.text = text; open.state = of.state;
+  }
+  r.el.addEventListener('click', (e) => { if (!e.target.closest('.note, .hit')) shut(); });
+  // Esc: a word's meaning first, then a note, then the pile if it's up; only then does it reach the rail and close it
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (open) { e.stopPropagation(); if (paint.querySelector('.note.small.open')) open.n.mean(); else shut(); }
+    else if (pl.isUp()) { e.stopPropagation(); pl.toggle(); }
+  }, true);
+
+  // ---- for judging only: Play types and sends a few asks for you; Slow halves its pace
+  const SCENE = [
+    [['claude', 'make the headline friendlier'], ['claude', 'soften the form'], ['claude', 'give the button a warmer color'], ['claude', 'make reminders stand out']],
+    [['claude', 'make the headline friendlier'], ['codex', 'make reminders stand out'], ['claude', 'give the button a warmer color'], ['codex', 'tidy the streaks card']],
+    [['claude', 'make the headline friendlier'], ['codex', 'make reminders stand out'], ['gemini', 'check the button’s color'], ['claude', 'rewrite the line under the headline']],
+  ][N - 1];
+  let playing = false, slow = false;
+  const pace = (ms) => (topo.still ? Math.min(ms, 400) : ms) * (slow ? 2 : 1), wait = (ms) => new Promise((ok) => setTimeout(ok, pace(ms)));
+  const playBtn = document.getElementById('play'), slowBtn = document.getElementById('slow');
+  async function play() {
+    if (playing) { playing = false; playBtn.setAttribute('aria-pressed', false); return; }      // click it again to stop
+    playing = true; playBtn.setAttribute('aria-pressed', true);
+    if (r.el.classList.contains('shut')) { r.open(true); await wait(1400); }
+    for (const [who, text] of SCENE) {
+      if (!playing) break;
+      field.lock(who); field.input.value = '';
+      for (const ch of text) { if (!playing) break; field.input.value += ch; await wait(42); }
+      await wait(350); if (!playing) break;
+      field.input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await wait(7600);
+    }
+    playing = false; playBtn.setAttribute('aria-pressed', false); field.input.blur();
+  }
+  playBtn.onclick = play;
+  slowBtn.onclick = () => { slow = !slow; slowBtn.setAttribute('aria-pressed', slow); };
+  document.getElementById('count').innerHTML = ['One', 'Two', 'Three'].map((w, i) => `<a href="?agents=${i + 1}${Q.get('still') ? '&still=1' : ''}" ${i + 1 === N ? 'aria-current="true"' : ''}>${w}</a>`).join(' · ') + ' agents';
+</script>
+</body>
+</html>

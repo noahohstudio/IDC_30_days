@@ -1,0 +1,1736 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>5 · Dashboard, v23</title>
+<link rel="stylesheet" href="../boarddash.css">
+<link rel="stylesheet" href="../wc/kit.css">
+<link rel="stylesheet" href="../sys/system.css">
+<link rel="stylesheet" href="../sys/note.css">
+<style>
+/* Nov 11, late: the words made real. Noah, in chat: "make sure that all the prototyping placeholder stuff, such as our dashboard, such as whenever we kind of have
+   placeholder copy, is more so ironed out and made to look much more realistic. Now we just have to really nail the
+   impression that this is a functioning app that already exists. Now it's just a demo reel for what it does."
+   So the data reads as one afternoon on Juniper and agrees with the other screens: the accent the button got is the
+   one the page really has (#2f5fd0 to #e8715a), Cursor's idle line says what it last did, Tidepool is a tide-times
+   app, and Settings says what each switch does ("Explain design words", "Open Gouache"). What an agent says about an
+   ask you send follows the ask (../sys/pile.js). Before that: */
+/* The dashboard, v23: polish. Noah's notes on v22, Nov 11, in chat (each is quoted again where it's acted on):
+     stagger     "even when we shrink it just a little bit for smaller screens in the dashboard view, the bundles snap
+                 back to the grid that they were once in, not staggered. Can we find a way to smartly fix that?"
+                 The loops keep to one band, low and high, however tall the window is, and no loop sits straight over
+                 its neighbor, so they interlock at every size (layout: zig, SPAN, SHIFT).
+     the pile    "I would like to see an edge case where the chat box is being used and the notifications are piling in
+                 above the chat box. And I want to see a way where we can structure it so that it doesn't really
+                 interfere too much with the agents themselves. Or sorry, the helpers, bottom left. Closest to the chat
+                 box itself."
+                 ?asks=N (1 to 8) sends N sample asks for you, a second or so apart, so the pile can be watched
+                 filling. And the layout keeps a lane clear over the ask field, as tall as the pile usually is (one
+                 whole note and two slim ones), so in ordinary use no paint is under it (layout: KEEP, LANE).
+     library     "When we open the library, maybe the dashboard on the bottom automatically becomes bigger so we know
+                 which one we're looking at."
+                 Your page in the corner grows while the library is open, and goes back when it shuts (unless you made
+                 it big yourself).
+     Group by    "when we change the group by, it just kind of snaps to where the word needs to be. Maybe we have a
+                 gentle slide or have enough room so that there doesn't need to be that at all. And when we change it,
+                 there's like a gentle animation where it fades in and fades out."
+                 The word has room as wide as the longest of the three, so nothing along the top moves, and it fades
+                 out, then in.
+     settings    "I think we could remove the meta prompting toggle. from the chat box itself and just put it into
+                 settings."
+                 It's a row in Settings. The field has no toggle.
+     lines       "I was wondering if the lines in technical view could just be our lines for the graphite. So, you
+                 know, again, still straight lines at the same opacity, but maybe not perfectly straight. Maybe like
+                 just very, very almost unnoticeably funny in the way we draw the circles."
+                 The rule over each job in the technical view is a pencil line: the same weight and gray, with a wobble
+                 of half a pixel, four hands of it so no two neighbors are copies.
+     leaving     "I love the subtle zoom in when you click on something ... I don't like how the zoom out though is a
+                 magnifying glass, kind of like, like you have to click out like twice. Maybe just when you click out of
+                 whatever you're hovering on, it zooms back out. And the zoom in doesn't have to be strong. It can be
+                 very subtle, like the same as it is now."
+                 No zoom-out cursor. One click off the note and the agent's paint, or one Esc, closes the note and
+                 leaves the focus together. The zoom is as it was.
+     amber       a ring that's waiting on you stays amber while its note is open (it took its agent's color).
+   Before that, v22: everything picked so far, in one working sheet. Noah, Nov 11, in chat:
+     "Can we take everything we currently have and then build the functional dashboard that's responsive so we can test
+      it out and see if anything has been missed or anything isn't exactly the way we want it to be?"
+   What's new here (the picks are in the desk's Decisions, in his words):
+     blur        when a bundle's note opens the whole field blurs and pales ("just blur everything"): a veil over the
+                 field (note.veil) with a soft hole where the bundle you clicked is, so that bundle and its note stay
+                 sharp. The library and settings blur everything under them the same way.
+     your page   the page in the corner marks the part a bundle is on while its note is open and while you point at
+                 the bundle. Pointing at an agent's own droplet, or anywhere inside a group's loop, marks every part
+                 that agent or group has touched ("when you're hovering on any group, it just shows and reflects that
+                 on the dashboard").
+     library     a note in pencil: each project is its paint (who's worked there, a ring as far as its work has gone,
+                 amber if something there waits on you) and its name. Pointing at one shows its page in the corner.
+     settings    a note in pencil too. A design word's meaning in the technical view is the small pencil note, the
+                 explanation alone. Nothing laid over the sheet is a white card any more.
+     asks        what you send from the field is painted into its agent's loop (the pile tells this page each step:
+                 ../sys/pile.js, on): a small bundle lands in a free spot inside the loop, wet with a growing ring
+                 while it's worked on, amber if it needs you, dried in the agent's color when done; it lifts if you
+                 undo or clear it. Nothing that's already painted is lifted for it. Sorted by state or part there's no
+                 loop of its own to go in, so it sits under its agent's small droplet in the corner.
+     any size    the field is as large as the window allows (it was 1320 x 760, whatever the window). Resize and the
+                 sheet is laid out again, once. Loops come down in size until none sits under the ask field, the
+                 pile's icon or your page. Notes stay on screen. A focus is kept across a resize.
+     Esc         a word's meaning, then the library or settings, then a note, then the pile if it's up, then the focus.
+     ?still=1    runs the reduced-motion path without the system setting, so it can be tested.
+   Before that, v21: focus. Noah's note on v20 · D, four agents (Nov 11):
+     "when we over one of the main agents in the center of these bundles, I think it would be good if all the other
+      ones, all the other bundles, kind of dial down a little bit. Not so much a blur, but more so they just become a
+      little lighter, or the focus is definitely placed on the one you're looking at. Maybe just the name of that one
+      stays and all the other names of the other ones fade for a little. When you click on one of the main LLMs though,
+      instead of having a overview of, or like an overlay of what that LLM is, maybe we just expand it to the entire
+      screen. The rest can kind of be pushed away for a second. Maybe we can still see elements of them, but they're
+      this time blurred out, dialed down, and on the sides of the screen whilst your main LLM you're looking at is the
+      center and zoomed into. I think this kind of ties into how we actually think as people. When you're having a
+      thought of something, Everything else kind of dials down, and when you're really honing in on it, nothing else
+      really matters. ... Let's try that and yeah, create a prototype for that."
+   and in chat, the same evening:
+     "We want it to be almost even just like representational of an infinite canvas. ... this almost reflects the way
+      that our brain naturally thinks, where it's like when you're thinking of something, like you kind of zoom into
+      that idea, but also like You still have in the back of your mind the other different things running. ... leaving
+      the kind of focus is just as important as entering it. I think it should be very coherent that users can just
+      click off it to go back to the main view, click on the blurs or on the edges of the screen. Or even just the LLM
+      again to minimize it. But yeah, let's experiment with that, create maybe a workshop for that, a couple different
+      iterations of that."
+   So, in the paint view (the technical view is as it was):
+     pointing    point at an agent's own droplet and every other agent goes paler, not blurred (.kd-fog.pale: a little
+                 of the paper laid over its loop), and the other names fade. Its own name stays.
+     focus       click an agent's own droplet, or any bundle, and that agent takes the screen. Three takes, ?focus=:
+                   a  Step in (the default): the sheet moves like a camera. It's larger than the screen (.kd-cam) and
+                      steps toward the agent until its loop fills most of the height; the others run off the edges.
+                   b  Push away: the agent is painted large in the middle and the others small at the sides. Paint
+                      doesn't slide here, so this is a regroup: it lifts where it is and comes up where it's needed.
+                   c  Pull focus: nothing moves. The others blur and pale where they are.
+                 In all three the others are blurred and paled (.kd-fog.blur) and still working, the agent's loop is
+                 firmer, and only its name stays. With one agent there's nothing to push away: a steps in a little.
+     leaving     the same move, back: click the blurred others, empty paper, the edges of the screen, the agent's own
+                 droplet again, or press Esc. A click during the move turns it round.
+     the note    the white slip is gone. A bundle's overlay is the note in pencil (../sys/note.css, note.js): one line,
+                 the bundle's own sentence, no captions. A bundle waiting on you asks, with a check and a cross; after
+                 you pick, the agent says what it's doing and the one mark left is undo. A click off closes the note
+                 first; the next one leaves the focus. Clicking an agent no longer opens anything about the agent.
+   Before that, v20: the top line on one center line, Group by further left, a wider ask field (see those rules).
+   Before that, v19: polish. Noah's notes on v18 (Nov 11):
+     "the working animation within the dashboard could be a little more noticeable"
+     "the dried up, complete state could also be slightly more noticeable"
+     "how can we indicate when batches of tasks are done? Blobs dry up when finished on the dashboard, but when a whole
+      task is complete, could we maybe recolor the circle with the respective colors?"
+     "the done state could have colored circles containing the lines in the state view, whereas needing you input could
+      have a signature color to itself. A yellow? something that signifies input needded"
+     "what is the caption for? Showing the models? They may be inconsistent as multiple different models could work on
+      a task - remove"
+     "could the pair being a toggle be more clear?"
+     "could we have a simpler icon for rail view? If the prior was a zoom in, why not a matching zoom out button? Or,
+      if this is more coherent, lets keep it. I'm interested in how icons that are consistent in both the rail and
+      here could be morphed into eachother during the transition"
+     "I'm noticing that the chat box is gone in the dashboard - could we solve that? It should be available both in
+      the dashboard and in the rail view"
+   So:
+     working     color lands in a working droplet more often and more strongly (the sheet's `lively`, ../wc/wc.js), and
+                 the drawn end of a working bundle's loop breathes a little, back and forth.
+     done        dried paint has a paler middle and a darker edge (`tide`), and once every helper in a bundle is done
+                 its closed loop is in its agent's color, not graphite. An agent whose jobs are all done gets its
+                 large loop in its color too.
+     waiting     waiting on you has a color of its own, amber (--c-you, --c-you-deep in ../sys/system.css): the
+                 bundle's stroke (longer than it was, and stronger), the "Waiting on you" group's loop and name, and
+                 the words "waiting on you" in a slip and in the technical view. Cursor's paint was yellow; it's teal
+                 now, so yellow means one thing.
+     captions    the small second line under an agent's name (the tool it runs in) is gone.
+     view        the two icons sit in one small track with a thumb behind the one you're on, like the switches.
+     back        the way back is the first mark top left, and it's the rail's dashboard mark with its arrows turned
+                 inward, in the same corner. Coming from the rail the arrows turn in as the dashboard opens; going
+                 back they turn out first.
+     ask         the ask field is here too, bottom left: the rail's own field. You can type in it.
+   Before that, v18. Noah's notes on v17 · D (Nov 11):
+     "when transitioning into technical view, i'm noticing that for blobs that are off the screen, they slide under
+      the viewport to reach where they are. This isn't working. I also don't know how to feel about the blobs sliding
+      to where they belong, it feels a little out of our language - lets limit movements on blobs. Try the transition
+      again, make it gentle but swift"
+     "some of these captions are not necessary. Lets move settings to top left, remove the word counter, remove the
+      instructional captions too"
+     "the agent onboarding happens with the command, we don't need this here"
+     "move the project name and where its hosted to center of the dashboard screen."
+     "group by could be a dropdown with no borders, just the text. Hover, and you can see options. Your current view
+      is highlighted"
+     "technical vs regular view should be a toggle icons, not words"
+     "not sure how the current LLM you're using is relevant"
+     "how do we track progress without clicking in? Is it the stains/dryness? Or can we have a more obvious visual
+      sign?"
+   So:
+     technical   nothing travels. Paint does only what paint does: it lifts where it is and comes up where it's
+                 needed. In: the pencil is lifted, the field's paint lifts a droplet at a time, and the columns come
+                 up in its place, each droplet painted in at its row as its words rise. Back: the words step back,
+                 and the field's paint comes up again where it was, with its loops drawn round it. Another Group by
+                 inside the technical view goes the same way: words step back, then come up in their new columns.
+     bottom      the strip is gone: no word counter, no instructions, no "Plug in an agent" (an agent joins with the
+                 command). Settings is the third button, top left.
+     top         the project and where it's hosted are in the middle. Group by is plain text ("Group by Agent"):
+                 point at it and the other ways show under it, with the one you're on marked. The view is two small
+                 pencil icons, paint and lines.
+     one agent   its droplet and name in the corner are gone: with one, there's nothing to tell apart.
+     progress    the sign the rail uses. A bundle's pencil loop is drawn only as far as its job has gone, from the
+                 top, clockwise: a short stroke while it waits on you, part of a loop while it's working, closed
+                 once it's done. An agent's large loop stays whole.
+   Before that, v17: with three or more agents the loops are staggered and uneven, and with two, one sits higher
+   (Noah, Nov 11: "lets do B staggered, but not perfectly aligned ... make them a little more varied in spacing. With
+   just two as well, maybe one is higher than the other?"). See layout(). ?pack=rows gives the old rows of two.
+   Before that, v16: how things come and go. Noah's notes on v15 (Nov 11):
+     "there seem to be inconsistencies with how the overlays appear when I click on agents or helpers - can we fix
+      that? A subtle slide/blur in thats consistent with all components that appear as overlays"
+     "I'm thinking that the background color of our dashboard and tool could be a little whiter even, with just a hint
+      of the tint of paper. Make sure that also makes sense with the overlays"
+     "I'm noticing that when i click certain agents or helpers, that the circles suddenly snap into the color that
+      they relate to - could it fade gently, swiftly instead?"
+     "the transformation between technical view and regular needs to be much more thoughtful and animated, not just a
+      simple total fade"
+     "flipping through different ways of viewing the work within technical view needs to be much smoother and more
+      animated"
+     "switching between specific views whilst in regular view takes too much time - but I appreciate the decoration.
+      Could we keep it, have a more coherent way of transforming, and have the change be slightly quicker? If not
+      quicker, more decorated in the sense that all details seem thought-out. Maybe the pencil lines gently glide and
+      cir circle the blobs instead of just fading in?"
+     "when switching the group by navs, I'm noticing that all blobs disappear at the same time, and reappear at the
+      same time, making an odd effect. Lets make it feel a little more swift, thoughtful, and tactile by introducing
+      some randomness or ordering?"
+   So:
+     overlays    everything laid over the sheet (a slip, the library, settings, design words, plug in an agent, a
+                 word's meaning) comes and goes one way: .kd-ov, 8px up out of a 4px blur in 260ms, back in 180ms.
+                 A slip that's open and asked for another bundle goes, then comes at the new place.
+     paper       whiter, from ../wc/kit.css. Every surface here reads the tokens; overlays share one shadow.
+     color       a loop takes its agent's color over 250ms; the outline on your small page fades the same way.
+     regroup     paint leaves and arrives a droplet at a time, left to right with a little chance in it, and the
+                 arriving starts before the leaving has finished (about 2s in all; it was about 3.6s). Pencil is
+                 drawn, not faded: each loop glides round its bundle as its paint lands, and is lifted the same way.
+     technical   the sheet isn't cross-faded. Every droplet's paint lifts off where it is and travels to its place
+                 in the columns (an agent's to the head of its column, a helper's to its row), the loops are lifted,
+                 and the words come in down each column. Back is the same in reverse: the droplets travel home and
+                 the loops are drawn round them.
+     in technical view, another Group by moves every job to its new column and place; nothing is rebuilt.
+   The project is Juniper again, the demo page from before Kino (Noah, Nov 11, on 3 · Watch it work v10: "lets use a
+   different screen rather than the Kino mockup - something a little simpler that can really show how our tools work.
+   Maybe just back to the prior demo screen?"). The 2:14 PM job is the one you ask for on screen 2.
+   The dashboard, v15: a helper says two short things here too, the thing it's on and what's happening to it (Noah, Nov
+   11: "Yes, two lines"). In a slip that's all a helper says. In the technical view the thing is the title and the
+   helper's own words, the file and the exact change follow under it.
+   The dashboard, v14: the rail's rings in the slips and the technical view, so every section reads the same. A helper's
+   droplet has its own pencil ring, drawn as far as its work has gone; a finished one is dry with a closed ring. The
+   agent's droplet has a ring for how far its helpers have got. (Noah, Nov 11: "a way to show what agents are or what
+   helpers are done with their tasks ... Maybe they dry out and have a full circle around them.") The counts of jobs
+   and helpers are gone from the technical view's heads; the paint on the sheet itself is unchanged.
+   The dashboard, v13. Noah, Nov 10, in chat:
+     "there's not enough visual hierarchy. The text is very close to the titles ... And then it's also very close to
+      the icons ... It needs to be much more spaced out, it needs to be much more readable and easier to follow."
+     "there's a technical view top right. This should reorder and, you know, redisplay what's going on on the screen
+      entirely. You should be able to see all your agents thinking with the actual words they're using with this view."
+     "a lot of these sections feel a little different from each other. They should all feel very similar and very
+      coherent to work around with similar patterns so that the tool is hyper-functional."
+   A slip is now made of the rail's own parts, with the rail's room (../sys/system.css): the agent's droplet, its name
+   with when and how long, what it did, what you asked, then a line per helper, each with its droplet 16px from its
+   words and 24px from the next.
+   Technical view turns the whole sheet over. The paint steps back and every agent's thinking is laid out in its own
+   words: a column per agent (or per state or part, whichever way you've grouped), newest job first, and for every
+   helper what it thought, in order, then the file and the exact change. Work happening now writes itself in as you
+   watch. It's built from the same parts as the rail and the slips.
+   The dashboard, v12, on the system (../sys/system.css). Noah, Nov 10, in chat: "making all of our design system very
+   consistent throughout the entire experience ... consistent font sizes, cutting down to just maybe a handful of them.
+   Colors too ... readability and easy tracking."
+   Type: the three sizes the rail uses and no others (it had seven, from 10.5 to 14px): 11 for quiet system text, 13 for
+   reading, 15 for what an agent tells you. Text: the system's three tones, each agent's one deep color for its words.
+   Controls: the paper's grays. The technical lines are in Figtree too, so there is one typeface.
+   The project is Kino, the page every screen of the flow is on, and the 2:14 PM job is the one you ask for on screen 2,
+   watch on screen 3 and get back on screen 4.
+   Nothing else changed from v11, below.
+   The dashboard, v11: larger, and more to find in it. Noah's note on v10 (Nov 10):
+     "So beautiful, but feels empty. I think we could make this much larger, and start engineering how certain
+      information could be shown on click, or in a general technical view"
+   Larger: the field is 1320 x 760 and the paint is sized to fill it. Whatever is on the sheet (one agent or four, any
+   way of grouping) is drawn as large as fits, up to about one and a half times v10.
+   On click: a bundle's slip now starts with what you asked, in your words, then what was done, a line per helper, and
+   how long it took.
+   Technical view (top right, off to start): for when you want what's underneath. Each bundle gets a pencil-gray line
+   (how many files, how long). Each helper's line in a slip gets the file it touched and the exact change. An agent's
+   name gets its jobs and helpers. Nothing technical shows until you ask for it.
+   The typeface is Figtree and the paper's grain is lighter, both from ../wc/kit.css.
+   The dashboard, v10: one agent, two, or a few, and how one joins. Noah's note on v9 (Nov 10):
+     "Looks really, really good. Let's have different edge cases for using one LLM versus 2 versus, say, a couple more.
+      And then also figure out the engineering and thought process behind how different LLMs join in on your dashboard
+      for this product. How do we link them? Maybe there's an onboarding. Yeah, looking at that. Same for the visual
+      language."
+   ?agents=1, 2 or 4 sets who's plugged in to start with (Claude, Codex, Gemini, Cursor).
+     one     there's nothing to tell apart, so there are no agent loops and no "Agent" way to group: the paint is sorted
+             by state, and the agent is one small droplet in the corner
+     two     as v9
+     a few   every agent gets its own hue family (Gemini greens, Cursor yellows), the loops sit in rows of two, and
+             everything is drawn smaller so it still fits one sheet
+   Joining: "Plug in an agent", bottom left, lists the agents found on this machine. Plug one in and it arrives in our
+   own purple, then takes its own color (Noah, Nov 10: "maybe it kind of snaps onto their colors"). It has an empty
+   loop until it does something here, and "Agent" shows up as a way to group.
+   ?font=Name tries a typeface from the type workshop.
+   Nothing else changed from v9, below.
+   The dashboard, v9: v8's bundles, in the language as Noah settled it on Workshop v4 (Nov 10):
+     "for our paper color, we want it to be a little bit more neutral ... way closer to gray or white than it is to
+      yellow" -> ../wc/kit.css's paper, and the grays, shadows and switches here are neutral too
+     "Pencil lines are really good, but I really dislike the dotted lines. Can we get rid of them and just replace them
+      with the pencil lines?" -> every line is a clean 0.9px pencil line with no grain; nothing is dotted or dashed
+      (the plug-in circle and the underline under a design word were)
+   Nothing else changed from v8, below.
+   The dashboard, v8: bundles. Noah's pinned notes on v7 · A (Nov 10):
+     "I really don't like it when the droplets are inside of each other because it gives this weird effect where it
+      doesn't look as realistic as it does when it's alone. And I also don't enjoy the kind of dry droplets next to the
+      semi-wet ones, especially when the semi-wet ones don't look very real. I like the pulsating nature of them, but
+      they could be a little drier on the end of things. Let's find ways to show agents and their subagents together as
+      a bundle, but not inside each other."
+     "I'm curious on what this button does. Does it reopen the rail and the actual webpage, or is it another library
+      button? Let's make it a little bit more clear. Let's put the library button underneath it perhaps and remove the
+      library kind of caption."
+     "The title of the project and where it's hosted could be the same size. I'm not sure how the opacity is working,
+      and I think they could also just be smaller. Maybe we still keep the opacity"
+   and, the same hour, on the workshop: "more representational than it is realistic", "a little bit more pastel and a
+   little lighter just to match our vibe with the graphite", and agents don't travel ("why is movement even kind of
+   necessary").
+   So: every droplet stands alone. A job is a bundle: its helpers' droplets side by side, never touching, tied by a
+   small graphite loop. An agent is a bigger loop around its own droplet and its bundles. There is no larger blob for
+   anything to stick to or sit inside. The paint is the soft look of ../wc/wc.js: working is a slow pulse, waiting is
+   drier at the edge, done is dry. Nothing glides: regroup, and the paint lifts where it was and comes up where it
+   belongs. Click a bundle and its loop takes its agent's color and a slip opens beside it.
+   Top left, two buttons with no captions (a name shows while you point at one): back to your page and the rail, then
+   the library under it. The project's name and host are the same small size; the host is fainter.
+   Kept from v5 and v7: the loops, Group by (only once there's something to sort), the widget, the slip, saying yes to a
+   waiting agent. Classes are kd-. */
+.kd-sheet { position: fixed; inset: 0; z-index: 5; box-shadow: none; overflow: hidden; overflow: clip; }      /* clip, not hidden: the camera's sheet is larger than the screen, and typing in the ask field scrolled a hidden box to 'show' the caret, which threw the whole dashboard up the screen */
+canvas.wc { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: multiply; pointer-events: none; }
+/* Clean paint. The field's paint is one picture with a pixel of paint to a point of screen, so on a sharp (2x) screen
+   each pixel of paint is 2 by 2, and 3 or 4 by 3 or 4 when the sheet steps in: its edges come out as little stairs.
+   Noah, Nov 11: "is there any way to make the paint kind of lossless? ... not to make it like too vector-like and
+   uninteresting ... clean and, you know, liquid-like? I don't want you to redo the engine". A blur over it (the first
+   try) only made it soft; then: "some of the splotches on my screen when I'm looking at the dashboard look blurry ...
+   please fix that and make sure it looks just as clean when zoomed in on." So the picture is drawn through a filter
+   (#wc-clean, below the sheet) that redraws each splotch's edge at the screen's own sharpness: where there's paint is
+   found, smoothed and cut again crisply, so a stair becomes a curve; the colour inside is the paint's own, smoothed by
+   half a pixel of paint, never mixed with the white round it. The engine is untouched. Because the browser draws the
+   filter at the size it is when it's set, it's set again (swapped for its twin, #wc-clean-b) whenever the sheet stops
+   moving or changes size, so after a step in it's as clean as at rest. ?smooth=0 shows the raw picture, to compare */
+.kd-sheet.smooth .kd-field > canvas.wc { filter: url(#wc-clean); }
+.kd-sheet.smooth.alt .kd-field > canvas.wc { filter: url(#wc-clean-b); }
+.kd-pencil { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.kd-sheet button { font: inherit; }
+
+/* top left: back to your page, then the library. No captions; a name while you point */
+.kd-nav { position: fixed; left: 26px; top: 22px; z-index: 9; display: flex; flex-direction: column; gap: 8px; }
+.kd-nav button { position: relative; width: 26px; height: 26px; border: 0; padding: 3px; background: none; color: var(--k-muted); cursor: pointer; transition: color .2s; }
+.kd-nav button svg { display: block; width: 20px; height: 20px; overflow: visible; }
+/* the way back: the rail's dashboard mark, arrows turned inward, at the size and in the corner it has in the rail */
+.kd-nav button svg.mark-size { width: 14px; height: 14px; margin: 3px; }
+.kd-nav button:hover, .kd-nav button.on { color: var(--k-text); }
+.kd-nav button::after { content: attr(data-tip); position: absolute; left: 32px; top: 50%; transform: translateY(-50%); font-size: var(--t-1); color: var(--k-muted); white-space: nowrap; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.kd-nav button:hover::after, .kd-nav button:focus-visible::after { opacity: 1; }
+.kd-nav button.on::after { opacity: 0; }
+
+/* system text: pencil gray, small */
+/* v20: everything along the top sits on one line, the middle of the back mark (35px down): the project, Group by and
+   the view switch are centered on it, not set on a baseline (Noah, Nov 11, on v19: "Let's have all the pills and top
+   line aligned together on the same line. Right now I think there's a little bit of off-centeredness.") */
+.kd-top { position: absolute; left: 60px; right: 60px; top: 23px; height: 24px; display: flex; align-items: center; justify-content: flex-end; font-size: var(--t-2); line-height: var(--l-2); }
+.kd-top b { font-weight: 500; color: var(--k-text); }
+.kd-top .host { color: var(--k-faint); }
+/* the project and where it's hosted, in the middle */
+.kd-title { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: baseline; gap: 9px; white-space: nowrap; }
+/* Group by: plain text. Point at it (or focus it) and the other ways show under it; the one you're on is marked */
+.kd-by { position: relative; display: flex; align-items: baseline; color: var(--k-faint); transition: opacity .3s; }
+.kd-by.off { opacity: 0; pointer-events: none; }
+.by-now { display: inline-flex; align-items: baseline; gap: 6px; border: 0; padding: 0; background: none; color: var(--k-faint); cursor: default; }
+/* v23: the word has room as wide as the longest of the three (they lie in one cell), so nothing along the top moves when
+   it changes; and it fades out, then in (Noah: "it just kind of snaps to where the word needs to be ... a gentle
+   animation where it fades in and fades out") */
+#by-cur { display: inline-grid; justify-items: start; }
+#by-cur > span { grid-area: 1 / 1; opacity: 0; transition: opacity .16s ease; }
+#by-cur > span.on { opacity: 1; transition: opacity .16s ease .16s; }
+.by-now:focus-visible, .by-list button:focus-visible, .kd-view button:focus-visible { outline: 1.5px solid rgba(43, 39, 35, .5); outline-offset: 3px; border-radius: 4px; }
+.by-list { position: absolute; top: 100%; left: 0; z-index: 8; margin-top: 2px; display: flex; flex-direction: column; align-items: flex-start; padding: 6px 12px 8px; border-radius: 10px;
+  background: color-mix(in srgb, var(--k-paper) 86%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.kd-ov.by-list { box-shadow: none; }      /* no border, no box: only enough paper behind the words to read them over paint */
+.by-list button { border: 0; padding: 3px 0; background: none; font-size: var(--t-2); line-height: var(--l-2); color: var(--c-soft); cursor: pointer; white-space: nowrap; transition: color .2s; }
+.by-list button:hover { color: var(--c-text); }
+.by-list button.on { color: var(--c-text); font-weight: 500; }
+.by-list button[hidden] { display: none; }
+/* the view: two small pencil icons, the paint and the lines. The one you're on is dark */
+/* v20: Group by sits further from the switch (Noah: "Group by agent could be a little more to the left"); it was 22px */
+.kd-view { position: relative; align-self: center; margin-left: 32px; display: flex; align-items: center; padding: 2px; border-radius: 999px; background: var(--c-ctl); cursor: pointer; }
+/* one track, and a thumb behind the view you're on: it reads as a switch (Noah, Nov 11: "could the pair being a toggle be more clear?") */
+.kd-view::before { content: ""; position: absolute; left: 2px; top: 2px; width: 26px; height: 22px; border-radius: 999px; background: var(--k-sheet); box-shadow: 0 0 0 1px rgba(40, 38, 35, .05), 0 1px 2px rgba(40, 38, 35, .08); transition: transform .3s cubic-bezier(.4, 0, .2, 1); }
+.kd-view.tech::before { transform: translateX(26px); }
+.kd-view button { position: relative; width: 26px; height: 22px; border: 0; padding: 3px 5px; background: none; color: var(--c-soft); cursor: pointer; transition: color .25s; }
+.kd-view button svg { display: block; width: 16px; height: 16px; overflow: visible; }
+.kd-view button.on { color: var(--c-text); }
+
+/* ?embed=1: this page as the dashboard inside ../flow/views.html, which moves between closed, the rail and here. The
+   outer page owns the mark top left and the ask field (they stay put across views), so they're not shown here. While
+   the sheet is `bare` there's paper, the widget and nothing else: the outer page calls dash.arrive() to paint the field
+   in and bring the top line in, and dash.leave() to lift it all again. On its own this page is unchanged */
+.kd-sheet.embed #back { visibility: hidden; }
+.kd-sheet.embed .kd-ask { display: none; }
+.kd-sheet.embed .kd-top > *, .kd-sheet.embed #lib-btn, .kd-sheet.embed #set-btn { transition: opacity .26s ease, filter .26s ease, translate .3s cubic-bezier(.3, .7, .2, 1), color .2s; }
+.kd-sheet.bare .kd-top > *, .kd-sheet.bare #lib-btn, .kd-sheet.bare #set-btn { opacity: 0; filter: blur(4px); translate: 0 -6px; pointer-events: none; }
+.kd-sheet.bare #lib-btn, .kd-sheet.bare #set-btn { translate: -6px 0; }
+
+/* the field: the open project's paint, in loops */
+/* v21: the field lies on a sheet of its own that's larger than the screen, so it can step toward an agent like a
+   camera. It has its own paper, so moving it doesn't cut the paint off from the paper it's painted on */
+/* The paper doesn't zoom. Noah, Nov 11, on v23: "when we zoom in, it's a physical zoom in. Like, I can see more of the
+   pixels on my screen. Instead of that, do you think we could actually just scale everything up to give the illusion of
+   zooming in, but still keep that kind of like the pixels for the background?" So as the sheet steps in, its grain is
+   drawn smaller by the same amount (--inv is 1 / the zoom), and stays the size it is everywhere else. Names and pencil
+   already keep their size the same way. The paint itself is still one picture made larger */
+.kd-cam { position: absolute; left: -60%; top: -60%; width: 220%; height: 220%; isolation: isolate; background-color: var(--k-paper); background-image: var(--k-grain); background-size: calc(220px * var(--inv, 1));
+  transition: transform .62s cubic-bezier(.45, .05, .2, 1), background-size .62s cubic-bezier(.45, .05, .2, 1); }
+.kd-field { position: absolute; left: 50%; top: calc(27.2727% + 70px); width: var(--fw, 1320px); height: var(--fh, 760px); margin-left: calc(var(--fw, 1320px) / -2); }      /* v22: --fw, --fh are set from the window (measure) */
+/* fog: what lies over an agent that isn't the one you're on. Pale while you point at another; blurred and pale while
+   another has the screen. It's laid over the paint, so the paint under it keeps working */
+.kd-fog { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; transition: opacity .3s ease;
+  background-image: var(--k-grain); background-size: 220px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 calc(100% - 18px), transparent); mask-image: radial-gradient(closest-side, #000 calc(100% - 18px), transparent); }
+.kd-fog.pale { background-color: color-mix(in srgb, var(--k-paper) 58%, transparent); transition: opacity .22s ease; }
+.kd-fog.blur { background-color: color-mix(in srgb, var(--k-paper) 48%, transparent); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+.kd-fog.on { opacity: 1; }
+.kd-fog.blur.on.peek { opacity: .7; }      /* point at the blurred others and they come up a little: a click there goes back */
+/* v23: no zoom-out cursor while an agent has the screen (Noah: "I don't like how the zoom out though is a magnifying glass"). The blurred others still come up a little under the pointer */
+/* notes are laid over the screen, not the sheet, so they stay the size they are when the sheet steps in */
+.kd-notes { position: absolute; inset: 0; pointer-events: none; }
+.thinking .kd-notes { display: none; }
+/* the field never fades as a whole: a faded container cuts the paint off from the paper under it and shows it as a
+   box. The paint's own canvas fades (script), names fade, pencil is drawn and lifted */
+.kd-field.away > .kd-lab, .kd-field.away > .kd-tick { opacity: 0 !important; }
+.kd-field.away > .kd-hit { pointer-events: none; }
+/* pencil is drawn: a loop glides round its paint (--t is how long), and is lifted the way it was put down. A loop
+   takes its agent's color gently */
+.kd-pencil path.lp { stroke-dasharray: 1 2; stroke-dashoffset: 1.03; transition: stroke-dashoffset var(--t, .75s) cubic-bezier(.45, .05, .2, 1), stroke-dasharray 1.4s cubic-bezier(.4, 0, .2, 1), stroke .25s ease, stroke-opacity .25s ease, stroke-width .25s ease; }
+.kd-pencil path.lp.on { stroke-dashoffset: 0; }
+.kd-pencil path.lp.out { stroke-dashoffset: -1.03; }
+.kd-pencil rect.hi { opacity: 0; transition: opacity .22s ease; }
+
+/* everything laid over the sheet comes and goes the same way: up 8px out of a soft blur, and back */
+.kd-ov { opacity: 0; visibility: hidden; pointer-events: none; filter: blur(4px); translate: 0 8px;
+  box-shadow: 0 0 0 1px rgba(40, 38, 35, .11), 0 2px 5px rgba(40, 38, 35, .05), 0 14px 34px rgba(40, 38, 35, .11);
+  transition: opacity .18s ease-in, filter .18s ease-in, translate .18s ease-in, visibility 0s .18s; }
+.kd-ov.on { opacity: 1; visibility: visible; pointer-events: auto; filter: none; translate: 0 0;
+  transition: opacity .26s cubic-bezier(.2, .7, .2, 1), filter .26s cubic-bezier(.2, .7, .2, 1), translate .26s cubic-bezier(.2, .7, .2, 1); }
+.def { translate: 0 8px; filter: blur(4px); box-shadow: 0 0 0 1px rgba(40, 38, 35, .11), 0 2px 5px rgba(40, 38, 35, .05), 0 14px 34px rgba(40, 38, 35, .11); transition: opacity .18s ease-in, filter .18s ease-in, translate .18s ease-in; }
+.def.on { translate: 0 0; filter: none; transition: opacity .26s cubic-bezier(.2, .7, .2, 1), filter .26s cubic-bezier(.2, .7, .2, 1), translate .26s cubic-bezier(.2, .7, .2, 1); }
+.kd-cap { position: absolute; transform: translateX(-50%); font-size: var(--t-1); color: var(--k-faint); white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums; transition: opacity .35s; }
+.kd-cap.off { opacity: 0; }
+.kd-lab.who small.t { font-variant-numeric: tabular-nums; }
+.kd-lab { position: absolute; transform: translate(-50%, -50%); font-size: var(--t-2); color: var(--k-muted); white-space: nowrap; text-align: center; pointer-events: none; scale: var(--inv, 1); transition: opacity .35s, scale .62s cubic-bezier(.45, .05, .2, 1); }      /* --inv: words keep their size when the sheet steps in */
+.kd-lab.off { opacity: 0; }
+.kd-lab.who { font-size: var(--t-2); color: var(--c); }
+.kd-lab.who.index { font-size: var(--t-1); line-height: var(--l-1); opacity: .72; }      /* in the index a name is the small size, and quieter */
+/* waiting on you: its own color, for the group's name here and the words elsewhere */
+.kd-lab.you, .th-label.you, .you-w { color: var(--c-you-deep); }
+.kd-hit { position: absolute; border: 0; padding: 0; background: none; border-radius: 50%; cursor: pointer; transform: translate(-50%, -50%); z-index: 2; }
+.kd-hit:focus-visible { outline: 1.5px solid rgba(43, 39, 35, .5); outline-offset: 2px; }
+.kd-tick { position: absolute; transform: translateX(-50%); transform-origin: 50% 100%; font-size: var(--t-1); color: var(--c); white-space: nowrap; opacity: 0; scale: var(--inv, 1); transition: opacity .25s, scale .62s cubic-bezier(.45, .05, .2, 1); pointer-events: none; }
+.kd-tick.on { opacity: 1; }
+
+
+/* your page: a small floating widget. Drag it; click it to make it bigger */
+.kd-widget { position: fixed; right: 36px; bottom: 32px; z-index: 7; width: 251px; height: 162px; border-radius: 10px; background: var(--k-sheet); overflow: hidden; cursor: pointer; touch-action: none;
+  box-shadow: 0 0 0 1px var(--k-hair), 0 2px 4px rgba(40, 38, 35, .05), 0 14px 34px rgba(40, 38, 35, .12); transition: width .5s cubic-bezier(.4,0,.2,1), height .5s cubic-bezier(.4,0,.2,1), box-shadow .3s; }
+.kd-widget.big { width: 561px; height: 361px; }
+.kd-widget:hover { box-shadow: 0 0 0 1px rgba(40, 38, 35, .16), 0 2px 4px rgba(40, 38, 35, .05), 0 16px 38px rgba(40, 38, 35, .15); }
+.kd-widget:focus-visible { outline: 1.5px solid rgba(43, 39, 35, .5); outline-offset: 3px; }
+.kd-wpage { position: absolute; left: 0; top: 0; width: 660px; height: 425px; transform-origin: 0 0; transform: scale(.38); transition: transform .5s cubic-bezier(.4,0,.2,1); }
+.kd-widget.big .kd-wpage { transform: scale(.85); }
+
+
+.kd-set { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
+.kd-key { font-size: var(--t-1); color: var(--k-faint); }
+.kd-sw { position: relative; width: 22px; height: 13px; border-radius: 999px; border: 0; padding: 0; cursor: pointer; background: var(--c-ctl); }
+.kd-sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 9px; height: 9px; border-radius: 50%; background: var(--k-sheet); transition: transform .3s; }
+.kd-sw.on { background: var(--c-ctl-on); }
+.kd-sw.on::after { transform: translateX(9px); }
+/* where you ask, here too: the rail's own field, bottom left (Noah, Nov 11: "It should be available both in the
+   dashboard and in the rail view") */
+/* v20: it stays on the left, a little wider, 360px (was 300). Noah, Nov 11, on v19: "Curious if it becomes too much
+   like an LLM if the chat is centered. Maybe keeping the chat on the left is a good idea, but maybe we extend the chat
+   box just a little bit." */
+.kd-ask { position: absolute; left: 32px; bottom: 28px; width: 360px; margin: 0; }      /* v22: not fixed and no z-index, so it's no layer of its own: the pile's paint (../sys/pile.js) hangs off it, and paint in a layer of its own shows as a box */      /* left 32px: where the rail's own field sits, so it doesn't shift between the rail and here */
+.kd-ask .front { outline: none; cursor: text; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 132px; overflow: hidden auto; scrollbar-width: none; }
+.kd-ask .front:empty::before { content: attr(data-ph); color: var(--c-quiet); }
+.kd-ask:focus-within .ask { box-shadow: 0 0 0 1px rgba(40, 38, 35, .3); }
+/* technical view: the sheet turned over. Every agent's thinking, in its own words, from the rail's parts */
+.kd-think { position: absolute; left: 60px; right: 60px; top: 84px; bottom: 100px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 460px); grid-template-rows: minmax(0, 1fr); justify-content: center; gap: clamp(20px, 3.4vw, 56px); pointer-events: none; }
+.thinking .kd-think { pointer-events: auto; }
+/* its words come up down each column, a little after one another (--d), and each droplet is painted in at its row as
+   its words arrive. The parts fade, never a container with a droplet in it */
+#think .th-w { transition: opacity .24s ease var(--d, 0ms), translate .36s cubic-bezier(.2, .7, .2, 1) var(--d, 0ms), filter .24s ease var(--d, 0ms); }
+#think .th-w:not(.in) { opacity: 0; translate: 0 6px; filter: blur(3px); }
+#think.leaving .th-w { opacity: 0; filter: blur(3px); transition: opacity .16s ease-in, filter .16s ease-in; }
+#think.leaving .th-job::before { opacity: 0; transition: opacity .16s ease-in; }
+#think.leaving .th-d canvas, #think.leaving .th-d .ring { opacity: 0 !important; transition: opacity .16s ease-in; }
+#think.solo .th-what .who-name { display: none; }      /* one agent: nothing to tell apart */
+#think .th-d canvas, #think .th-d .ring { transition: opacity .25s ease; }
+#think .th-d:not(.in) canvas, #think .th-d:not(.in) .ring { opacity: 0 !important; }
+#think.by-agent .th-what .who-name { display: none; }
+.th-job { position: relative; }
+/* the columns fade into the paper at the bottom: a strip of the same paper laid over them, with the mask on the strip. A mask on the columns would cut the droplets off from the paper they're painted on */
+.kd-think::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background-color: var(--k-paper); background-image: var(--k-grain); background-size: 220px; background-attachment: fixed; -webkit-mask-image: linear-gradient(transparent, #000); mask-image: linear-gradient(transparent, #000); pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+.thinking .kd-think::after { opacity: 1; transition: opacity .3s ease .25s; }      /* v21: the thinking is laid over the field's sheet now, so this strip is there only while the sheet is turned over */
+.thinking .kd-field { pointer-events: none; }
+.th-col { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+/* what you scroll up fades out under the agent's head, as it does at the foot (Noah, Nov 11: "when you scroll at the
+   top, it should kind of disappear or fade out just as it does on the bottom. Not as lightly as the bottom because
+   there's a bigger gap between it, but it should be fading out"). A strip of paper over the top of the column's list,
+   shorter and firmer than the foot's, there only once you've scrolled (--tf, set as you scroll) */
+.th-col::after { content: ""; position: absolute; left: -6px; right: -6px; top: var(--bt, 0px); height: 38px; z-index: 1; pointer-events: none; opacity: var(--tf, 0); background-color: var(--k-paper); background-image: var(--k-grain); background-size: 220px; background-attachment: fixed; -webkit-mask-image: linear-gradient(#000 30%, transparent); mask-image: linear-gradient(#000 30%, transparent); }
+.th-label { display: flex; align-items: baseline; justify-content: space-between; min-height: 32px; padding: 6px 0 0 48px; font-size: var(--t-2); line-height: var(--l-2); font-weight: 500; color: var(--c-text); }
+.th-label .who-meta { font-weight: 400; }
+.th-body { flex: 1; min-height: 0; margin-top: var(--s-5); padding-bottom: 60px; overflow: hidden auto; scrollbar-width: none; display: flex; flex-direction: column; gap: var(--s-6); }
+.th-body::-webkit-scrollbar { display: none; }
+.th-job { padding-top: var(--s-4); border-top: 1px solid transparent; }
+/* v23: the rule over a job is a pencil line (Noah: "still straight lines at the same opacity, but maybe not perfectly
+   straight ... very, very almost unnoticeably funny in the way we draw the circles"). Then, on seeing it: "they should
+   be our graphite lines, and they should be a little noticeably like imperfect, which would be cool. The topmost ones
+   that divide the Agent from their task forces are fine." So the first rule in a column is as it was (a wobble of half
+   a pixel), and the others wander about a pixel and a half and stop a little short of the edges, like a line drawn
+   along no ruler. The hairline's own gray and weight. Four hands, turned round in every other column */
+.th-job::before { content: ""; position: absolute; left: 0; right: 0; top: -4px; height: 6px; pointer-events: none; opacity: 0; transition: opacity .4s ease var(--d, 0ms);
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'><path d='M0.6 3.4C13 1.7 27 4.5 43 2.9 60 1.5 78 4.6 99.4 2.7' fill='none' stroke='rgb(40,38,35)' stroke-opacity='.1' stroke-width='1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>") 0 0 / 100% 100% no-repeat; }
+.th-job:nth-child(4n+2)::before { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'><path d='M0.4 2.6C17 4.4 33 1.8 52 3.3 69 4.5 86 1.9 99.6 3.5' fill='none' stroke='rgb(40,38,35)' stroke-opacity='.1' stroke-width='1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>"); }
+.th-job:nth-child(4n+3)::before { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'><path d='M0.8 3.8C11 2.2 29 1.6 46 3.4 63 4.8 81 2.1 99.2 3.1' fill='none' stroke='rgb(40,38,35)' stroke-opacity='.1' stroke-width='1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>"); }
+.th-job:nth-child(4n)::before { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'><path d='M0.5 2.9C20 4.6 36 2.3 54 1.9 71 1.6 87 4.2 99.5 3.3' fill='none' stroke='rgb(40,38,35)' stroke-opacity='.1' stroke-width='1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>"); }
+.th-job:first-child::before { top: -2px; height: 3px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 3' preserveAspectRatio='none'><path d='M0 1.5C16 1.1 30 2 47 1.55 65 1.1 82 1.9 100 1.4' fill='none' stroke='rgb(40,38,35)' stroke-opacity='.1' stroke-width='1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>"); }
+.th-col:nth-child(even) .th-job::before { transform: scaleX(-1); }
+.th-job.in::before { opacity: 1; }
+.th-top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); padding-left: 48px; font-size: var(--t-1); line-height: var(--l-1); color: var(--c-quiet); }
+.th-what { padding-left: 48px; margin-top: var(--s-2); }
+.th-what .who-name { display: block; }
+.th-what .who-say { margin-top: 2px; }
+.th-job .who-lines { margin-top: var(--s-4); gap: var(--s-4); }
+.th-thought + .th-thought { margin-top: 6px; }
+.th-thought.off { display: none; }
+.th-thought { animation: th-in .5s ease both; }
+.th-fact { display: block; margin-top: 6px; font-size: var(--t-1); line-height: var(--l-1); color: var(--c-quiet); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+@keyframes th-in { from { opacity: 0; transform: translateY(2px); } }
+@media (prefers-reduced-motion: reduce) { .kd-widget, .kd-wpage, .kd-ov, .def, #think .th-w, .th-job::before, #by-cur > span, .kd-pencil path.lp, .kd-cam, .kd-fog, .kd-lab, .kd-tick { transition-duration: .01s !important; transition-delay: 0s !important; } }
+
+/* ---- v22 ---- */
+/* the veil over the field while a bundle's note is open: everything blurs and pales but a soft hole where that bundle
+   is (--hx, --hy, --hr, set when the note opens). It lies over the field's sheet and under the top line */
+#veil { -webkit-mask-image: radial-gradient(circle at var(--hx, -999px) var(--hy, -999px), transparent calc(var(--hr, 0px) - 10px), #000 calc(var(--hr, 0px) + 12px)); mask-image: radial-gradient(circle at var(--hx, -999px) var(--hy, -999px), transparent calc(var(--hr, 0px) - 10px), #000 calc(var(--hr, 0px) + 12px)); }
+.thinking #veil { display: none; }
+/* the library, settings and a word's meaning: notes laid over everything but the marks top left, the ask field and your page */
+.kd-pops { position: absolute; inset: 0; pointer-events: none; }
+.kd-prows { position: relative; padding: 12px 18px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.kd-prow { display: flex; align-items: center; gap: 10px; border: 0; padding: 0; background: none; font-size: var(--t-2); line-height: var(--l-2); color: var(--c-soft); text-align: left; cursor: pointer; }
+.kd-prow .slot { position: relative; flex: none; width: 40px; height: 40px; }
+.kd-prow b { font-weight: 400; transition: opacity .25s ease, color .2s ease; }
+.kd-prow:hover b, .kd-prow:focus-visible b { color: var(--c-text); }
+.kd-prow.on b { font-weight: 500; color: var(--c-text); }
+.kd-prow:focus-visible { outline: 1.5px solid rgba(43, 39, 35, .5); outline-offset: 2px; border-radius: 8px; }
+.kd-prow.needs .ring path { stroke: var(--c-you); opacity: .95; stroke-width: 1.3; }
+.kd-prow.mine .ring path { stroke: var(--c, #2b2723); opacity: .8; }
+.kd-prow canvas, .kd-prow .ring { transition: opacity .25s ease; }
+.note:not(.open) .kd-prow canvas { opacity: 0; }
+.note:not(.open) .kd-prow .ring { opacity: 0 !important; }
+.note:not(.open) .kd-prow b { opacity: 0; }
+.kd-sets { position: relative; padding: 9px 16px 9px 16px; font-size: var(--t-2); color: var(--k-muted); transition: opacity .25s ease; }
+.note:not(.open) .kd-sets { opacity: 0; }
+/* your page in the corner showing another project's page while you point at it in the library */
+.kd-wpeek { position: absolute; inset: 0; background: var(--k-sheet); opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+.kd-wpeek.on { opacity: 1; }
+/* ?still=1: the reduced-motion path, without the system setting */
+.still .kd-widget, .still .kd-wpage, .still .kd-ov, .still #think .th-w, .still .th-job::before, .still #by-cur > span, .still .kd-pencil path.lp, .still .kd-cam, .still .kd-fog, .still .kd-lab, .still .kd-tick, .still .note-veil, .still .note *, .still .kd-wpeek { transition-duration: .01s !important; transition-delay: 0s !important; }
+@media (prefers-reduced-motion: reduce) { .note-veil, .kd-wpeek, .kd-prow b, .kd-prow canvas, .kd-sets { transition-duration: .01s !important; } }
+</style>
+</head>
+<body>
+<div class="page"><main class="site" data-state="after"></main></div>
+
+<div class="kd-sheet k-paper" id="sheet">
+  <div class="kd-nav">
+    <button id="back" data-tip="Back to your page" aria-label="Back to your page and the rail"></button>
+    <button id="lib-btn" data-tip="Library" aria-label="Library" aria-expanded="false" aria-controls="lib">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><rect x="2.5" y="6.5" width="12" height="10" rx="2"/><path d="M6 3.5h9.5a2 2 0 0 1 2 2V13"/></g></svg>
+    </button>
+    <button id="set-btn" data-tip="Settings" aria-label="Settings" aria-expanded="false" aria-controls="set-pop">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><path d="M3 6.5h7.6M15.4 6.5H17M3 13.5h1.6M9.4 13.5H17"/><circle cx="13" cy="6.5" r="2.3"/><circle cx="7" cy="13.5" r="2.3"/></g></svg>
+    </button>
+  </div>
+
+  <div class="kd-cam" id="cam"><div class="kd-field" id="field"></div></div>
+
+  <div class="kd-top">
+    <div class="kd-title"><b id="p-name"></b><span class="host" id="p-host"></span></div>
+    <div class="kd-by" id="by">
+      <button class="by-now" id="by-now" aria-haspopup="listbox" aria-expanded="false" aria-controls="by-list"><span>Group by</span><b id="by-cur"><span data-mode="agent">Agent</span><span data-mode="state">State</span><span data-mode="part">Part</span></b></button>
+      <div class="by-list kd-ov" id="by-list" role="listbox" aria-label="Group by"><button role="option" data-mode="agent">Agent</button><button role="option" data-mode="state">State</button><button role="option" data-mode="part">Part</button></div>
+    </div>
+    <div class="kd-view" id="view" role="group" aria-label="View: paint or technical">
+      <button id="paint-btn" class="on" aria-pressed="true" aria-label="Paint view" title="Paint view">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10.4 3.1c3.5-.2 6.2 2.1 6.5 5.7.3 4-2.3 7.7-6.4 8-3.6.3-6.9-2.3-7.2-6.1-.3-3.9 2.9-7.4 7.1-7.6z" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="tech-btn" aria-pressed="false" aria-label="Technical view" title="Technical view">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 5.5h13M3.5 10h9M3.5 14.5h11.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="kd-think" id="think" aria-live="polite"></div>
+  <div class="kd-notes" id="notes"></div>
+  <div class="kd-pops" id="pops"></div>
+
+  <div class="ask-wrap on kd-ask" id="ask"><div class="ask"><div class="front" id="ask-front" contenteditable="true" role="textbox" aria-label="Ask anything" data-ph="Ask anything" spellcheck="false"></div></div></div>
+
+  <div class="kd-widget" id="widget" role="button" tabindex="0" aria-label="Your page. Click to make it bigger, drag to move it." title="Your page"><div class="kd-wpage" id="wpage"></div></div>
+</div>
+
+<script src="../site.js"></script>
+<script src="../v2/ask.js"></script>
+<script src="../wc/wc.js"></script>
+<script src="../wc/kit.js"></script>
+<script src="../sys/rail.js"></script>
+<script src="../sys/note.js"></script>
+<script src="../sys/pile.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg', TAU = Math.PI * 2, RAD = Math.PI / 180;
+  const T = (w) => term(w);
+  const Q = new URLSearchParams(location.search), STAGGER = Q.get('pack') !== 'rows';      // staggered unless ?pack=rows
+  if (Q.get('font')) {      // try a typeface from the type workshop
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + Q.get('font').replace(/ /g, '+') + ':wght@400;500;600&display=swap';
+    document.head.appendChild(l); document.body.style.fontFamily = `"${Q.get('font')}", system-ui, sans-serif`;
+  }
+  // agents past Claude and Codex bring their own hues: Gemini greens, Cursor teals (they were yellows; yellow is now
+  // "waiting on you" and nothing else). Placeholders until Noah picks them
+  // the agents' colors come from the one palette in ../sys/rail.js (rail.HUES, rail.TINT; Noah, Nov 11: "make sure the hues
+  // are a little more varying so that's extremely clear which agent is working on what")
+  const YOU = 'var(--c-you)';      // waiting on you: amber
+  const LIVELY = 1.7, TIDE = 1.5;      // working shows more; dried paint is more marked (../wc/wc.js)
+  const DEEP = wc.DEEP, NAMES = { claude: 'Claude', codex: 'Codex', gemini: 'Gemini', cursor: 'Cursor' };
+  // one hue family per agent; each helper's droplet takes one hue of it, so a bundle reads as one agent's
+  const FAM = rail.HUES;
+  const DOT = rail.TINT;
+  // ?still=1: run the reduced-motion path without the system setting (wc.js and this page ask matchMedia each time)
+  if (Q.get('still') === '1') { const mm = window.matchMedia.bind(window); window.matchMedia = (q) => (/prefers-reduced-motion/.test(q) ? { matches: true, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} } : mm(q)); document.documentElement.classList.add('still'); }
+  const RES = Math.max(1, Math.min(2, +(Q.get('res') || 1)));      // how fine the field's paint is: pixels of paint to a point of screen. ?res=1.5 paints finer, at about 1.7 times the work each step and 2.25 times the memory (measured: 45ms a step against 27, 362MB against 161, four agents, while the paint lands), so it's for a capture on a fast machine, not the default
+  let W = 1320, H = 760;      // v22: the field is as large as the window allows (measure), not 1320 x 760 whatever the window
+  const PW = 660, PH = 425, DROP = 46;
+  let K = 1;      // how large the paint is drawn: as large as fits the sheet
+  let tech = false;      // technical view: off until you ask for it
+  const EMBED = Q.get('embed') === '1';
+  const FOCUS = { b: 'b', c: 'c' }[Q.get('focus')] || 'a';      // how an agent takes the screen: a step in, b push away, c pull focus
+  let bare = EMBED;      // embedded (../flow/views.html): no paint on the sheet until the outer page says so
+  // (each helper's 5th item is its two short lines: the thing it's on, and what's happening to it)
+  // what's underneath each job, for the technical view and the slip: what you asked, how long it took, and for each
+  // helper the file it touched, the exact change, and how long. In the order of each project's jobs
+  const TECH = { juniper: [
+    { ask: 'check the signup on my phone too', took: '1m 35s so far', kids: [['app/signup/page.tsx', 'reading at 390px wide', '40s so far', ["Opening your signup at 390px wide.", "The headline holds up. The form drops below it and the button ends up under the fold.", "Looking at whether the form can come up beside the last line."], ['Your signup at 390px', 'Reading the ' + T('layout')]], ['components/SignupCard.tsx', 'button height 36px → 44px', 'next', ["Queued. The button is 36px tall, and 44 is the usual size for a thumb."], ['Signup button', 'Next: sizing it for thumbs']]] },
+    { ask: 'clean up after the reminders page', took: 'waiting 34m', kids: [['styles/reminders.css', '3 rules nothing uses: .rem-old, .rem-grid-2, .rem-chip', 'waiting on you', ["reminders.css has three rules that match nothing: .rem-old, .rem-grid-2, .rem-chip.", "I searched every page and component. Nothing uses them.", "Deleting them is safe, but it’s your file, so I’m waiting for a yes."], ['Reminder styles', 'Found 3 that nothing uses']]] },
+    { ask: 'make my signup more friendly and nicer', took: '1m 40s', kids: [['app/signup/page.tsx', 'h1 text rewritten', '38s', ["The headline says “Track habits. Build streaks.” It’s correct, but it reads like a list of features.", "Trying something you’d say to a friend: “Small steps, every day.”", "It still fits on two lines at 390px."], ['Your headline', 'Rewritten in ' + T('warmer copy')]], ['components/SignupCard.tsx', 'border-radius: 6px → 14px', '21s', ["The form has a 6px radius. The cards under it use 14.", "Raising it to 14px so it matches. Nothing else moves."], ['Signup form', term('corner radius', 'Corner radius') + ' from 6px to 14px']], ['styles/tokens.css', '--accent: #2f5fd0 → #e8715a, label rewritten', '41s', ["The button is the same blue as your links, so it doesn’t read as the one thing to do.", "Switching it to your warm accent, and “Create account” becomes “Start my first habit”, so it says what happens.", "White text on it is 4.6 to 1. Easy to read."], ['Signup button', 'Warm ' + T('accent color') + ', clearer ' + T('button label')]]] },
+    { ask: 'the menu is cut off on my phone', took: '1m 10s', kids: [['components/Header.tsx', '3 of 4 menu labels shortened', '52s', ["At 390px the menu runs off the screen: “Stories” and “Log in” are cut off.", "Shortening three of the labels so all four fit."], ['Menu labels', 'Shortened so they fit']], ['components/Header.tsx', 'gap: 32px → 20px', '18s', ["The links sit 32px apart, which wastes width on a phone.", "At 20px all four fit on one line."], ['Menu links', 'Tighter ' + T('spacing')]]] },
+    { ask: 'add a reminders page', took: '4m 15s', kids: [['app/reminders/page.tsx', 'new file, 86 lines', '3m 10s', ["There’s no reminders page yet. Starting one at /reminders.", "Building it the way your other pages are built, so they look the same.", "It lists your reminders, soonest first."], ['Reminders page', 'Built, soonest first']], ['lib/account.ts', 'reminders saved for the person signed in', '1m 05s', ["Reminders need to be there when you come back.", "Saving them to your account, the same way your habits are saved."], ['Your account', 'Saves your reminders']]] },
+    { ask: 'are my colors easy to read?', took: '1m so far', kids: [['styles/tokens.css', 'checking 14 color pairs', '1m so far', ["Reading tokens.css. Fourteen color pairs are used for text.", "The small print under the button is a pale gray on white: 2.4 to 1. That’s too faint.", "Checking the rest before I suggest anything."], ['Your colors', 'Reading every pair on your signup']]] },
+    { ask: 'describe my reminder cards for screen readers', took: '1m 14s', kids: [['components/ReminderCard.tsx', 'alt text on 3 cards', '44s', ["Three cards have a picture and no description.", "Writing each one as what the card is for, which is what a screen reader should say."], ['Reminder cards', 'Each one says what it shows']], ['components/ReminderCard.tsx', 'wording matched to your headline', '30s', ["The descriptions sounded stiffer than the rest of the page.", "Matched them to the headline’s voice."], ['Their wording', 'Matched to your ' + T('warmer copy')]]] },
+    { ask: 'start a habit tracker called Juniper', took: '2m 20s', kids: [['components/Header.tsx', 'new file, 48 lines', '2m 20s', ["New project. Setting up the pages and a header.", "A logo, three links and a way to log in."], ['Header', 'First version built']]] },
+  ] };
+  const soft = (host, o) => wc.stage(host, { soft: true, ...o });
+
+  // ---- each project: its page, drawn in pencil ([kind, ...numbers]), and its jobs, newest first.
+  // A job has a state (now, wait, done) and the part of the page it's about. Its helpers each say how they worked
+  // ('done' once finished), what they did, where on the page (the mark), and the part to outline.
+  const frame = [['r', 1, 1, 658, 423, 11], ['l', 1, 27, 659, 27, 1], ['c', 16, 14, 3], ['c', 28, 14, 3], ['c', 40, 14, 3]];
+  const PROJECTS = [
+    { id: 'juniper', name: 'Juniper', host: 'localhost:3000', agents: [['claude', 'working'], ['codex', 'waiting']], parts: ['Header', 'Signup', 'Reminders'],
+      page: [...frame,
+        ['r', 34, 44, 12, 12, 3], ['l', 54, 50, 98, 50, 3], ['l', 360, 50, 400, 50, 2], ['l', 420, 50, 460, 50, 2], ['l', 480, 50, 520, 50, 2], ['l', 590, 50, 626, 50, 2],
+        ['l', 40, 104, 108, 104, 1.6], ['l', 40, 134, 268, 134, 9], ['l', 40, 162, 208, 162, 9], ['l', 40, 198, 262, 198, 2.2], ['l', 40, 212, 236, 212, 2.2],
+        ['r', 392, 92, 228, 196, 7], ['l', 410, 118, 508, 118, 3], ['l', 410, 141, 448, 141, 1.5], ['r', 410, 150, 192, 30, 4], ['R', 410, 194, 192, 34, 5], ['l', 410, 247, 518, 247, 1.5],
+        ['r', 40, 318, 180, 74, 7], ['l', 56, 342, 124, 342, 2.6], ['l', 56, 358, 168, 358, 1.5],
+        ['r', 240, 318, 180, 74, 7], ['l', 256, 342, 310, 342, 2.6], ['l', 256, 358, 372, 358, 1.5],
+        ['r', 440, 318, 180, 74, 7], ['l', 456, 342, 530, 342, 2.6], ['l', 456, 358, 566, 358, 1.5]],
+      jobs: [
+        { agent: 'claude', state: 'now', part: 'Signup', tick: 'Now', when: 'Now', what: 'I’m checking your signup on small screens.',
+          kids: [['reading', 'Reading the ' + T('layout') + ' at 390px wide', [386, 190], [386, 86, 240, 208]], ['waiting', 'Next, sizing the button for thumbs', [399, 226], [404, 188, 204, 46]]] },
+        { agent: 'codex', state: 'wait', part: 'Reminders', tick: 'Waiting on you', when: 'Waiting on you', what: 'Can I remove the old reminder styles? Nothing uses them anymore.',
+          kids: [['waiting', 'I found 3 styles the reminders page no longer uses.', [330, 316], [234, 312, 192, 86]]],
+          then: { what: 'I’m removing the old reminder styles.', kid: ['changing', 'Removing 3 styles nothing uses'], now: 'I’m removing the old reminder styles.' } },
+        { agent: 'claude', state: 'done', part: 'Signup', tick: '2:14 PM', when: 'Today, 2:14 PM', what: 'I made your signup friendlier.',
+          kids: [['done', 'I rewrote your headline in ' + T('warmer copy') + ': “Small steps, every day.”', [30, 120], [28, 116, 252, 62]], ['done', 'I raised the ' + T('corner radius') + ' of your signup form from 6px to 14px.', [392, 92], [386, 86, 240, 208]], ['done', 'I gave your signup button your warm ' + T('accent color') + ' and a clearer ' + T('button label') + '.', [612, 211], [404, 188, 204, 46]]] },
+        { agent: 'claude', state: 'done', part: 'Header', tick: '11:02 AM', when: 'Today, 11:02 AM', what: 'I fixed the header on small screens.',
+          kids: [['done', 'I shortened the menu labels so they fit.', [348, 44], [352, 38, 176, 24]], ['done', 'I tightened the ' + T('spacing') + ' between links.', [470, 40], [352, 38, 176, 24]]] },
+        { agent: 'codex', state: 'done', part: 'Reminders', tick: 'Yesterday', when: 'Yesterday', what: 'I added your reminders page.',
+          kids: [['done', 'I built the page. It shows your reminders, soonest first.', [452, 320], [434, 312, 192, 86]], ['done', 'I saved reminders to your account.', [44, 320], [34, 312, 592, 86]]] },
+        { agent: 'gemini', state: 'now', part: 'Signup', tick: 'Now', when: 'Now', what: 'I’m checking your colors are easy to read.',
+          kids: [['reading', 'Reading every color pair on your signup', [612, 150], [404, 144, 204, 42]]] },
+        { agent: 'gemini', state: 'done', part: 'Reminders', tick: '9:40 AM', when: 'Today, 9:40 AM', what: 'I wrote alt text for your reminder cards.',
+          kids: [['done', 'Each card now says what it shows, for people who can’t see it.', [222, 320], [34, 312, 392, 86]], ['done', 'I checked the wording against your ' + T('warmer copy') + '.', [128, 390], [34, 312, 192, 86]]] },
+        { agent: 'cursor', state: 'done', part: 'Header', tick: 'Nov 8', when: 'Nov 8', what: 'I set up the pages and the header.',
+          kids: [['done', 'I built the first version of the header.', [40, 40], [28, 38, 80, 24]]] },
+      ],
+      words: ['corner radius', 'warmer copy', 'button label', 'accent color', 'spacing', 'layout'] },
+    { id: 'lumen', name: 'Lumen', host: 'localhost:5173', agents: [['claude', 'done'], ['codex', 'done']], parts: ['Grid'],
+      page: [...frame, ['l', 40, 58, 150, 58, 6], ['l', 520, 58, 620, 58, 2],
+        ...[0, 1, 2].flatMap((i) => [0, 1].flatMap((j) => [['r', 40 + i * 200, 96 + j * 156, 180, 108, 7], ['l', 44 + i * 200, 218 + j * 156, 150 + i * 200, 218 + j * 156, 2]]))],
+      jobs: [
+        { agent: 'claude', state: 'done', part: 'Grid', tick: 'Yesterday', when: 'Yesterday', what: 'I made your project grid feel calmer.',
+          kids: [['done', 'I added more ' + T('spacing') + ' between the cards.', [230, 148], [214, 90, 32, 280]], ['done', 'I lined every caption up to one ' + T('layout') + ' grid.', [36, 232], [34, 208, 592, 20]]] },
+        { agent: 'codex', state: 'done', part: 'Grid', tick: 'Nov 6', when: 'Nov 6', what: 'I wrote alt text for 24 images.', kids: [['done', 'Every picture now says what it shows, for people who can’t see it.', [44, 98], [34, 90, 592, 276]]] },
+      ],
+      words: ['spacing', 'layout'] },
+    { id: 'tidepool', name: 'Tidepool', host: 'localhost:8080', agents: [['codex', 'done']], parts: ['Search'],
+      page: [...frame, ['l', 40, 58, 130, 58, 6], ['r', 120, 92, 420, 42, 21], ['l', 144, 113, 250, 113, 2],
+        ...[0, 1, 2, 3].flatMap((j) => [['r', 120, 164 + j * 58, 420, 46, 7], ['l', 138, 182 + j * 58, 250, 182 + j * 58, 2.6], ['l', 138, 196 + j * 58, 330, 196 + j * 58, 1.5]])],
+      jobs: [
+        { agent: 'codex', state: 'done', part: 'Search', tick: 'Nov 4', when: 'Nov 4', what: 'I set up the beach search.',
+          kids: [['done', 'I made the search field easier to find.', [116, 96], [112, 84, 436, 58]], ['done', 'I gave each result a clearer ' + T('label') + '.', [124, 168], [112, 156, 436, 236]]] },
+      ],
+      words: ['label'] },
+  ];
+  // every agent found on this machine, and the ones plugged in (?agents=1, 2 or 4 to start with)
+  const POOL = [
+    { id: 'claude', name: 'Claude', tool: 'Claude Code', state: 'working', now: 'I’m checking your signup on small screens.' },
+    { id: 'codex', name: 'Codex', tool: 'Codex', state: 'waiting', now: 'I’m waiting on your yes to remove the old reminder styles.' },
+    { id: 'gemini', name: 'Gemini', tool: 'Gemini CLI', state: 'working', now: 'I’m checking your colors are easy to read.' },
+    { id: 'cursor', name: 'Cursor', tool: 'Cursor', state: 'ready', now: 'I’m free. The last thing I did was your header, on Nov 8.' },
+  ];
+  let AGENTS = POOL.slice(0, Math.max(1, Math.min(4, +(Q.get('agents') || 2))));
+  const STATES = [['now', 'Now'], ['wait', 'Waiting on you'], ['done', 'Done']];
+  // what a helper's paint is doing: a slow pulse while it works, drier at the edge while it waits on you, damp and
+  // still while it's next in line, dry once it's finished
+  const paintOf = (job, how) => (job.state === 'done' ? 'done' : job.state === 'wait' ? 'waiting' : how === 'waiting' ? 'ready' : 'working');
+
+  // ---- graphite: drawn by hand. Its own SVG, so it's drawn once and not again while the paint works
+  function pencilSvg(host, w, h, before) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'kd-pencil'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.setAttribute('width', w); svg.setAttribute('height', h);
+    const id = 'kp' + Math.random().toString(36).slice(2, 7);
+    svg.innerHTML = `<filter id="${id}" filterUnits="userSpaceOnUse" x="0" y="0" width="${w}" height="${h}" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="8" result="warp"/>
+        <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter><g filter="url(#${id})" fill="none" stroke="#2b2723" stroke-linecap="round"></g><g filter="url(#${id})" fill="none" stroke-linecap="round"></g>`;
+    host.insertBefore(svg, before || null);
+    const [, g, hi] = svg.children;
+    const add = (name, attrs, parent = g) => { const n = document.createElementNS(NS, name); for (const a in attrs) n.setAttribute(a, attrs[a]); parent.appendChild(n); return n; };
+    return { svg, g, add, hi };
+  }
+  // the page, small: lines are drawn heavier so they hold at widget size
+  function drawPage(pen, prims, kx = 1) {
+    prims.forEach(([kind, a, b, c, d, e]) => {
+      if (kind === 'l') pen.add('path', { d: `M${a} ${b}L${c} ${d}`, 'stroke-width': Math.max(e, 1.2) * (e > 5 ? 1 : kx), 'stroke-opacity': e > 5 ? 0.5 : 0.5 });
+      else if (kind === 'c') pen.add('circle', { cx: a, cy: b, r: c, 'stroke-width': kx, 'stroke-opacity': 0.45 });
+      else pen.add('rect', { x: a, y: b, width: c, height: d, rx: e, 'stroke-width': 0.9 * kx, 'stroke-opacity': 0.55, ...(kind === 'R' ? { fill: '#2b2723', 'fill-opacity': 0.5 } : {}) });
+    });
+  }
+  // a loop drawn in one go: not quite round, and its ends don't quite meet
+  function loopPath(cx, cy, r, seed, top) {      // top: it starts at the top and goes clockwise, like the rail's rings
+    const N = r < 90 ? 56 : 96, pts = [], over = r < 90 ? 0.32 : 0.2, grow = r < 90 ? 4 : 7, th0 = top ? -Math.PI / 2 - 0.2 + 0.24 * Math.sin(seed * 3.1) : -1.9 + seed;
+    for (let i = 0; i <= N; i++) {
+      const th = th0 + (i / N) * (TAU + over);
+      const rr = r * (1 + 0.02 * Math.sin(3 * th + seed * 2) + 0.012 * Math.sin(5 * th + seed)) + (i / N) * grow;
+      pts.push((cx + Math.cos(th) * rr).toFixed(1) + ' ' + (cy + Math.sin(th) * rr * 0.96).toFixed(1));
+    }
+    return 'M' + pts.join('L');
+  }
+
+  // ---- the library: a note in pencil. Each project is its paint and its name, nothing else (Noah, Nov 11, on Overlay
+  // workshop v2: "I would go with A ... Maybe even if you hover over the specific blobs in A, that also reflects on the
+  // dashboard, but it doesn't have to be a direct correlation and showing the actual thumbnail"). The paint: a droplet
+  // for each agent that has worked there, in one ring drawn as far as that project's work has gone; the ring is amber
+  // if something there waits on you. Pointing at a project shows its page in the corner. Shut until asked for
+  const libBtn = $('lib-btn');
+  let libStages = [];
+  const jobPart0 = (job) => job.kids.reduce((n, k) => n + PARTS[paintOf(job, k[0])], 0) / job.kids.length;
+  function buildLib() {      // only the projects an agent you've plugged in has worked on
+    libStages.forEach((x) => x.remove()); libStages = []; libRows.innerHTML = '';
+    PROJECTS.forEach((p) => {
+      const who = p.agents.filter(([w]) => AGENTS.some((a) => a.id === w && !a.fresh));
+      if (!who.length) return;
+      const jobs = (p.all || p.jobs).filter((j) => who.some(([w]) => w === j.agent)), waits = jobs.some((j) => j.state === 'wait'), done = jobs.every((j) => j.state === 'done');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'kd-prow' + (P && P.id === p.id ? ' on' : '') + (waits ? ' needs' : done ? ' mine' : ''); b.dataset.id = p.id;
+      if (who.length === 1) b.style.setProperty('--c', DEEP[who[0][0]]);
+      b.innerHTML = `<span class="slot"></span><b>${p.name}</b>`;
+      libRows.appendChild(b);
+      const slot = b.firstElementChild, n = who.length;
+      who.forEach(([w, state], i) => { const th = (-90 + (i * 360) / n) * RAD, at = n === 1 ? [20, 20] : n === 2 ? [i ? 27 : 13, 20] : [20 + Math.cos(th) * 8.5, 20 + Math.sin(th) * 8.5]; libStages.push(kit.drop(slot, w, 13, state, { at }).stage); });
+      rail.ring(slot, n === 1 ? 13 : n === 2 ? 17 : 19, p.name.length).set(jobs.length ? jobs.reduce((a, j) => a + jobPart0(j), 0) / jobs.length : 0);
+      b.onmouseenter = b.onfocus = () => peek(p); b.onmouseleave = b.onblur = () => peek(null);
+      b.onclick = (e) => { e.stopPropagation(); shut(); if (P.id !== p.id) swap(p.id); };
+    });
+  }
+  // your page in the corner shows the project you're pointing at in the library, and goes back to yours
+  function peek(p) {
+    let el = wpage.querySelector('.kd-wpeek');
+    if (!p || (P && p.id === P.id)) { if (el) el.classList.remove('on'); return; }
+    if (!el) { el = document.createElement('div'); el.className = 'kd-wpeek'; wpage.appendChild(el); }
+    el.innerHTML = ''; drawPage(pencilSvg(el, PW, PH), p.page, 2); el.classList.add('on');
+  }
+
+  // ---- the open project
+  const field = $('field'), wpage = $('wpage'), cam = $('cam'), notes = $('notes');
+  cam.addEventListener('transitionend', (e) => { if (e.target === cam && e.propertyName === 'transform') sharpen(); });
+  let P = null, mode = 'agent', sel = null, hov = null, only = null;
+  // v21. foc: the group that has the screen (an agent, or a state or part when the paint is sorted that way).
+  // hovA: the agent you're pointing at. GS: the groups as they're laid out. view: where the camera is
+  let foc = null, hovA = null, GS = [], fogs = [], fogAt = null, nt = null, ntJob = -1, ntTimer = 0, noteAt = 0, stale = false, view = { s: 1, gx: 0, gy: 0, ox: 0, oy: 0 };
+  // v22. hovG: the group whose loop you're pointing inside. selQ: the ask (a bundle painted from the field) whose note is open
+  let hovG = null, selQ = null, selA = null;      // selA: the agent whose own droplet you clicked; its one line is up while it has the screen
+  const solo = () => AGENTS.length < 2;
+  let st = null, pen = null, labs = [], wst = null, wpen = null;
+
+  const hit = (r, fn, over, label) => {
+    const h = document.createElement('button');
+    h.className = 'kd-hit'; h.setAttribute('aria-label', label.replace(/<[^>]+>/g, ''));
+    Object.assign(h.style, { width: r * 2 + 'px', height: r * 2 + 'px' });
+    h.onclick = (e) => { e.stopPropagation(); fn(); };
+    if (over) { h.onmouseenter = () => over(true); h.onmouseleave = () => over(false); h.onfocus = () => over(true); h.onblur = () => over(false); }
+    field.appendChild(h);
+    return h;
+  };
+
+  function open(id, keep) {      // keep: the group that had the screen, when the same sheet is laid out again for a new window size
+    P = PROJECTS.find((x) => x.id === id); sel = null; hov = null; only = null; foc = null; hovA = null; hovG = null; selQ = null; stale = false; fogs = []; GS = [];
+    veil.on(false); peek(null); P.asks = P.asks || [];
+    clearTimeout(ntTimer); if (nt) { nt.remove(); nt = null; } ntJob = -1; sheet.classList.remove('focus'); camTo(null, true);
+    P.all = P.all || P.jobs; P.jobs = P.all.filter((j) => AGENTS.some((a) => a.id === j.agent && !a.fresh));      // a agent that just joined has done nothing here yet
+    document.querySelectorAll('.kd-prow').forEach((r) => r.classList.toggle('on', r.dataset.id === id));
+    $('p-name').textContent = P.name; $('p-host').textContent = P.host;
+    st && st.remove(); wst && wst.remove(); stopMoves(); stopTech(); clearThink(); loopTimers.forEach(clearTimeout); loopTimers = [];
+    field.replaceChildren();
+    wpage.innerHTML = ''; labs = [];
+
+    pen = pencilSvg(field, W, H);
+    st = soft(field, { width: W, height: H, res: RES, lively: LIVELY, tide: TIDE }); st.on(lifter); lifts = [];
+    fogAt = field.appendChild(document.createComment('fog goes here: over the paint, under the names'));
+
+    // your page, small, in the widget: pencil, and a droplet on each part a helper touched
+    wpen = pencilSvg(wpage, PW, PH);
+    drawPage(wpen, P.page, 2);
+    wst = soft(wpage, { width: PW, height: PH, res: 1, lively: LIVELY, tide: TIDE });
+
+    // agents: their own droplet in the middle of their loop, or a small one in the corner when the paint is sorted another way
+    AGENTS.forEach((a) => {
+      a.s = null;
+      a.lab = document.createElement('div');
+      a.lab.className = 'kd-lab who'; setLab(a);
+      field.appendChild(a.lab);
+      a.hit = hit(40, () => onAgent(a), (on) => { hovA = on ? a.id : hovA === a.id ? null : hovA; refresh(); }, a.name + ', ' + a.now);
+    });
+
+    // jobs: a bundle each. Its helpers' droplets side by side, never touching, each a hue of its agent's family
+    P.jobs.forEach((job, i) => {
+      const n = job.kids.length, th = (-90 + i * 47) * RAD, d = n === 1 ? 0 : n === 2 ? 29 : n === 3 ? 33 : 41;
+      job.i = i; job.br0 = n === 1 ? 41 : n === 2 ? 65 : n === 3 ? 70 : 78; job.br = job.br0; job.loop = null; job.tech = (TECH[P.id] || [])[P.all.indexOf(job)];
+      job.tickEl = document.createElement('span');
+      job.tickEl.className = 'kd-tick'; job.tickEl.style.setProperty('--c', DEEP[job.agent]);
+      field.appendChild(job.tickEl);
+      job.marks = job.kids.map(([how, words, at, part], k) => {
+        const pig = FAM[job.agent][(i + k) % 3];
+        const m = { how, at, k, pig, ux: Math.cos(th + (k * TAU) / n) * d, uy: Math.sin(th + (k * TAU) / n) * d, ox: 0, oy: 0, s: null };
+        m.w = wst.add(pig, { size: 30, x: at[0], y: at[1], state: paintOf(job, how), seed: i * 5 + k });
+        m.hi = wpen.add('rect', { x: part[0], y: part[1], width: part[2], height: part[3], rx: 9, stroke: DEEP[job.agent], 'stroke-width': 2.4, 'stroke-opacity': 0.9, class: 'hi' }, wpen.hi);
+        return m;
+      });
+      job.hit = hit(job.br, () => onJob(i), (on) => { hov = on ? i : hov === i ? null : hov; refresh(); }, job.what);
+    });
+
+    // what you've asked from the field here: its paint is put down again on the new sheet
+    P.asks.forEach((q) => { q.s = null; q.loop = null; q.hit = hit(q.br || 30, () => onAskHit(q), null, q.x.text); q.hit.hidden = q.st === 'back'; });
+
+    ways();
+    const g0 = keep && groups().some((g) => g.key === keep) ? keep : null;
+    if (g0 && FOCUS !== 'a') foc = g0;      // take b is a layout of its own; a and c are laid out as ever and stepped into after
+    if (tech) paint(false);
+    layout(true);
+    if (g0 && !tech) { foc = g0; sheet.classList.add('focus'); if (FOCUS === 'a') camTo(GS.find((g) => g.key === g0), true); }
+    refresh();
+  }
+
+  // ---- sorting the paint: by agent, by state, or by part of the page
+  function groups() {
+    if (mode === 'agent') return AGENTS.map((a) => ({ key: a.id, agent: a, jobs: P.jobs.filter((j) => j.agent === a.id) }));
+    if (mode === 'state') return STATES.map(([key, label]) => ({ key, label, jobs: P.jobs.filter((j) => j.state === key) })).filter((g) => g.jobs.length);
+    return P.parts.map((key) => ({ key, label: key, jobs: P.jobs.filter((j) => j.part === key) })).filter((g) => g.jobs.length);
+  }
+  // a way to group shows up only once it would sort something (Noah, Nov 10: "let's only have them show up when we
+  // reach that stage of the process ... maybe they appear as you increase your workflow"). With fewer than two ways,
+  // there's no switch at all
+  function ways() {
+    const many = (key) => new Set(P.jobs.map((j) => j[key])).size > 1, has = { agent: AGENTS.length > 1, state: many('state'), part: many('part') };
+    document.querySelectorAll('#by-list button').forEach((b) => { b.hidden = !has[b.dataset.mode]; });
+    $('by').classList.toggle('off', Object.values(has).filter(Boolean).length < 2);
+    if (!has[mode]) mode = has.agent ? 'agent' : has.state ? 'state' : has.part ? 'part' : 'agent';
+  }
+
+  // paint doesn't travel (Noah, Nov 10: "why is movement even kind of necessary"): it lifts where it was and comes up
+  // where it belongs. Not all at once (Noah, Nov 11: "all blobs disappear at the same time, and reappear at the same
+  // time, making an odd effect ... introducing some randomness or ordering"): a droplet at a time, left to right with
+  // a little chance in it, and the first ones arrive while the last are still leaving
+  let moves = [], moveTimers = [], loopTimers = [], labsAway = false, redraw = () => {};
+  const later = (ms, fn) => moveTimers.push(setTimeout(fn, ms));
+  const stopMoves = () => { moveTimers.forEach(clearTimeout); moveTimers = []; moves = []; };
+  const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  const ARRIVE = 460;      // ms from the click to the first droplet coming up
+  function lay(s, who, o) {
+    if (!s) { const n = st.add(who, tech || bare ? { ...o, hidden: true } : o); n._at = 0; return n; }      // turned over, paint waits unpainted
+    s._at = 0;
+    if (s.alive && Math.hypot(s.x - o.x, s.y - o.y) < 1 && Math.abs(s.R - o.size / 2) < 0.5) return s;
+    moves.push({ s, o, x0: s.x, y0: s.y });
+    return s;
+  }
+  // paint that has let go of its paper lifts in about half a second here. Left alone it dries first and takes a few
+  // seconds, which is most of what made a regroup feel slow (Noah, Nov 11: "takes too much time")
+  let lifts = [];
+  function leaveFast(s) {
+    if (!s.alive) return;
+    lifts.push({ M: s.M, x0: s.x0, y0: s.y0, bw: s.bw, bh: s.bh, t0: performance.now(), last: performance.now(), st });
+    s.leave();
+  }
+  function lifter() {
+    if (!lifts.length) return;
+    const now = performance.now();
+    lifts = lifts.filter((r) => {
+      if (r.st !== st) return false;
+      const f = Math.exp(-(now - r.last) / 170), K = st.G.length; r.last = now;
+      for (let y = 0; y < r.bh; y++) for (let x = 0; x < r.bw; x++) {
+        if (r.M[x + y * r.bw] > 1.25) continue;
+        const gi = x + r.x0 + (y + r.y0) * st.w;
+        if (st.own[gi]) continue;
+        for (let k = 0; k < K; k++) { st.G[k][gi] *= f; st.D[k][gi] *= f; }
+      }
+      st.wake(r.x0, r.y0, r.x0 + r.bw, r.y0 + r.bh);
+      return now - r.t0 < 900;
+    });
+  }
+  // how: true puts it there at once; 'back' is coming back from the technical view, where there's nothing to leave;
+  // otherwise it's a regroup. While the sheet is turned over, paint isn't put down at all: it's lifted, and waits
+  // where it will come up
+  function settle(how) {
+    const list = moves; moves = [];
+    const land = (m, dur) => { m.s.R = m.o.size / 2; m.s.put(m.o.x, m.o.y); m.s.spread(dur); };
+    if (tech || bare) { list.forEach((m) => { leaveFast(m.s); m.s.R = m.o.size / 2; m.s.put(m.o.x, m.o.y); }); return; }
+    if (how === true) { list.forEach((m) => { leaveFast(m.s); land(m); }); return; }
+    const step = Math.min(60, 600 / Math.max(1, list.length));
+    const by = (f, salt) => list.map((m, i) => [m, f(m) + (rnd(i + salt) - 0.5) * 240]).sort((a, b) => a[1] - b[1]);
+    if (how === 'back') { by((m) => m.o.x + m.o.y * 0.3, 11).forEach(([m], i) => { m.s._at = i * Math.min(step, 22); later(m.s._at, () => land(m, 1)); }); return; }
+    by((m) => m.x0 + m.y0 * 0.3, 3).forEach(([m], i) => { m.out = i * step; later(m.out, () => leaveFast(m.s)); });
+    by((m) => m.o.x + m.o.y * 0.3, 11).forEach(([m], i) => { m.s._at = Math.max(ARRIVE + i * step, m.out + 380); later(m.s._at, () => land(m, 1.6)); });
+  }
+  // pencil is drawn, not faded (Noah, Nov 11: "Maybe the pencil lines gently glide and cir circle the blobs instead of
+  // just fading in?"). A loop glides round its paint as the paint lands, and is lifted the way it was put down
+  // part: how far round it's drawn (a bundle's loop shows how far its job has gone); without it the loop is whole
+  function loop(d, x, delay, dur, op, part) {
+    const p = pen.add('path', { d, pathLength: 1, class: 'lp', 'stroke-width': 0.9 });
+    p._x = x; p.style.setProperty('--t', dur + 'ms'); if (op) p.style.strokeOpacity = op;
+    if (part != null) { p._part = part; p.style.strokeDasharray = part.toFixed(3) + ' 2'; p.style.strokeDashoffset = (part + 0.03).toFixed(3); }
+    const on = () => { p.classList.add('on'); if (part != null) p.style.strokeDashoffset = 0; };
+    if (wc.still()) on(); else loopTimers.push(setTimeout(on, Math.max(30, delay)));
+    return p;
+  }
+  // how far a job has gone, the way the rail counts it: the mean of its helpers. A short stroke while it waits on you,
+  // closed once it's done (Noah, Nov 11: "how do we track progress without clicking in? ... can we have a more obvious
+  // visual sign?")
+  // (waiting on you is a longer stroke here than in the rail, 0.18 of the loop: at 0.1 it was faint on a small bundle)
+  const PARTS = { ...rail.PART, waiting: 0.18 };
+  const partOf = (job) => job.marks.reduce((n, m) => n + PARTS[paintOf(job, m.how)], 0) / job.marks.length;
+  // working: the drawn end of a working bundle's loop breathes a little, back and forth (Noah, Nov 11: "the working
+  // animation within the dashboard could be a little more noticeable"). It rides the loop's own 1.4s glide
+  let breath = 0;
+  setInterval(() => {
+    if (wc.still() || tech || !P || document.hidden) return;
+    breath ^= 1;
+    P.jobs.forEach((job) => { const p = job.loop; if (!p || !p.classList.contains('on') || job.state !== 'now' || p._part >= 1) return; p.style.strokeDasharray = (p._part + (breath ? 0.035 : -0.03)).toFixed(3) + ' 2'; });
+  }, 1400);
+  function undraw(now) {
+    loopTimers.forEach(clearTimeout); loopTimers = [];
+    if (pen) [...pen.g.querySelectorAll('path')].sort((a, b) => a._x - b._x).forEach((p, i) => {
+      if (now || !p.classList.contains('on')) return p.remove();
+      p.style.setProperty('--t', '380ms');
+      setTimeout(() => { p.classList.remove('on'); if (p._part != null && p._part < 1) p.style.strokeDashoffset = (p._part + 0.03).toFixed(3); else { p.style.strokeDashoffset = ''; p.style.strokeDasharray = ''; p.classList.add('out'); } }, Math.min(i * 28, 220));
+      setTimeout(() => p.remove(), 680);
+    });
+    labs.forEach((l) => { l.classList.add('off'); setTimeout(() => l.remove(), now ? 0 : 400); }); labs = [];
+    if (P) { P.jobs.forEach((j) => { j.loop = null; }); (P.asks || []).forEach((q) => { q.loop = null; }); }
+  }
+  // the paint's own canvas fades, never the field around it
+  const paint = (on, ms = 0) => { if (!st) return; const c = st.canvas; c.style.transition = ms ? `opacity ${ms}ms ease` : 'none'; void c.offsetWidth; c.style.opacity = on ? 1 : 0; };
+
+  function layout(how) {      // true: a new sheet, nothing to watch. 'back': from the technical view. Otherwise a regroup
+    const first = how === true, back = how === 'back', gs = groups(), n = gs.length;
+    const grid = mode === 'agent' && n > 2;      // more than two agents: their loops sit in rows of two
+    // each loop's size at K = 1, then K: the largest that fits the sheet
+    gs.forEach((g) => {
+      const m = g.jobs.length, big = Math.max(0, ...g.jobs.map((j) => j.br0));
+      g.ring0 = mode === 'agent' ? 150 : m === 1 ? 0 : Math.max(m === 2 ? 80 : m === 3 ? 96 : 124, (big + 6) / Math.sin(Math.PI / m));
+      g.r0 = mode === 'agent' ? (m ? g.ring0 + 84 : 96) : m === 1 ? 90 : g.ring0 + 88;
+    });
+    const sum = gs.reduce((a, g) => a + g.r0, 0), top = Math.max(...gs.map((g) => g.r0)), rows = grid ? Math.ceil(n / 2) : 1;
+    let CAP = 1.45;      // v22: the most the paint may be drawn at. It comes down until no loop sits under the ask field or your page (place, below)
+    // v17. Three or more agents: the loops are staggered, one low, one high, so each sits in the gap between its
+    // neighbors and all of them are drawn larger (Noah, Nov 11, in chat, on the Layout workshop: "lets do B staggered,
+    // but not perfectly aligned - im noticing that for 3 and 4 different LLM's, although they're staggered, they're
+    // perfectly aligned. Lets play with that, and make them a little more varied in spacing. With just two as well,
+    // maybe one is higher than the other?"). So no two loops share a height and no two gaps are the same: each loop
+    // has its own lift (LIFT, a share of the play J) and each pair its own gap (ROOM). They're fixed, not random, so
+    // the sheet looks the same every time you come back to it. zig(k) places them at size k and returns the width
+    const stag = grid && STAGGER, FOOT = 46, LIFT = [0.1, -0.85, 1, -0.2, 0.6, -1], ROOM = [20, 64, 34, 78, 28];      // looser since Noah's "a little looser is alright" (Nov 11): the play was 30, the gaps 22 to 54
+    // v23. Noah, Nov 11, on v22: "even when we shrink it just a little bit for smaller screens in the dashboard view, the
+    // bundles snap back to the grid that they were once in, not staggered. Can we find a way to smartly fix that?" In a
+    // window that's tall for its width the high ones went to the top and the low ones to the foot, so far apart that
+    // each low loop sat straight under a high one: two neat rows. Two things keep it a zigzag at every size. The low
+    // and high ones are never further apart than SPAN of the largest loop's radius (a wide window has them closer than
+    // that anyway, so it's unchanged); what height is left over is shared above and below the band. And a loop is always at least SHIFT of the
+    // two radii to the side of the one before it, a different share each time, so none sits over its neighbor
+    const SPAN = +(Q.get('span') || 1.7), SHIFT = [0.46, 0.6, 0.5, 0.66];      // 1.7 of a radius apart, the loops sit in each other's gaps like a honeycomb row: about one radius to the side of each other
+    // o (solve, below): rise, how far the low ones are lifted off the foot of the field; flip, whether the first is
+    // high and the last low (as it stands the last is high, clear of your page); end, how far a low loop at either end
+    // is lifted on its own, since those are the ones beside the ask field's lane and your page
+    const zig = (k, o) => {
+      const J = 46 * k, y0 = 6 + top * k + J, y1 = H - o.rise - FOOT - top * k - J, over = Math.max(0, y1 - y0 - SPAN * top * k), yT = y0 + over / 2, yB = y1 - over / 2;
+      gs.forEach((g, i) => {
+        const low = !!((n - 1 - i) % 2) !== o.flip, lone = low && (i === 0 || i === n - 1) ? Math.min(o.end, Math.max(0, yB - yT)) : 0;
+        const r = g.r0 * k, y = (low ? yB - lone : yT) + LIFT[i % 6] * J, p = gs[i - 1], pp = gs[i - 2];
+        let x = r;
+        if (p) x = Math.max(p.zx + Math.sqrt(Math.max(0, (p.r0 * k + r + ROOM[(i - 1) % 5]) ** 2 - (y - p.zy) ** 2)), p.zx + SHIFT[(i - 1) % 4] * (p.r0 * k + r));
+        if (pp) x = Math.max(x, pp.zx + pp.r0 * k + r + ROOM[(i - 2) % 5]);
+        g.zx = x; g.zy = y;
+      });
+      const last = gs[n - 1];
+      return y1 - y0 < 0 ? Infinity : last.zx + last.r0 * k;
+    };
+    const place = (o) => {
+    const rise = o.rise, HH = H - rise;
+    K = grid ? Math.min(CAP, (W - 110) / (4 * top), (HH - 70 - rows * 44) / (2 * rows * top)) : Math.min(CAP, (W - 30 * (n + 1)) / (2 * sum), (HH - 96) / (2 * top));
+    if (stag) {
+      let lo = Math.min(0.3, CAP), hi = CAP;
+      for (let j = 0; j < 18; j++) { const mid = (lo + hi) / 2; if (zig(mid, o) <= W - 24) lo = mid; else hi = mid; }
+      K = lo;
+      const wide = zig(K, o); gs.forEach((g) => { g.zx += (W - wide) / 2; });
+    }
+    // two agents: one sits higher than the other
+    const pair = mode === 'agent' && n === 2 && STAGGER;
+    if (pair) K = Math.min(K, (HH - 96 - 104) / (2 * top));
+    const gap = (W - 2 * K * sum) / (n + 1);
+    let run = 0;
+    gs.forEach((g, i) => {
+      g.k = K; g.r = g.r0 * K;
+      if (stag) { g.cx = g.zx; g.cy = g.zy; }
+      else if (grid) { g.cx = i === n - 1 && n % 2 ? W / 2 : W * (i % 2 ? 0.75 : 0.25); g.cy = 12 + top * K + Math.floor(i / 2) * (2 * top * K + 44); }
+      else { g.cx = gap * (i + 1) + 2 * K * run + g.r; g.cy = (HH - 30) / 2 + (n > 1 && g.r < top * K ? (i % 2 ? 14 : -10) : 0); run += g.r0; }
+      // v22: the right one is the higher one, clear of your page in the corner. v23: or the left one (flip), and the left
+      // one can go up further on its own (end), off the pile's lane: whichever lets the paint be larger
+      if (pair) { g.cy += (i ? -52 : 48) * (o.flip ? -1 : 1); if (!i) g.cy = Math.max(g.r + 10, g.cy - o.end); }
+    });
+    };
+    // what a loop must keep clear of, in the field's own measure: the ask field with the pile's icon over it (bottom
+    // left), and your page (bottom right), each where it sits unless you've moved it
+    // v23: and over the ask field, a lane as tall as the pile usually is: one whole note and two slim ones (101 + 36 + 36
+    // and the 8 between them, measured in v22 at 1440 x 900: LANE), from 46 under the field's foot upward. So in
+    // ordinary use no paint is under the pile; only a taller pile lies over paint, which its notes blur (Noah: "structure
+    // it so that it doesn't really interfere too much with ... the helpers, bottom left. Closest to the chat box itself")
+    const LANE = Q.get('lane') === '0' ? 2 : Math.min(190, Math.round(H * 0.27));      // in a short window it's a little less (a whole note and one slim one), or the lane would take the field. ?lane=0: without it, to see what it costs
+    const KEEP = EMBED ? [] : [[-60, H - 46 - LANE, 344, H + 70], [W - 239, H - 136, W + 60, H + 70]];
+    const under = () => gs.some((g) => KEEP.some(([x0, y0, x1, y1]) => Math.hypot(Math.max(x0 - g.cx, 0, g.cx - x1), Math.max(y0 - g.cy, 0, g.cy - y1)) < g.r + 8));
+    // Loops come down in size until none sits under the ask field or your page. Shrinking alone made them small in a
+    // window that's nearly square (Noah's pane, Nov 11): the low loops hug the foot of the field, where those two are,
+    // so the only way clear was to get tiny. So the foot can also be lifted: solve(rise) is the largest the paint can be
+    // with the low loops that far off the foot, and the lift that gives the largest paint wins (by 4% or more, so a
+    // wide window, where nothing is in the way, stays exactly as it was)
+    // v23: the pile's lane is a large thing to keep clear of, bottom left, and lifting every low loop for the sake of the
+    // one beside it cost too much. So solve also tries the zigzag the other way up (flip: the first high, the last low)
+    // and lifting only a low loop at an end (end). The plainest way wins unless another lets the paint be 2% larger
+    const solve = (o) => { CAP = 1.45; place(o); for (let t = 0; t < 18 && under(); t++) { CAP = K * 0.94; place(o); } return under() ? 0 : K; };
+    let best = { rise: 0, flip: false, end: 0 }, most = solve(best);
+    const two = mode === 'agent' && n === 2 && STAGGER;
+    if (!EMBED) for (const flip of stag || two ? [false, true] : [false]) for (let rise = 0; rise <= 180; rise += 20) for (let end = 0; end <= (stag || two ? 240 : 0); end += 40) {
+      const o = { rise, flip, end }, k = solve(o);
+      if (k > most * 1.02) { most = k; best = o; }
+    }
+    solve(best);
+    // v21, take b (?focus=b): the group that has the screen is painted large in the middle, and the others small at
+    // the sides, each on the side it was on, so you know where to look for it. It's a regroup like any other: the
+    // paint lifts where it is and comes up where it's needed
+    const fg = FOCUS === 'b' && foc && n > 1 && !solo() ? gs.find((g) => g.key === foc) : null;
+    if (fg) {
+      fg.k = Math.min(2.4, (H * 0.84) / (2 * fg.r0));
+      const side = (W - 2 * fg.r0 * fg.k) / 2, rest = gs.filter((g) => g !== fg), left = rest.filter((g) => g.cx < fg.cx), right = rest.filter((g) => g.cx >= fg.cx);
+      fg.cx = W / 2; fg.cy = H / 2 - 6;
+      [[left, -1, 36, H - 56], [right, 1, 28, H - 196]].forEach(([list, sgn, y0, y1]) => list.forEach((g, j) => {      // the right side stops above your page's widget
+        const r = Math.min(side * 0.42, (y1 - y0) / (2 * list.length) - 8, 118);
+        g.k = r / g.r0; g.cx = (sgn < 0 ? side * 0.46 : W - side * 0.46) + (j % 2 ? 14 : -10); g.cy = y0 + ((j + 0.5) * (y1 - y0)) / list.length;
+      }));
+    }
+    gs.forEach((g, i) => {
+      const m = g.jobs.length, ring = g.ring0 * g.k, a0 = mode === 'agent' ? -110 + i * 37 : -28 + i * 50;
+      g.r = g.r0 * g.k;
+      g.jobs.forEach((job) => { job.k = g.k; job.gk = g.key; job.br = job.br0 * g.k; job.marks.forEach((mk) => { mk.ox = mk.ux * g.k; mk.oy = mk.uy * g.k; }); });
+      g.jobs.forEach((job, k) => { const a = (a0 + (k * 360) / m) * RAD; job.tx = g.cx + Math.cos(a) * ring; job.ty = g.cy + Math.sin(a) * ring; });
+    });
+    gs.how = best; GS = gs;
+    const put = [];      // names and click targets move once the old ones have faded
+    // Sorted by State or Part, the agents are an index, top right: whose color is whose. It's small and quiet, a droplet
+    // and a name each, set from the right so the row ends where the view switch's pill ends (Noah, Nov 11, on v23: "the
+    // agent index at the top for group by part and state could be way smaller ... justified to the right, aligned with
+    // the pill for the toggle, smaller, and yeah, just subtler"). It was a 32px droplet with its name under it, 88px apart
+    const IDX = []; { let x = W; for (let i = AGENTS.length - 1; i >= 0; i--) { const w = AGENTS[i].name.length * 6.2; IDX[i] = { tx: x - w - 13, ty: 16, tr: 7, lx: x - w / 2, ly: 16 }; x -= w + 20 + 18; } }
+    AGENTS.forEach((a, i) => {
+      const g = mode === 'agent' ? gs.find((x) => x.key === a.id) : null;
+      // sorted another way, the agents are small droplets in the corner: the key to whose color is whose. With one
+      // agent there's nothing to tell apart, so it isn't shown (Noah, Nov 11: "not sure how the current LLM you're
+      // using is relevant")
+      a.shown = !!g || AGENTS.length > 1;
+      if (g) Object.assign(a, { tx: g.cx, ty: g.cy, tr: 44 * g.k, lx: g.cx, ly: g.cy + g.r + (grid ? 16 : 26) });
+      else Object.assign(a, IDX[i]);      // the index: small, in a row that ends under the view switch
+      if (a.shown) a.s = lay(a.s, a.id, { size: a.tr * 2, x: a.tx, y: a.ty, state: a.state, seed: i });
+      else if (a.s) leaveFast(a.s);
+      put.push(() => {
+        a.lab.hidden = a.hit.hidden = !a.shown;
+        a.lab.classList.toggle('small', !g || grid); a.lab.classList.toggle('index', !g);
+        Object.assign(a.lab.style, { left: a.lx + 'px', top: a.ly + 'px' });
+        Object.assign(a.hit.style, { left: a.tx + 'px', top: a.ty + 'px', width: a.tr * 2 + 12 + 'px', height: a.tr * 2 + 12 + 'px' });
+      });
+    });
+    P.jobs.forEach((job) => {
+      job.marks.forEach((m) => { m.s = lay(m.s, m.pig, { size: DROP * (job.k || K), x: job.tx + m.ox, y: job.ty + m.oy, state: paintOf(job, m.how), seed: job.i * 5 + m.k }); });
+      put.push(() => {
+        Object.assign(job.hit.style, { left: job.tx + 'px', top: job.ty + 'px', width: job.br * 2 + 'px', height: job.br * 2 + 'px' });
+        Object.assign(job.tickEl.style, { left: job.tx + 'px', top: job.ty - job.br - 24 + 'px' });
+      });
+    });
+
+    layAsks(put);
+    // the loops and their names are pencil. The old ones are lifted as the paint leaves; each new one is drawn round
+    // its bundle as that bundle's paint lands (t0 is when the first paint arrives)
+    const quiet = first || wc.still() || tech || bare;      // nothing to watch: the sheet is new, or it's turned over
+    // fog for every group, where it now is; the old ones fade where they were, over the paint that's lifting there
+    const old = fogs; fogs = [];
+    old.forEach((f) => { f.classList.remove('on'); setTimeout(() => f.remove(), quiet ? 0 : 700); });
+    gs.forEach((g) => ['pale', 'blur'].forEach((kind) => {
+      const f = document.createElement('i'), d = 2 * (g.r + 22);
+      f.className = 'kd-fog ' + kind; Object.assign(f.style, { left: g.cx + 'px', top: g.cy + 'px', width: d + 'px', height: d + 'px' });
+      field.insertBefore(f, fogAt); g[kind] = f; fogs.push(f);
+    }));
+    undraw(quiet || back);
+    settle(quiet ? true : how);
+    const draw = (t0) => {
+      gs.forEach((g, i) => {
+        const big = loop(loopPath(g.cx, g.cy, g.r, i * 1.7 + n), g.cx, t0 + 140 + i * 90, 950, 0.3);
+        g.big = big; g.bigOp = 0.3;
+        if (g.key === 'wait') { big.style.stroke = YOU; g.bigOp = 0.75; }      // waiting on you: its own color
+        else if (g.agent && g.jobs.length && g.jobs.every((j) => j.state === 'done')) { big.style.stroke = DEEP[g.agent.id]; g.bigOp = 0.5; }      // everything this agent had is done
+        g.jobs.forEach((job) => {
+          const at = Math.max(0, ...job.marks.map((m) => (m.s && m.s._at) || 0));
+          job.loop = loop(loopPath(job.tx, job.ty, job.br - 3, job.i * 2.3 + 0.6, true), job.tx, at ? at + 240 : t0 + 160 + (job.tx / W) * 320 + rnd(job.i) * 90, 720, 0, partOf(job));
+        });
+        if (g.agent) return;
+        const l = document.createElement('div');
+        l.className = 'kd-lab off' + (g.key === 'wait' ? ' you' : ''); l.textContent = g.label;
+        Object.assign(l.style, { left: g.cx + 'px', top: g.cy + g.r + 20 + 'px' });
+        field.appendChild(l); labs.push(l); g.labEl = l;
+        loopTimers.push(setTimeout(() => l.classList.remove('off'), t0 + 380));
+      });
+      P.asks.forEach((q) => { if (q.st !== 'back') drawAsk(q, (q.s && q.s._at ? q.s._at + 240 : t0 + 200)); });
+      AGENTS.forEach(setLab);
+      loopTimers.push(setTimeout(() => { labsAway = false; refresh(); }, t0 + 380));      // the agents' names come back with their loops
+      refresh();
+    };
+    redraw = draw;
+    if (quiet) { labsAway = false; put.forEach((f) => f()); if (!tech && !bare) draw(first ? 60 : 0); }
+    else if (back) { labsAway = false; put.forEach((f) => f()); draw(0); }
+    else { labsAway = true; later(240, () => put.forEach((f) => f())); draw(ARRIVE); }
+    document.querySelectorAll('#by-list button').forEach((b) => { const on = b.dataset.mode === mode; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $('by-cur').querySelectorAll('span').forEach((w) => { const on = w.dataset.mode === mode; w.classList.toggle('on', on); w.setAttribute('aria-hidden', !on); });      // v23: the word fades out, then in, in room it always has
+    if (tech) { if (first) cols(0); else recols(); }
+  }
+
+  // an agent's name under its droplet
+  function setLab(a) {
+    a.lab.style.setProperty('--c', DEEP[a.id]);
+    a.lab.textContent = a.name;      // the name only: the tool it runs in isn't shown (Noah, Nov 11: "They may be inconsistent as multiple different models could work on a task - remove")
+  }
+
+  // a droplet from the kit, remembered so its small sheet can be thrown away when what it's on is rebuilt
+  const thinkBag = [], headBag = [];
+  let thinkTimers = [], techTimers = [];
+  const dropIn = (host, who, size, state, bag, hidden) => { const d = kit.drop(host, who, size, state, hidden ? { hidden: true } : undefined); d.stage.lively = LIVELY; bag.push(d.stage); return d; };
+  const clearBag = (bag) => { bag.forEach((x) => x.remove()); bag.length = 0; };
+
+  // ---- technical view: the sheet turned over. A column for each group (agents, states or parts, whichever way the
+  // paint is sorted), newest job first: what you asked, what the agent says it did, then for each helper what it
+  // thought, in its own words and in order, and the file and exact change. Work happening now writes itself in.
+  // Its droplets aren't painted until they're called for: each comes up at its row as its words arrive
+  const think = $('think'), sheet = $('sheet');
+  // clean paint (see the CSS): two identical filters, so swapping one for the other makes the browser draw it again at
+  // the size it's shown now. sharpen() does that once the sheet has stopped moving
+  if (Q.get('smooth') !== '0') {
+    const F = (id) => `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">`
+      + '<feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -0.3333 -0.3333 -0.3333 1 0" result="p"/>'      // how much paint: 0 on white and where nothing was drawn
+      + '<feComponentTransfer in="p" result="m0"><feFuncA type="linear" slope="200" intercept="-1"/></feComponentTransfer>'      // where there's paint at all (1% and up)
+      + '<feComposite in="SourceGraphic" in2="m0" operator="in" result="s"/><feGaussianBlur in="s" stdDeviation="0.5" result="sb"/>'      // the paint alone, smoothed
+      + '<feColorMatrix in="sb" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1" result="c"/>'      // its colour, without the white round it
+      + '<feGaussianBlur in="m0" stdDeviation="1.2" result="mb"/><feComponentTransfer in="mb" result="m"><feFuncA type="linear" slope="5" intercept="-2"/></feComponentTransfer>'      // the edge, smoothed and cut crisply again
+      + '<feComposite in="c" in2="m" operator="in"/></filter>';
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); defs.setAttribute('width', 0); defs.setAttribute('height', 0); defs.setAttribute('aria-hidden', 'true'); defs.style.position = 'absolute';
+    defs.innerHTML = F('wc-clean') + F('wc-clean-b'); document.body.appendChild(defs);
+    sheet.classList.add('smooth');
+  }
+  let sharpT = 0;
+  const sharpen = (later) => { clearTimeout(sharpT); sharpT = setTimeout(() => sheet.classList.toggle('alt'), later || 0); };
+  // v22. The veil over the field while a bundle's note is open: everything blurs and pales but a soft hole where that
+  // bundle is (Noah, Nov 11, on Overlay workshop v2: "just blur everything. Let's try it."). It lies over the field's
+  // sheet and under the top line
+  const veil = note.veil(sheet); veil.el.id = 'veil'; cam.after(veil.el);
+  veil.hole = (x, y, r) => { veil.el.style.setProperty('--hx', x.toFixed(1) + 'px'); veil.el.style.setProperty('--hy', y.toFixed(1) + 'px'); veil.el.style.setProperty('--hr', r.toFixed(1) + 'px'); };
+  const esc = (t) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  // v22. The field is as large as the window allows: 60px either side, the top line over it and the ask field under it
+  function measure() {
+    const sw = sheet.clientWidth || innerWidth, sh = sheet.clientHeight || innerHeight;
+    W = Math.max(720, sw - 120); H = Math.max(420, sh - 140);
+    sheet.style.setProperty('--fw', W + 'px'); sheet.style.setProperty('--fh', H + 'px');
+  }
+
+  // ---- v22: what you ask from the field is painted into its agent's loop. The pile (../sys/pile.js) tells this page
+  // each step of each ask: sent, work, ask, done, back (undone), clear. An ask is a small bundle of one droplet in a
+  // free spot inside the loop; nothing that's already painted is lifted for it. q: { x (the pile's own record: text,
+  // who, part, line), agent, st, tx, ty, br, k, s (its paint), loop (its pencil), hit }
+  let askN = 0;
+  const askPaint = (q) => ({ sent: 'ready', work: 'working', ask: 'waiting', done: 'done', back: 'ready' }[q.st]);
+  const askPart = (q) => (q.st === 'done' ? 1 : q.st === 'ask' ? Math.max(0.5, q.x.part || 0) : Math.max(0.08, q.x.part || 0));      // amber where it stopped; closed once done
+  // where it goes: the spot inside its agent's loop with the most room from that agent's droplet, its bundles and the
+  // other asks. Sorted by state or part an agent has no loop, so it goes under that agent's small droplet in the corner
+  function spot(q) {
+    const g = mode === 'agent' ? GS.find((x) => x.key === q.agent) : null, ag = AGENTS.find((a) => a.id === q.agent), mine = P.asks.filter((o) => o.agent === q.agent && o.st !== 'back');
+    if (!g) { const n = Math.max(0, mine.indexOf(q)); q.k = 0.5; q.br = 41 * q.k; q.tx = ag.tx; q.ty = 58 + 26 + q.br + n * (q.br * 2 + 8); return; }
+    q.k = g.k * 0.8; q.br = 41 * q.k;
+    const taken = [[g.cx, g.cy, ag.tr + 4], ...g.jobs.map((j) => [j.tx, j.ty, j.br]), ...mine.filter((o) => o !== q && o.tx != null && P.asks.indexOf(o) < P.asks.indexOf(q)).map((o) => [o.tx, o.ty, o.br])];
+    let best = null;
+    [g.r - q.br - 10, g.ring0 * g.k, g.ring0 * g.k * 0.56].forEach((rr, ri) => { for (let d = 0; d < 360; d += 10) {
+      const th = (d + 23) * RAD, x = g.cx + Math.cos(th) * rr, y = g.cy + Math.sin(th) * rr * 0.96;
+      const room = Math.min(...taken.map(([tx, ty, tr]) => Math.hypot(x - tx, y - ty) - tr - q.br)) - ri * 3;      // a little preference for the edge of the loop
+      if (!best || room > best.room) best = { x, y, room };
+    } });
+    q.tx = best.x; q.ty = best.y;
+  }
+  function layAsks(put) {
+    P.asks.forEach((q) => {
+      spot(q);
+      if (q.st !== 'back') q.s = lay(q.s, q.pig, { size: DROP * q.k, x: q.tx, y: q.ty, state: askPaint(q), seed: 90 + q.id });
+      put.push(() => Object.assign(q.hit.style, { left: q.tx + 'px', top: q.ty + 'px', width: q.br * 2 + 'px', height: q.br * 2 + 'px' }));
+    });
+  }
+  // its pencil: a loop drawn as far as the ask has gone. Graphite while it's worked on, amber if it needs you, its
+  // agent's color once it's done
+  function lookAsk(q) {
+    const p = q.loop, on = selQ === q, fine = 1 / view.s; if (!p) return;
+    p._part = askPart(q); p.style.strokeDasharray = p._part.toFixed(3) + ' 2'; if (p.classList.contains('on')) p.style.strokeDashoffset = 0;
+    Object.assign(p.style, { stroke: q.st === 'ask' ? YOU : on || q.st === 'done' ? DEEP[q.agent] : '#2b2723'      /* v23: amber stays amber while its note is open */, strokeOpacity: on ? 0.95 : q.st === 'ask' ? 0.9 : q.st === 'done' ? 0.62 : 0.4, strokeWidth: (on || q.st === 'ask' ? 1.3 : q.st === 'done' ? 1 : 0.9) * fine });
+  }
+  function drawAsk(q, delay = 60) {
+    if (q.loop) q.loop.remove();
+    q.loop = loop(loopPath(q.tx, q.ty, q.br - 2, q.id * 1.9 + 0.3, true), q.tx, delay, 720, 0, askPart(q));
+    lookAsk(q);
+  }
+  function landAsk(q) {      // it lands when it's heard, a moment after you send it
+    if (tech || bare || !q.s) return;      // turned over: it waits unpainted and comes up with the rest
+    const go = () => { if (q.st === 'back' || !q.s || q.s.alive) return; q.s.R = (DROP * q.k) / 2; q.s.put(q.tx, q.ty); if (wc.still()) q.s.lay(); else q.s.spread(0.9); };
+    if (wc.still()) go(); else setTimeout(go, 350);
+    drawAsk(q, 380);
+  }
+  function liftAsk(q) {
+    if (q.s) leaveFast(q.s);
+    if (q.loop) { const p = q.loop; q.loop = null; p.style.setProperty('--t', '380ms'); p.classList.remove('on'); p.style.strokeDashoffset = ((p._part || 0) + 0.03).toFixed(3); setTimeout(() => p.remove(), 680); }
+    if (q.hit) q.hit.hidden = true;
+  }
+  function onAsk(what, x) {
+    if (!P) return;
+    let q = null, home = null;
+    PROJECTS.forEach((p) => (p.asks || []).forEach((o) => { if (o.x === x) { q = o; home = p; } }));
+    const here = home === P;
+    if (what === 'sent') {
+      if (!q) {
+        if (!AGENTS.some((a) => a.id === x.who)) return;
+        q = { id: askN++, x, agent: x.who, st: 'sent', pig: FAM[x.who][askN % 3], s: null, loop: null }; P.asks.push(q);
+        spot(q);
+        q.hit = hit(q.br, () => onAskHit(q), null, x.text); Object.assign(q.hit.style, { left: q.tx + 'px', top: q.ty + 'px' });
+        q.s = st.add(q.pig, { size: DROP * q.k, x: q.tx, y: q.ty, state: 'ready', seed: 90 + q.id, hidden: true }); q.s._at = 0;
+        landAsk(q);
+      } else { q.st = 'sent'; if (here) { q.hit.hidden = false; if (q.s && q.s.alive) { q.s.set('ready'); lookAsk(q); } else landAsk(q); } }      // a reply: the same bundle goes round again
+      if (selQ === q && nt && nt.resay) nt.resay();
+      return;
+    }
+    if (!q) return;
+    if (what === 'clear') {
+      if (here) { if (q.st !== 'back') liftAsk(q); if (selQ === q) { selQ = null; refresh(); } if (q.hit) q.hit.remove(); }
+      home.asks.splice(home.asks.indexOf(q), 1); return;
+    }
+    q.st = what;      // work, ask, done or back
+    if (!here) return;
+    if (what === 'back') { liftAsk(q); if (selQ === q) { selQ = null; refresh(); } return; }
+    if (q.s) q.s.set(askPaint(q));
+    lookAsk(q);
+    if (selQ === q && nt && nt.resay) nt.resay();
+  }
+  // its bundle on the canvas: from the main view it takes you to its agent and opens its note; inside the focus it
+  // opens and closes its note. Sorted by state or part there's no agent to go to, so its note just opens
+  function onAskHit(q) {
+    if (foc && mode === 'agent' && q.agent !== foc && !solo()) return stepBack();
+    if (selQ === q) { selQ = null; refresh(); return; }
+    sel = null; selQ = q;
+    if (!foc && mode === 'agent') focus(q.agent); else { noteAt = 0; refresh(); }
+  }
+  function clearThink() {
+    clearBag(thinkBag); clearBag(headBag); thinkTimers.forEach(clearTimeout); thinkTimers = []; think.innerHTML = ''; think.className = 'kd-think';
+    PROJECTS.forEach((p) => (p.all || p.jobs).forEach((j) => { j.blk = null; }));
+  }
+  function jobBlock(job) {
+    if (job.blk) return job.blk;
+    const tk = job.tech || { kids: [] }, blk = (job.blk = document.createElement('article'));
+    blk.className = 'th-job'; blk.style.setProperty('--c', DEEP[job.agent]);
+    blk.innerHTML = `<div class="th-top th-w"><span>${tk.ask ? 'You asked: “' + tk.ask + '”' : ''}</span><span class="who-meta${job.state === 'wait' ? ' you-w' : ''}">${job.when}</span></div>`
+      + `<div class="th-what th-w"><span class="who-name">${NAMES[job.agent]}</span><span class="who-say">${job.what}</span></div><div class="who-lines"></div>`;
+    const lines = blk.querySelector('.who-lines');
+    job.kids.forEach(([how, words], k) => {
+      const m = job.marks[k], t = tk.kids[k] || [], thoughts = t[3] || [words], row = document.createElement('div');
+      row.className = 'line in' + (how === 'waiting' ? ' wait' : '');
+      row.innerHTML = `<span class="line-drop th-d" data-g="m:${job.i}:${k}"></span><div class="line-body th-w">${t[4] ? `<span class="line-thing">${t[4][0]}</span>` : ''}${thoughts.map((x) => `<span class="line-now th-thought">${x}</span>`).join('')}${t[0] ? `<span class="th-fact">${t[0]}<br>${t[1]} · ${t[2] === 'waiting on you' ? '<span class="you-w">waiting on you</span>' : t[2]}</span>` : ''}</div>`;
+      lines.appendChild(row);
+      row.querySelector('.line-drop')._s = dropIn(row.querySelector('.line-drop'), m.pig, 13, paintOf(job, m.how), thinkBag, true);
+      rail.ring(row.querySelector('.line-drop'), 12, k + 1).set(rail.PART[paintOf(job, m.how)]);
+      if (job.state !== 'now' || wc.still() || thoughts.length < 2) return;
+      const ths = [...row.querySelectorAll('.th-thought')];      // still thinking: its words arrive one at a time
+      (function cycle() {
+        ths.slice(1).forEach((x) => x.classList.add('off'));
+        ths.forEach((x, n) => { if (n) thinkTimers.push(setTimeout(() => x.classList.remove('off'), 1400 + n * 2600 + k * 700)); });
+        thinkTimers.push(setTimeout(cycle, 1400 + ths.length * 2600 + 6000));
+      })();
+    });
+    return blk;
+  }
+  // the columns. The words come up down each column, a little after one another, and each droplet is painted in at
+  // its row as its words arrive. Nothing arrives from anywhere else (Noah, Nov 11: "lets limit movements on blobs").
+  // base: how long to wait first, while the field's paint lifts
+  const bloom = (x) => { if (x._s && !x._s.alive) { if (wc.still()) x._s.lay(); else x._s.spread(0.9); } x.classList.add('in'); };
+  function cols(base = 0) {
+    clearBag(headBag); think.innerHTML = ''; think.classList.remove('leaving');
+    if (!tech) return;
+    think.classList.toggle('by-agent', mode === 'agent'); think.classList.toggle('solo', AGENTS.length < 2);
+    const due = [];
+    groups().forEach((g, ci) => {
+      const col = document.createElement('section'), a = g.agent;
+      col.className = 'th-col';
+      if (a) {
+        col.innerHTML = `<div class="who" style="--c:${DEEP[a.id]}"><div class="who-head"><span class="who-drop th-d"></span><span class="who-text th-w"><span class="who-top"><span class="who-name">${a.name}</span></span><span class="who-say">${a.now}</span></span></div></div>`;
+        col.querySelector('.who-drop')._s = dropIn(col.querySelector('.who-drop'), a.id, 24, a.state, headBag, true);
+        const all = g.jobs.flatMap((j) => j.marks.map((m) => rail.PART[paintOf(j, m.how)]));
+        if (all.length) rail.ring(col.querySelector('.who-drop'), 19, 2).set(all.reduce((n, x) => n + x, 0) / all.length);
+      } else col.innerHTML = `<div class="th-label th-w${g.key === 'wait' ? ' you' : ''}">${g.label}</div>`;
+      const body = document.createElement('div');
+      body.className = 'th-body'; col.appendChild(body);
+      body.addEventListener('scroll', () => { col.style.setProperty('--bt', body.offsetTop + 'px'); col.style.setProperty('--tf', Math.min(1, body.scrollTop / 26).toFixed(2)); }, { passive: true });      // the fade at the top comes in over the first 26px you scroll
+      rail.heavy(body);      // the same slightly heavier scroll as the rail (Noah, Nov 11: "very subtle, to the point where its almost unnoticeable")
+      g.jobs.forEach((job) => body.appendChild(jobBlock(job)));
+      think.appendChild(col);
+      let n = 0;      // reading order, down the column. A droplet comes up with the words beside it
+      col.querySelectorAll('.th-w, .th-job, .th-d').forEach((x) => {
+        if (x.classList.contains('in')) return;
+        const d = Math.min(ci * 40 + n * 16, 300);
+        if (x.classList.contains('th-d')) due.push([x, d]); else { x.style.setProperty('--d', d + 'ms'); n++; }
+      });
+    });
+    const go = () => {
+      think.querySelectorAll('.th-w, .th-job').forEach((x) => x.classList.add('in'));
+      due.forEach(([x, d]) => { if (wc.still()) bloom(x); else techTimers.push(setTimeout(() => bloom(x), d + 30)); });
+    };
+    if (wc.still()) go(); else techTimers.push(setTimeout(go, Math.max(30, base)));
+  }
+  // another way to group, in the technical view: the words step back and their droplets with them, then everything
+  // comes up again in its new column. Nothing flies across (it was a move of every block, droplets and all)
+  function recols() {
+    techTimers.forEach(clearTimeout); techTimers = [];
+    if (wc.still()) { clearThink(); cols(0); return; }
+    think.classList.add('leaving');
+    techTimers.push(setTimeout(() => { clearThink(); cols(0); }, 170));
+  }
+
+  // ---- between the paint and the thinking. Nothing travels (Noah, Nov 11, on v17: "for blobs that are off the
+  // screen, they slide under the viewport to reach where they are. This isn't working. I also don't know how to feel
+  // about the blobs sliding to where they belong, it feels a little out of our language - lets limit movements on
+  // blobs. Try the transition again, make it gentle but swift"). Paint does what paint does. In: the pencil is lifted,
+  // the field's paint lifts where it is, a droplet at a time, and the thinking comes up in its place. Back: the words
+  // step back, and the paint comes up again where it was, with its loops drawn round it
+  const stains = () => [...AGENTS.map((a) => a.s), ...P.jobs.flatMap((job) => job.marks.map((m) => m.s))].filter(Boolean);
+  function stopTech() { techTimers.forEach(clearTimeout); techTimers = []; think.classList.remove('leaving'); }
+  function setTech(on) {
+    if (tech === on) return;
+    unfocus('skip');
+    tech = on;
+    $('view').classList.toggle('tech', on);
+    $('tech-btn').classList.toggle('on', on); $('tech-btn').setAttribute('aria-pressed', on);
+    $('paint-btn').classList.toggle('on', !on); $('paint-btn').setAttribute('aria-pressed', !on);
+    sel = null; selQ = null; only = null; refresh();
+    stopTech(); stopMoves();
+    if (wc.still()) {
+      sheet.classList.toggle('thinking', on); field.classList.toggle('away', on); paint(!on);
+      if (on) { undraw(true); cols(0); } else { clearThink(); layout(true); }
+      return;
+    }
+    if (on) {
+      undraw(); field.classList.add('away'); sheet.classList.add('thinking');
+      stains().sort((a, b) => a.x + a.y * 0.3 - (b.x + b.y * 0.3)).forEach((s, i) => techTimers.push(setTimeout(() => leaveFast(s), Math.min(i * 16, 220))));
+      cols(120);
+      techTimers.push(setTimeout(() => paint(false, 200), 1300));      // by now the field is bare; this keeps it so
+    } else {
+      think.classList.add('leaving');
+      techTimers.push(setTimeout(() => { clearThink(); sheet.classList.remove('thinking'); field.classList.remove('away'); paint(true); layout('back'); }, 170));
+    }
+  }
+
+  // ---- v21: focus. One group takes the screen and the rest step back; leaving is the same move, back
+  // where a point of the field is on the screen, with the camera where it is (or is going)
+  const at = (x, y) => [view.ox + (x - view.gx) * view.s, view.oy + (y - view.gy) * view.s];
+  // the camera (take a): the sheet steps toward a group until its loop fills most of the screen's height, or steps
+  // back. It turns about the group's own middle, so a click during the move simply turns it round
+  function camTo(g, now) {
+    const sw = sheet.clientWidth, sh = sheet.clientHeight, fx = cam.offsetLeft + field.offsetLeft, fy = cam.offsetTop + field.offsetTop;
+    if (now || wc.still()) cam.style.transition = 'none';
+    if (g && FOCUS === 'a') {
+      // one agent: there's nothing to push away, so the sheet only steps in a little, toward the group, and doesn't turn to it
+      const one = solo(), s = one ? 1.1 : Math.max(1.08, Math.min(2.2, (sh * 0.72) / (2 * g.r))), ox = one ? fx + g.cx : sw / 2, oy = one ? fy + g.cy : sh / 2;
+      view = { s, gx: g.cx, gy: g.cy, ox, oy };
+      cam.style.transformOrigin = `${field.offsetLeft + g.cx}px ${field.offsetTop + g.cy}px`;
+      cam.style.transform = `translate(${(ox - fx - g.cx).toFixed(1)}px, ${(oy - fy - g.cy).toFixed(1)}px) scale(${s.toFixed(4)})`;
+      cam.style.setProperty('--inv', (1 / s).toFixed(4));
+    } else {
+      view = { s: 1, gx: 0, gy: 0, ox: fx, oy: fy };
+      cam.style.transform = 'translate(0px, 0px) scale(1)'; cam.style.setProperty('--inv', 1);
+    }
+    if (now || wc.still()) { void cam.offsetWidth; cam.style.transition = ''; }
+    sharpen(now || wc.still() ? 30 : 700);      // the paint drawn again at the size it's now shown (the move takes 620ms; transitionend below usually comes first)
+  }
+  const repaints = () => FOCUS === 'b' && !solo() && GS.length > 1;      // take b moves nothing: it regroups
+  function focus(key, i = null) {
+    const g = GS.find((x) => x.key === key); if (!g) return;
+    foc = key; sel = i; only = null; hovA = null; sheet.classList.add('focus');
+    noteAt = performance.now() + (FOCUS === 'a' ? 430 : 0);      // a note waits for the camera
+    if (FOCUS === 'a') camTo(g);
+    else if (repaints()) {
+      stopMoves(); layout();
+      if (i !== null) noteAt = performance.now() + Math.max(0, ...P.jobs[i].marks.map((m) => (m.s && m.s._at) || 0)) + 760;      // and for its bundle's paint to land
+    }
+    if (FOCUS !== 'a') camTo(null, true);
+    refresh();
+  }
+  // how: 'skip' when whoever called is about to lay the sheet out again anyway (another Group by, the technical view,
+  // another project): the focus is simply dropped
+  function unfocus(how) {
+    if (!foc) return;
+    const again = (repaints() || stale) && how !== 'skip';
+    foc = null; sel = null; selQ = null; stale = false; sheet.classList.remove('focus');
+    camTo(null, how === 'skip');
+    if (again) { stopMoves(); layout(); }
+    refresh();
+  }
+  // v23: leaving is one step. A note that's open and the focus go together (Noah, Nov 11, on v22: "you have to click
+  // out like twice. Maybe just when you click out of whatever you're hovering on, it zooms back out"). It was a note
+  // first, then the focus
+  function stepBack() {
+    if (foc) unfocus();      // drops the note with it
+    else if (selQ || sel !== null || only) { selQ = null; sel = null; only = null; refresh(); }
+  }
+  // an agent's own droplet: it takes the screen; again, it gives it back. Clicking another agent's, blurred, goes back
+  // too. Sorted another way, an agent is a small droplet in the corner and a click marks what it did, as before
+  // Its own line comes up under it, a line or two on what it's doing with its helpers (Noah, Nov 11, on v23: "Something
+  // should happen when you click the main blobs of each category. Maybe just like the overall kind of theme or task
+  // that it's doing with its subagents and helpers. Just a line or 2 is fine."). The line is the agent's own, from the
+  // data (a.now). Nothing is blurred for it: it's about the whole loop, so the loop stays in view
+  function onAgent(a) {
+    if (mode !== 'agent') { if (foc) return stepBack(); only = only === a.id ? null : a.id; sel = null; selQ = null; selA = only; refresh(); return; }
+    if (foc) stepBack(); else { selA = a.id; focus(a.id); }
+  }
+  // a bundle: from the main view it takes you to its agent and opens its note in one go. Inside the focus it opens
+  // and closes its note. A bundle of the blurred others goes back
+  function onJob(i) {
+    const job = P.jobs[i];
+    if (!foc) { selQ = null; selA = null; return focus(job.gk, i); }
+    if (job.gk !== foc && !solo()) return stepBack();
+    selQ = null; sel = sel === i ? null : i; noteAt = 0; refresh();
+  }
+
+  // the overlay: a note in pencil (../sys/note.js), laid over the screen beside its bundle. One line, the bundle's own
+  // sentence. A bundle that's waiting on you asks, with a check and a cross; after that the one mark is undo
+  function showNote(want) {
+    const ag = typeof want === 'string' && want[0] === 'a' ? AGENTS.find((a) => 'a' + a.id === want) : null;      // an agent's own line
+    const q = !ag && typeof want === 'string' ? selQ : null, job = q || ag ? null : P.jobs[want], sub = ag ? { tx: ag.tx, ty: ag.ty, br: ag.tr, agent: ag.id } : q || job; if (!sub) return;
+    const [bx, by] = at(sub.tx, sub.ty), r = sub.br * view.s, sw = sheet.clientWidth, sh = sheet.clientHeight, from = [bx, by + r - 2];
+    const n = (nt = note.make(notes, { c: DEEP[sub.agent], from, halo: false }));      // no halo: a bundle's note has the whole field blurred (the veil) instead; an agent's must not blur the paint round it (Noah, Nov 11: "some of the splotches ... look blurry": the halo was blurring the agent's own droplet and the helpers beside it)
+    // an ask's note says what the pile's note says, and its marks press the pile's own (the pile owns the answer)
+    const press = (label) => { const b = q.x.nt && [...q.x.nt.el.querySelectorAll('.note-acts .note-mark')].find((m) => m.getAttribute('aria-label') === label); if (b) b.click(); };
+    const marks = () => (ag ? [] : q ? (q.st === 'ask' ? [{ mark: 'yes', label: 'Yes', on: () => press('Yes') }, { mark: 'no', label: 'No', on: () => press('No') }] : q.st === 'done' ? [{ mark: 'undo', label: 'Undo', on: () => press('Undo') }] : [])
+      : job.state === 'wait' && job.then ? [{ mark: 'yes', label: 'Yes', on: () => { answer(job, true); say(); } }, { mark: 'no', label: 'No', on: () => { answer(job, false); say(); } }]
+      : job.was ? [{ mark: 'undo', label: 'Undo', on: () => { unanswer(job); say(); } }] : []);
+    const say = (now) => n.say(ag ? esc(ag.now) : q ? q.x.line || esc(q.x.text) : job.what, now).acts(marks(), now);
+    n.resay = () => say();
+    say(true);
+    // under the bundle if there's room and it's clear of your page and the ask field; over it if not. Never off screen
+    const h = n.el.offsetHeight, w = n.el.offsetWidth, x = Math.max(24, Math.min(bx - 46, sw - w - 24));
+    const hits = (y) => [$('widget'), $('ask')].some((e) => { const b = e.getBoundingClientRect(); return b.width && x < b.right + 8 && x + w > b.left - 8 && y < b.bottom + 8 && y + h + 24 > b.top - 8; });
+    let y = by + r + 12;
+    if (y + h + 24 > sh - 16 || hits(y)) { y = by - r - 12 - h; from[0] = Math.max(x + 22, Math.min(bx, x + w - 22)); from[1] = y + 1; }      // over it: no stroke, it would land on the wrong edge
+    const y0 = y; y = Math.max(56, Math.min(y, sh - h - 20));
+    if (y !== y0) { from[0] = Math.max(x + 22, Math.min(bx, x + w - 22)); from[1] = y + 1; }      // held on screen by its edge: no stroke either
+    Object.assign(n.el.style, { left: x + 'px', top: y + 'px' });
+    if (!ag) { veil.hole(bx, by, r + 6); veil.on(true); }
+    n.open();
+  }
+  // what's marked: the bundle you're pointing at or have open. Its loop takes its agent's color. And who has the
+  // screen: everyone else is under fog, and only its name stays
+  function refresh() {
+    const many = !solo(), fine = 1 / view.s;      // pencil keeps its weight when the sheet steps in
+    P.jobs.forEach((job, i) => {
+      const far = !!foc && many && job.gk !== foc, on = sel === i || only === job.agent, near = hov === i && !far;
+      // a finished job's closed loop is in its agent's color; one waiting on you is amber; work under way is graphite.
+      // Styles, so a change of color fades (Noah, Nov 11: "could it fade gently, swiftly instead?")
+      const done = job.state === 'done', wait = job.state === 'wait';
+      if (job.loop) Object.assign(job.loop.style, { stroke: wait ? YOU : on || done ? DEEP[job.agent] : '#2b2723', strokeOpacity: on ? 0.95 : wait ? (near ? 1 : 0.9) : done ? (near ? 0.9 : 0.62) : near ? 0.7 : 0.4, strokeWidth: (on ? 1.3 : wait ? 1.3 : done ? 1 : 0.9) * fine });
+      job.tickEl.style.setProperty('--c', wait ? 'var(--c-you-deep)' : DEEP[job.agent]);
+      job.tickEl.textContent = job.tick; job.tickEl.classList.toggle('on', near && sel !== i);
+      // your page in the corner marks its part while you point at it or its note is open; and every part of an agent
+      // or a group while you point at that agent's own droplet or anywhere inside the group's loop (not at a bundle)
+      const whole = !foc && hov === null && sel === null && ((mode === 'agent' && hovA === job.agent) || (hovG !== null && job.gk === hovG));
+      job.marks.forEach((m) => { m.hi.style.opacity = sel === i || near || whole ? 1 : 0; });
+      job.hit.classList.toggle('far', far);
+    });
+    const byAgent = mode === 'agent';
+    AGENTS.forEach((a) => {
+      const other = byAgent && many && a.id !== (foc || hovA);
+      a.lab.style.opacity = labsAway ? 0 : foc && other ? 0 : !foc && hovA && other ? 0.3 : only && only !== a.id ? 0.4 : '';
+      a.hit.classList.toggle('far', !!foc && other); a.hit.classList.toggle('home', !!foc && byAgent && a.id === foc);
+    });
+    GS.forEach((g) => {
+      const other = !!foc && many && g.key !== foc;
+      if (g.blur) { g.blur.classList.toggle('on', other); if (!other) g.blur.classList.remove('peek'); }
+      if (g.pale) g.pale.classList.toggle('on', !foc && byAgent && many && !!hovA && g.key !== hovA);
+      if (g.labEl) g.labEl.style.opacity = other ? 0 : '';
+      if (g.big) Object.assign(g.big.style, foc === g.key && many ? { strokeOpacity: Math.max(0.55, g.bigOp), strokeWidth: 1.1 * fine } : { strokeOpacity: g.bigOp, strokeWidth: 0.9 * fine });      // the one you're on: a firmer loop
+    });
+    P.asks.forEach((q) => { lookAsk(q); if (q.hit) q.hit.classList.toggle('far', !!foc && many && byAgent && q.agent !== foc); });
+    const want = selQ ? 'q' + selQ.id : foc && sel !== null ? sel : selA && (foc === selA || only === selA) ? 'a' + selA : -1;
+    if (want === ntJob) return;
+    clearTimeout(ntTimer); if (nt) { nt.remove(); nt = null; } veil.on(false);
+    ntJob = want;
+    if (want !== -1) ntTimer = setTimeout(() => showNote(want), wc.still() ? 0 : Math.max(0, noteAt - performance.now()));
+  }
+
+  // a yes or a no from a note. Yes: the droplet takes water again and gets to work. No: it dries; the job is closed
+  // as it stands. Either way what was there is kept, so undo puts the question back
+  function answer(job, yes) {
+    const ag = AGENTS.find((a) => a.id === job.agent), m = job.marks[0], tk = job.tech && job.tech.kids[0];
+    job.was = { state: job.state, tick: job.tick, when: job.when, what: job.what, kid: job.kids[0].slice(0, 2), t4: tk && tk[4] ? tk[4][1] : null, t2: tk ? tk[2] : null, ag: [ag.state, ag.now] };
+    if (yes) {
+      Object.assign(job, { state: 'now', tick: 'Now', when: 'Now', what: job.then.what });
+      job.kids[0][0] = m.how = job.then.kid[0]; job.kids[0][1] = job.then.kid[1];
+      if (tk && tk[4]) { tk[4][1] = 'Removing the 3 nothing uses'; tk[2] = 'now'; }
+      ag.state = 'working'; ag.now = job.then.now;
+    } else {
+      Object.assign(job, { state: 'done', tick: 'Now', when: 'Now', what: 'I’ve left the old reminder styles as they are.' });      // v21's own words: the data has no sentence for a no
+      job.kids[0][0] = m.how = 'done';
+      if (tk) tk[2] = 'kept';
+      ag.state = 'ready'; ag.now = job.what;
+    }
+    moved(job, ag);
+  }
+  function unanswer(job) {
+    const ag = AGENTS.find((a) => a.id === job.agent), m = job.marks[0], tk = job.tech && job.tech.kids[0], w = job.was;
+    if (!w) return;
+    Object.assign(job, { state: w.state, tick: w.tick, when: w.when, what: w.what, was: null });
+    job.kids[0][0] = m.how = w.kid[0]; job.kids[0][1] = w.kid[1];
+    if (tk) { if (tk[4]) tk[4][1] = w.t4; tk[2] = w.t2; }
+    [ag.state, ag.now] = w.ag;
+    moved(job, ag);
+  }
+  // its paint, its loop and where it's sorted follow. While its group has the screen nothing is regrouped under your
+  // hand: that waits until you leave (stale)
+  function moved(job, ag) {
+    const m = job.marks[0], p = paintOf(job, m.how);
+    m.s.set(p); m.w.set(p); if (ag.s) ag.s.set(ag.state);
+    const was = mode; ways();
+    if (job.loop) { job.loop._part = partOf(job); job.loop.style.strokeDasharray = job.loop._part.toFixed(3) + ' 2'; }      // its loop goes on round to where the job now is
+    if (mode !== was || mode === 'state') { if (foc) stale = true; else { sel = null; layout(); } }
+    refresh();
+  }
+
+  // another project: the paint fades on its own canvas and the pencil is lifted, then the new sheet's loops are drawn
+  function swap(id) {
+    unfocus('skip'); undraw(); paint(false, 200); field.classList.add('away');
+    setTimeout(() => { open(id); if (tech) return; field.classList.remove('away'); paint(false); requestAnimationFrame(() => requestAnimationFrame(() => paint(true, 260))); }, 240);
+  }
+  // ---- Group by: plain text. Point at it, or focus it, and the ways show under it. Arrow keys move, Enter picks, Esc shuts
+  const by = $('by'), byNow = $('by-now'), byList = $('by-list');
+  let byT = 0;
+  const byOpts = () => [...byList.querySelectorAll('button')].filter((b) => !b.hidden);
+  const byOpen = (on) => { clearTimeout(byT); if (on) byList.style.left = $('by-cur').offsetLeft - 12 + 'px'; byList.classList.toggle('on', on); byNow.setAttribute('aria-expanded', on); };
+  by.onmouseenter = () => byOpen(true);
+  by.onmouseleave = () => { byT = setTimeout(() => byOpen(false), 180); };
+  byNow.onfocus = () => byOpen(true);
+  byNow.onclick = (e) => { e.stopPropagation(); byOpen(true); };
+  byNow.onkeydown = (e) => { if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); byOpen(true); (byList.querySelector('.on:not([hidden])') || byOpts()[0]).focus(); } };
+  byList.onkeydown = (e) => {
+    const o = byOpts(), i = o.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); o[(i + (e.key === 'ArrowDown' ? 1 : o.length - 1)) % o.length].focus(); }
+    else if (e.key === 'Escape') { e.stopPropagation(); byNow.focus(); byOpen(false); }
+  };
+  by.addEventListener('focusout', (e) => { if (!by.contains(e.relatedTarget)) byT = setTimeout(() => byOpen(false), 120); });
+  byList.querySelectorAll('button').forEach((b) => { b.onclick = (e) => { e.stopPropagation(); byOpen(false); if (mode === b.dataset.mode) return; unfocus('skip'); mode = b.dataset.mode; sel = null; only = null; layout(); refresh(); }; });
+  // leaving is as much a part of it as entering: a click on empty paper, on the blurred others, or out at the edges
+  // of the screen goes back, note and focus together (v23). So does Esc, and the agent's own droplet again
+  sheet.addEventListener('click', (e) => { if (tech || e.target.closest('button, .note, .kd-ov, #ask, #widget')) return; if (POPS.some(([, n]) => n.isOpen)) return; stepBack(); });      // with the library or settings open, the click only shuts it
+  // point at the blurred others and they come up a little, so you can tell a click there goes back
+  sheet.addEventListener('mousemove', (e) => {
+    if (tech || !P) return;
+    const r = field.getBoundingClientRect(), k = r.width / W, x = (e.clientX - r.left) / k, y = (e.clientY - r.top) / k;
+    if (foc && !solo()) GS.forEach((g) => { if (g.blur && g.key !== foc) g.blur.classList.toggle('peek', Math.hypot(x - g.cx, y - g.cy) < g.r + 12); });
+    // v22: pointing anywhere inside a group's loop marks that group's parts on your page in the corner
+    const g = foc || POPS.some(([, n]) => n.isOpen) || e.target.closest('#widget, #ask, .note, .kd-nav, .kd-top') ? null : GS.find((g) => Math.hypot(x - g.cx, y - g.cy) < g.r), key = g ? g.key : null;
+    if (key !== hovG) { hovG = key; refresh(); }
+  });
+  sheet.addEventListener('mouseleave', () => { if (hovG !== null) { hovG = null; refresh(); } });
+
+  // ---- the library and settings: notes in pencil, shut until asked for (v22: they were white cards). While one is
+  // open everything under it blurs and pales, the same as for a bundle's note
+  const popsEl = $('pops'), veilB = note.veil(popsEl);
+  const libNote = note.make(popsEl, { at: [62, 46], w: 172, c: 'var(--c-text)', halo: false }), libRows = document.createElement('div');
+  libNote.el.id = 'lib'; libNote.el.setAttribute('aria-label', 'Projects'); libNote.el.querySelector('.note-body').hidden = true; libRows.className = 'kd-prows'; libNote.el.appendChild(libRows);
+  const setNote = note.make(popsEl, { at: [62, 100], w: 236, c: 'var(--c-text)', halo: false }), setRows = document.createElement('div');
+  setNote.el.id = 'set-pop'; setNote.el.querySelector('.note-body').hidden = true; setRows.className = 'kd-sets';
+  // v23: meta-prompting is a setting, not a toggle in the field (Noah: "I think we could remove the meta prompting toggle.
+  // from the chat box itself and just put it into settings"). In Settings it has one row, in plain words: "Rephrase my
+  // ask". That row was here already and is the same thing (Enter rewrites your ask in place; a second Enter sends it),
+  // so a second row named "Meta-prompting" was one switch too many. Noah, Nov 11, asked which name the row keeps:
+  // "Rephrase my ask". On by default; it keeps its state for the page's life and changes nothing else in this sketch
+  setRows.innerHTML = '<div class="kd-set"><span>Rephrase my ask</span><button class="kd-sw on" id="set-mp" aria-label="Rephrase my ask" aria-pressed="true"></button></div><div class="kd-set"><span>Explain design words</span><button class="kd-sw on" aria-label="Explain design words"></button></div><div class="kd-set"><span>Open Gouache</span><span class="kd-key">⌥ Space</span></div>';
+  setNote.el.appendChild(setRows);
+  const POPS = [[libBtn, libNote], [$('set-btn'), setNote]];
+  // v23: while the library is open your page in the corner is big, so you can tell which project you're looking at
+  // (Noah: "When we open the library, maybe the dashboard on the bottom automatically becomes bigger"). It goes back
+  // when the library shuts, unless it was big already or you changed its size yourself meanwhile (libBig)
+  let libBig = false;
+  const pageBig = (on) => { const w = $('widget'); if (on) { libBig = !w.classList.contains('big'); if (libBig) w.classList.add('big'); } else if (libBig) { libBig = false; w.classList.remove('big'); } };
+  function shut(except) { POPS.forEach(([b, n]) => { if (n !== except && n.isOpen) { n.open(false); b.classList.remove('on'); b.setAttribute('aria-expanded', 'false'); if (n === libNote) pageBig(false); } }); if (!except) veilB.on(false); peek(null); }
+  POPS.forEach(([b, n]) => { b.onclick = (e) => { e.stopPropagation(); shut(n); const on = !n.isOpen; n.open(on); veilB.on(on); b.classList.toggle('on', on); b.setAttribute('aria-expanded', on); if (n === libNote) pageBig(on); }; n.el.addEventListener('click', (e) => e.stopPropagation()); });
+  document.addEventListener('click', () => shut());
+  // Esc, one thing at a time: a word's meaning, then the library or settings, then the note and the focus together
+  // (v23: they were two presses), then the pile if it's up
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (wordNote) return wordOff();
+    if (nt && notes.querySelector('.note.small.open')) return void nt.mean();
+    if (POPS.some(([, n]) => n.isOpen)) return shut();
+    if (foc || selQ || sel !== null || only) return stepBack();
+    if (asked.isUp()) return void asked.toggle();
+  });
+  document.querySelectorAll('.kd-sw').forEach((s) => { s.onclick = () => { const on = s.classList.toggle('on'); s.setAttribute('aria-pressed', on); if (s.id === 'set-mp') $('ask').classList.toggle('on', on); }; });
+  // the view is a switch: a click anywhere on it turns it over, and the arrow keys pick a side
+  $('view').onclick = (e) => { e.stopPropagation(); setTech(!tech); };
+  $('view').onkeydown = (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); setTech(e.key === 'ArrowRight'); $(tech ? 'tech-btn' : 'paint-btn').focus(); } };
+
+  // ---- the way back: the rail's dashboard mark with its arrows turned inward, in the corner it has in the rail. From
+  // the rail, the arrows turn in as the dashboard opens; going back they turn out first, and the rail has them outward
+  const back = $('back'), fromRail = /\/v\d+\/0[1-4]-/.test(document.referrer);
+  back.innerHTML = rail.MARK.home;
+  const mark = back.firstElementChild;
+  if (fromRail && !wc.still()) requestAnimationFrame(() => requestAnimationFrame(() => mark.classList.add('in'))); else mark.classList.add('in');
+  back.onclick = (e) => {
+    e.stopPropagation(); mark.classList.remove('in');
+    setTimeout(() => { if (fromRail && history.length > 1) history.back(); else location.href = '../v15/03-watch.html?agents=' + Math.min(3, AGENTS.length); }, wc.still() ? 0 : 340);
+  };
+  addEventListener('pageshow', (e) => { if (e.persisted) mark.classList.add('in'); });
+
+  // ---- where you ask: the rail's field, now real and naming its agent with @ (rail.target in ../sys/rail.js). Noah,
+  // Nov 11, in chat, on the prototype (../sys/ask-target.html): "The asking feature works really well. I think we can
+  // just push this onto our main build." With one agent its name is baked in; with more, clicking in puts an @ there
+  // and the agent you choose stays until you change it. Enter sends it off (what happens next is the Chat box workshop)
+  $('sheet').addEventListener('scroll', (e) => { e.currentTarget.scrollTop = 0; e.currentTarget.scrollLeft = 0; });      // belt and braces for a browser without overflow: clip
+  const askWrap = $('ask');
+  askWrap.onclick = (e) => e.stopPropagation();
+  // what you send becomes a pile you pull up, over the field (../sys/pile.js), the same as in the rail
+  const asked = pile.mount(askWrap, { ...(AGENTS.length === 1 ? { pig: (rail.HUES[AGENTS[0].id] || [])[1], c: `var(--c-${AGENTS[0].id})` } : {}), on: onAsk });      // v22: and each step of each ask is painted into its agent's loop (onAsk)
+  rail.target(askWrap, AGENTS.map((a) => a.id), { send: (t, who) => asked.add(t, who) });
+
+  // ---- the widget: drag it anywhere; a click makes it bigger, another puts it back
+  const wg = $('widget');
+  let drag = null; const off = { x: 0, y: 0 };
+  wg.onpointerdown = (e) => { drag = { sx: e.clientX, sy: e.clientY, ox: off.x, oy: off.y, moved: false }; wg.setPointerCapture(e.pointerId); };
+  wg.onpointermove = (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+    drag.moved = true; off.x = drag.ox + dx; off.y = drag.oy + dy; wg.style.translate = `${off.x}px ${off.y}px`;
+  };
+  wg.onpointerup = wg.onpointercancel = () => { if (drag && !drag.moved) { wg.classList.toggle('big'); libBig = false; } drag = null; };      // your own click: the library leaves its size alone after that
+  wg.onclick = (e) => e.stopPropagation();
+  wg.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wg.classList.toggle('big'); libBig = false; } };
+
+  // a design word's meaning, outside a note (the technical view's words): the small pencil note, the explanation alone
+  // (v22: it was a white card with the word as a title). Inside a note, the note shows its own (../sys/note.js)
+  let wordNote = null, wordT = 0;
+  const wordOff = () => { clearTimeout(wordT); if (wordNote) { wordNote.remove(); wordNote = null; } };
+  sheet.addEventListener('mouseover', (e) => {
+    const t = e.target.closest('.term'); if (!t || t.closest('.note')) return;
+    clearTimeout(wordT); if (wordNote && wordNote.term === t) return; wordOff();
+    const b = sheet.getBoundingClientRect(), r = t.getBoundingClientRect(), x = r.left - b.left, y = r.bottom - b.top;
+    wordNote = note.make(popsEl, { small: true, at: [Math.max(12, Math.min(x - 6, b.width - 230)), y + 12], from: [x + 12, y + 2] });
+    wordNote.say(t.dataset.def, true); wordNote.term = t;
+    if (y + 12 + wordNote.el.offsetHeight > b.height - 12) wordNote.el.style.top = r.top - b.top - wordNote.el.offsetHeight - 10 + 'px';      // no room under the word: over it
+    wordNote.open();
+  });
+  sheet.addEventListener('mouseout', (e) => { if (e.target.closest('.term') && !e.target.closest('.note')) wordT = setTimeout(wordOff, 220); });
+  // any window size: laid out again once the window has stopped changing. The paint comes up on the new sheet, a
+  // focus is kept, and anything open is put away
+  let rz = 0;
+  addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => {
+    const w0 = W, h0 = H; measure(); if (W === w0 && H === h0) return;
+    const keep = foc; shut(); stopMoves(); stopTech(); open(P.id, keep);
+  }, 220); });
+  measure();
+  buildLib();
+  if (EMBED) {
+    sheet.classList.add('embed', 'bare'); field.classList.add('away');
+    const showView = () => { $('view').classList.toggle('tech', tech); $('tech-btn').classList.toggle('on', tech); $('tech-btn').setAttribute('aria-pressed', tech); $('paint-btn').classList.toggle('on', !tech); $('paint-btn').setAttribute('aria-pressed', !tech); };
+    window.dash = {
+      // the field's paint is painted in, a droplet at a time, with its loops drawn; the top line comes in
+      arrive() {
+        if (!bare) return;
+        bare = false; sheet.classList.remove('bare'); field.classList.remove('away'); stopTech(); stopMoves(); paint(true);
+        layout(wc.still() ? true : 'back'); refresh();
+      },
+      // everything lifts where it is: loops, paint, the top line, anything open
+      leave() {
+        if (bare) return;
+        shut(); byOpen(false); unfocus('skip'); sel = null; only = null; refresh(); stopTech(); stopMoves();
+        if (tech) { tech = false; showView(); clearThink(); sheet.classList.remove('thinking'); }
+        bare = true; sheet.classList.add('bare'); undraw(wc.still()); field.classList.add('away');
+        stains().sort((a, b) => a.x + a.y * 0.3 - (b.x + b.y * 0.3)).forEach((s, i) => techTimers.push(setTimeout(() => leaveFast(s), wc.still() ? 0 : Math.min(i * 16, 220))));
+      },
+      widget: () => $('widget').getBoundingClientRect(),
+    };
+    // keys pressed in here belong to the outer page too: Esc with nothing open goes back, Option Space closes
+    document.addEventListener('keydown', (e) => {
+      const v = parent.views; if (!v) return;
+      if (e.key === 'Escape') { if (sel === null && !selQ && !only && !foc && !POPS.some(([, n]) => n.isOpen) && !asked.isUp() && document.activeElement === document.body) v.key('Escape'); }
+      else if (e.altKey && e.code === 'Space') { e.preventDefault(); v.key('AltSpace'); }
+    }, true);
+  }
+  open('juniper');
+  // v23, ?asks=N (1 to 8): N asks are sent for you once the sheet has settled, a little over a second apart, to the
+  // agents in turn, so the pile can be watched filling over the ask field (Noah: "I would like to see an edge case where
+  // the chat box is being used and the notifications are piling in above the chat box"). These are sample asks about
+  // Juniper's page, not anything anyone asked; what comes back is the pile's own canned lines
+  const ASKS = ['make the button bigger', 'warm up the headline', 'round the form’s corners', 'line the three cards up', 'make the email field taller', 'check the colors are easy to read', 'tighten the space under the headline', 'make the links in the header darker'];
+  const askN0 = EMBED ? 0 : Math.max(0, Math.min(8, +(Q.get('asks') || 0)));
+  for (let i = 0; i < askN0; i++) setTimeout(() => asked.add(ASKS[i], AGENTS[i % AGENTS.length].id), 2200 + i * 1150);
+</script>
+</body>
+</html>

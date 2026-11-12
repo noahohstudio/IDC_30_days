@@ -1,0 +1,26 @@
+/* The typeface is Figtree (Noah, Nov 10, on the Type workshop: "lets go with figtree"). Only the extension's own
+   surfaces are set in it; your page keeps its own type. */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap');
+/* What the screens share once the paint is the soft watercolor (wc.js) and pointing is a pencil line.
+   Neutral paper (Noah, Nov 10: "make sure it's very neutral ... way closer to gray or white than it is to yellow").
+   Whiter since Nov 11 (Noah, on Dashboard v15: "could be a little whiter even, with just a hint of the tint of paper.
+   Make sure that also makes sense with the overlays"): paper was #f1f0ee, sheets #fafaf9. Sheets (fields, slips,
+   anything laid over the paper) are now all but white and stand off the paper by their hairline and shadow. */
+:root {
+  --k-paper: #f7f6f3; --k-sheet: #fefefd; --k-hair: rgba(40, 38, 35, 0.1); --k-own-deep: #6b56a8;
+  --k-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .27  0 0 0 0 .27  0 0 0 0 .26  0 0 0 .3 -.125'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+  --k-font: "Figtree", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+}
+canvas.wc { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: multiply; pointer-events: none; }
+.wdrop { position: relative; display: inline-block; flex: none; vertical-align: middle; pointer-events: none; }
+.wdrop.at { position: absolute; }
+svg.pen { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+svg.pen rect { transition: opacity .7s; }
+/* droplets on your page sit in the overlay; the overlay as a whole is laid on the page the way paint is, so a droplet
+   never shows as a white square */
+.overlay { mix-blend-mode: multiply; }
+
+/* the extension's surfaces, in Figtree. The paper's grain is about half what it was (Noah, Nov 10: "the noise is very
+   strong - the paper effect should be subtle and lighter") */
+.k-paper, .k-sheet, .k-tag, .k-launch, .k-key, .def { font-family: var(--k-font); }
+.k-paper button, .k-paper input, .k-paper textarea, .k-launch button { font-family: inherit; }

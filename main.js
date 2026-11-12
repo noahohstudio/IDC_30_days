@@ -136,7 +136,7 @@ run("fit", () => {
   const number = document.querySelector("[data-count-number]");
   if (number) {
     // The day of 30: two places, any it hasn't reached barely there
-    const digits = "14";
+    const digits = "21";
     setFlip(number.querySelector(".zeros"), "0".repeat(2 - digits.length));
     setFlip(number.querySelector("[data-count-digits]"), digits);
     fit(number, number.parentElement);
@@ -404,6 +404,56 @@ run("sequences", () => {
       seen = entry.isIntersecting;
       tick();
     }, { threshold: 0.3 }).observe(seq);
+  });
+});
+
+/* ---------- Day 19: the features, each film in turn, the dot under the one playing ---------- */
+
+run("features", () => {
+  document.querySelectorAll("[data-features]").forEach((box) => {
+    const videos = [...box.querySelectorAll("video")];
+    const steps = [...box.querySelectorAll(".seq-steps li:not(.seq-dot)")];
+    const dot = box.querySelector(".seq-dot");
+    box.querySelector(".seq-steps").style.setProperty("--n", steps.length);
+    videos.forEach(sources);
+    let i = 0;
+    let seen = false;
+    let chosen = false; // played by a click, so it plays even with reduced motion
+    const allowed = () => seen && (!calm.matches || chosen);
+    const show = (n, play) => {
+      i = (n + videos.length) % videos.length;
+      videos.forEach((v, k) => {
+        v.toggleAttribute("data-on", k === i);
+        if (k !== i) v.pause();
+      });
+      steps.forEach((s, k) => s.toggleAttribute("data-at", k === i));
+      dot?.style.setProperty("--i", i);
+      videos[i].currentTime = 0;
+      if (play && allowed()) videos[i].play().catch(() => {});
+    };
+    // When one film ends, the next starts, and after the last, the first again
+    videos.forEach((v) => v.addEventListener("ended", () => show(i + 1, true)));
+    steps.forEach((s, k) =>
+      s.addEventListener("click", () => {
+        chosen = true;
+        show(k, true);
+      }),
+    );
+    box.querySelector(".feat-frames").addEventListener("click", () => {
+      chosen = true;
+      const v = videos[i];
+      if (v.paused) v.play().catch(() => {});
+      else v.pause();
+    });
+    show(0, false);
+    new IntersectionObserver(
+      ([entry]) => {
+        seen = entry.isIntersecting && entry.intersectionRatio >= 0.5;
+        if (allowed()) videos[i].play().catch(() => {});
+        else videos[i].pause();
+      },
+      { threshold: [0, 0.5] },
+    ).observe(box);
   });
 });
 

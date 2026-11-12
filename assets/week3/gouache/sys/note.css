@@ -1,0 +1,82 @@
+/* sys/note.css + sys/note.js: the overlay, as a note in pencil. Noah, Nov 11, in chat, on Overlay workshop v1:
+     "we want to go with a note inside the pencil lines ... I don't think we firstly need the thumbnail of whatever
+      it's working on. Let's get rid of that. The captions, unless absolutely necessary, I think we could also lose and
+      have the main kind of state header title ... be the actual text that explains everything contextually."
+     "For like a job waiting on you ... just have a check and an X drawn in pencil that the user gets to decide."
+     "if we want to undo, it could just be like a very simple icon. Like we're trying to reduce the amount of text.
+      This is a very visual product ... So I think with that comes like heavy usage of icons."
+     "because our graphite line, like text box for all of our overlays, are supposed to be kind of transparent, I think
+      it would be good if everything around it and within it is blurred when you open it. In a way so that you can read
+      everything and it's pastel wherever it clashes with anything."
+   So a note is: a pencil line that draws itself round, one line of words in the agent's color, and pencil marks for
+   anything you can do. It has no fill of its own. What's under it is blurred and paled (.note-glass), and that eases
+   off round it (.note-halo), so the words read over paint.
+   The note itself must never fade or move as a whole (no opacity, transform or filter on .note): its glass reads what's
+   behind it, and that would cut it off from the paint. Its parts fade instead.
+   No z-index either: a note is on top because it's added after the paint, so a droplet added after a note (the one
+   that signs a word's meaning) can sit on it and still be paint. */
+.note { position: absolute; width: 286px; --reach: 46px; --c: var(--c-text); color: var(--c); font-family: var(--k-font); pointer-events: none; }
+.note.open { pointer-events: auto; }
+.note-glass, .note-halo { position: absolute; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+.note.open .note-glass, .note.open .note-halo { opacity: 1; transition: opacity .36s ease; }
+.note-glass { inset: 0; border-radius: 16px; background-color: color-mix(in srgb, var(--k-paper) 52%, transparent); background-image: var(--k-grain); background-size: 220px;
+  -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
+.note-halo { inset: calc(-1 * var(--reach)); background-color: color-mix(in srgb, var(--k-paper) 30%, transparent); background-image: var(--k-grain); background-size: 220px; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--reach), #000 calc(100% - var(--reach)), transparent), linear-gradient(to bottom, transparent, #000 var(--reach), #000 calc(100% - var(--reach)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--reach), #000 calc(100% - var(--reach)), transparent), linear-gradient(to bottom, transparent, #000 var(--reach), #000 calc(100% - var(--reach)), transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect; }
+.note.no-halo .note-halo { display: none; }
+.note-box, .note-lead { position: absolute; overflow: visible; pointer-events: none; }
+.note-box { inset: 0; width: 100%; height: 100%; }
+.note-lead { left: 0; top: 0; width: 1px; height: 1px; }
+.note-box rect, .note-lead path { fill: none; stroke: var(--c-pencil); stroke-opacity: .5; stroke-width: .9; stroke-linecap: round; filter: url(#note-warp);
+  stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .2s ease; }
+.note.open .note-box rect, .note-lead.open path { stroke-dashoffset: 0; transition: stroke-dashoffset .55s cubic-bezier(.4, 0, .2, 1); }
+.note-body { position: relative; padding: 14px 18px 15px; opacity: 0; transform: translateY(3px); transition: opacity .16s ease, transform .2s ease; }
+.note.open .note-body { opacity: 1; transform: none; transition: opacity .3s .1s ease, transform .36s .1s cubic-bezier(.2, .7, .2, 1); }
+.note-say { margin: 0; font-size: var(--t-3); line-height: var(--l-3); text-wrap: pretty; transition: opacity .18s ease; }
+.note-acts { display: flex; gap: 6px; margin: 6px 0 -5px -6px; transition: opacity .18s ease; }
+.note-acts[hidden] { display: none; }
+.note-say.out, .note-acts.out { opacity: 0; }
+/* a mark: something you can do, drawn in pencil. Its words are in its label, for a screen reader and on hover.
+   No ring round a mark since Nov 11 (Noah, in chat, on Overlay workshop v2: "we also don't like the kind of circling
+   around the undo and edit buttons ... Too many things become encased in circles then, and in the graphite, and we want
+   to kind of hone it for what really needs to be encased and circled. So instead of that, maybe we just have an opacity
+   shift, maybe a slight tilt, maybe both to have a fun effect"). So a mark you reach for darkens and tilts a little.
+   Smaller, and the check is plain pencil like the cross, since Noah's picks on Overlay workshop v2 (Nov 11, in chat):
+   "the amber looks like a caution, which I'm not enjoying. Maybe we just keep it as a, like, a check and an X. I think
+   it should be smaller too ... when we blow this up on the dashboard, I feel like a lot of the elements are going to
+   be a lot larger than we anticipate." (ring: 'you' is still accepted and now changes nothing.) */
+.note-mark { position: relative; flex: none; width: 28px; height: 28px; display: grid; place-items: center; border: 0; padding: 0; background: none; color: var(--c-pencil); cursor: pointer; border-radius: 50%; }
+.note-mark svg.ico { width: 16px; height: 16px; overflow: visible; opacity: .6; filter: url(#note-warp-s); transition: opacity .2s ease, transform .32s cubic-bezier(.3, 1.5, .5, 1); }
+.note-mark:hover svg.ico, .note-mark:focus-visible svg.ico { opacity: 1; transform: rotate(-9deg); }
+.note-mark:nth-child(even):hover svg.ico, .note-mark:nth-child(even):focus-visible svg.ico { transform: rotate(8deg); }
+.note-mark:active svg.ico { transform: rotate(-3deg) scale(.92); }
+.note-mark.flip svg.ico { transform: scaleX(-1); }
+.note-mark.flip:hover svg.ico, .note-mark.flip:focus-visible svg.ico { transform: scaleX(-1) rotate(-9deg); }
+.note-mark:focus-visible { outline: 1px solid color-mix(in srgb, var(--c-pencil) 40%, transparent); outline-offset: -3px; }
+/* a word's meaning: the same note, smaller, under the word, with a pencil line up to it. Noah's pick on Overlay
+   workshop v2 (Nov 11, in chat): "when you hover over it, everything can be blurred but the words that you're hovering
+   over. So like warmer copy can be visible, but then like the rest of the message, like I rewrote your headline, could
+   be blurred. Oh, that's good because then we can just remove warmer copy header on the overlay. It just becomes the
+   explanation itself, which reduces visual clutter." And: "make sure that there's no droplet on the word itself. It's
+   just a line stemming from the box". So while a meaning is up, the note's words blur (drawn as their own soft shadow)
+   except the word you're on, which stays sharp; the meaning is the explanation alone; and it has no halo, so it blurs
+   nothing but what's right under it. */
+.note.small { width: 214px; --c: var(--c-soft); }
+.note.small .note-glass { border-radius: 13px; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.note.small .note-halo { display: none; }
+.note.small .note-body { padding: 10px 14px 11px; }
+.note.small .note-say { font-size: var(--t-2); line-height: var(--l-2); }
+.note-say { transition: opacity .18s ease, color .25s ease, text-shadow .25s ease; }
+.note.under .note-say { color: transparent; text-shadow: 0 0 7px color-mix(in srgb, var(--c) 62%, transparent); }
+.note.under .note-say .term { border-bottom-color: transparent; transition: color .25s ease, text-shadow .25s ease; }
+.note.under .note-say .term.on { color: var(--c); text-shadow: none; border-bottom-color: color-mix(in srgb, var(--c) 38%, transparent); }
+.note.under .note-acts { filter: blur(3px); opacity: .45; transition: filter .25s ease, opacity .25s ease; }
+/* a veil: when a note opens, the whole field behind it can blur and pale (note.veil(host); Noah, on the workshop's
+   take C: "that's how your brain thinks when you're focusing on something, everything else kind of blurs out ... just
+   blur everything. Let's try it."). Add it before the paint that should stay sharp and before the note. */
+.note-veil { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .36s ease; background-color: color-mix(in srgb, var(--k-paper) 50%, transparent); background-image: var(--k-grain); background-size: 220px; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.note-veil.on { opacity: 1; }
+.note .term { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .note *, .note-lead * { transition: none !important; } }
