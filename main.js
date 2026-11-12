@@ -415,7 +415,38 @@ run("scrolly", () => {
   if (!boxes.length) return;
   const clamp01 = (t) => Math.min(1, Math.max(0, t));
   const smooth = (t) => t * t * (3 - 2 * t);
-  const STEP = 40; // degrees between the wheel's photos
+  const easeInOut = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+  const STEP = 30; // degrees between the wheel's photos
+
+  // The wheel follows the scroll with a little weight, so it eases into each stop rather than snapping to the page.
+  // Each frame it closes part of the gap to where the scroll says it should be, and stops once it's there.
+  const turn = (box) => {
+    const spokes = [...box.querySelectorAll(".spoke")];
+    const draw = () =>
+      spokes.forEach((spoke, i) => {
+        const d = Math.min(1, Math.abs(i - box.spun));
+        spoke.style.transform = `rotate(${(i - box.spun) * STEP}deg)`;
+        const img = spoke.firstElementChild;
+        img.style.scale = String(1 - 0.12 * d); // the one on top is the nearest
+        img.style.opacity = String(1 - 0.3 * d);
+      });
+    if (box.spun === undefined || calm.matches) {
+      box.spun = box.goal;
+      return draw();
+    }
+    if (box.turning) return;
+    box.turning = true;
+    let then = performance.now();
+    const step = (now) => {
+      box.spun += (box.goal - box.spun) * (1 - Math.exp(-(now - then) / 160));
+      then = now;
+      if (Math.abs(box.goal - box.spun) < 0.0008) box.spun = box.goal;
+      draw();
+      if (box.spun !== box.goal) requestAnimationFrame(step);
+      else box.turning = false;
+    };
+    requestAnimationFrame(step);
+  };
 
   const kinds = {
     // Day 15: the first print is down already; each next one drops in from below, tilting more while it flies and
@@ -439,11 +470,11 @@ run("scrolly", () => {
     },
     // Day 17: the wheel turns from one photo to the next, resting on each for a moment as a prize wheel would
     wheel(box, p) {
-      const spokes = [...box.querySelectorAll(".spoke")];
-      const q = p * (spokes.length - 1);
-      const k = Math.min(spokes.length - 2, Math.floor(q));
-      const s = k + smooth(clamp01((q - k - 0.15) / 0.7));
-      spokes.forEach((spoke, i) => (spoke.style.transform = `rotate(${(i - s) * STEP}deg)`));
+      const n = box.querySelectorAll(".spoke").length;
+      const q = p * (n - 1);
+      const k = Math.min(n - 2, Math.floor(q));
+      box.goal = k + easeInOut(clamp01((q - k - 0.12) / 0.76));
+      turn(box);
     },
   };
 
@@ -460,7 +491,7 @@ run("scrolly", () => {
   const layout = () => {
     for (const box of boxes) {
       box.toggleAttribute("data-on", !calm.matches);
-      if (calm.matches) box.querySelectorAll("img, .spoke").forEach((el) => (el.style.transform = ""));
+      if (calm.matches) for (const el of box.querySelectorAll("img, .spoke")) for (const prop of ["transform", "scale", "opacity"]) el.style.removeProperty(prop);
     }
     update();
   };
