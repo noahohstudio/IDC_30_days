@@ -407,6 +407,69 @@ run("sequences", () => {
   });
 });
 
+/* ---------- Days 15 to 17: photographs the scroll presents ----------
+   Each is a tall section with a stage pinned to the screen. `p` runs 0 to 1 as the page scrolls through it. */
+
+run("scrolly", () => {
+  const boxes = [...document.querySelectorAll("[data-scrolly]")];
+  if (!boxes.length) return;
+  const clamp01 = (t) => Math.min(1, Math.max(0, t));
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const STEP = 40; // degrees between the wheel's photos
+
+  const kinds = {
+    // Day 15: the first print is down already; each next one drops in from below, tilting more while it flies and
+    // settling at its own slight angle, and every print it lands on sinks back a little
+    pile(box, p) {
+      const prints = [...box.querySelectorAll(".print")];
+      const span = 0.84 / (prints.length - 1);
+      const landed = prints.map((_, i) => (i === 0 ? 1 : smooth(clamp01((p - 0.06 - (i - 1) * span) / (span * 0.85)))));
+      prints.forEach((img, i) => {
+        const t = landed[i];
+        const r = parseFloat(img.style.getPropertyValue("--r")) || 0;
+        const fall = (1 - t) * (innerHeight / 2 + img.offsetHeight / 2 + 60);
+        const sink = 1 - 0.035 * landed.slice(i + 1).reduce((a, b) => a + b, 0);
+        img.style.transform = `translate(calc(${t} * var(--x)), ${fall}px) rotate(${r * (4 - 3 * t)}deg) scale(${sink})`;
+      });
+    },
+    // Day 16: the presenters rise as the room falls, side by side at the halfway point
+    diptych(box, p) {
+      const D = innerHeight * 0.32;
+      for (const img of box.querySelectorAll(".dip")) img.style.transform = `translateY(${Number(img.dataset.dir) * (p - 0.5) * 2 * D}px)`;
+    },
+    // Day 17: the wheel turns from one photo to the next, resting on each for a moment as a prize wheel would
+    wheel(box, p) {
+      const spokes = [...box.querySelectorAll(".spoke")];
+      const q = p * (spokes.length - 1);
+      const k = Math.min(spokes.length - 2, Math.floor(q));
+      const s = k + smooth(clamp01((q - k - 0.15) / 0.7));
+      spokes.forEach((spoke, i) => (spoke.style.transform = `rotate(${(i - s) * STEP}deg)`));
+    },
+  };
+
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    for (const box of boxes) {
+      if (!box.hasAttribute("data-on")) continue;
+      const r = box.getBoundingClientRect();
+      if (r.bottom < -innerHeight || r.top > innerHeight * 2) continue;
+      kinds[box.dataset.scrolly](box, clamp01(-r.top / Math.max(1, r.height - innerHeight)));
+    }
+  };
+  const layout = () => {
+    for (const box of boxes) {
+      box.toggleAttribute("data-on", !calm.matches);
+      if (calm.matches) box.querySelectorAll("img, .spoke").forEach((el) => (el.style.transform = ""));
+    }
+    update();
+  };
+  layout();
+  addEventListener("scroll", () => (frame ||= requestAnimationFrame(update)), { passive: true });
+  addEventListener("resize", update);
+  calm.addEventListener("change", layout);
+});
+
 /* ---------- Day 19: the features, each film in turn, the dot under the one playing ---------- */
 
 run("features", () => {

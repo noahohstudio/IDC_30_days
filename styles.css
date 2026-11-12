@@ -1144,3 +1144,61 @@ html[data-bands] :is(.seq-frames, .compare, .comps, .film img, .stats) { positio
 .feat-frames video[data-on] { opacity: 1; }
 
 html[data-bands] :is(.photos img, .feat-frames) { position: relative; z-index: 61; }
+
+/* ---------- Days 15 to 17: photographs the scroll presents (main.js) ----------
+   Still by default, and with reduced motion: the photos in a column (Day 16's two side by side). With motion, main.js
+   turns each on: a tall section whose stage pins to the screen while the scroll moves the photos. */
+
+.scrolly-stage { display: grid; gap: var(--space-4); }
+.scrolly img { display: block; width: 100%; height: auto; aspect-ratio: var(--ar); object-fit: cover; background: #f4f4f4; }
+.diptych:not([data-on]) .scrolly-stage { grid-template-columns: 1fr 1fr; }
+.wheel-pointer { display: none; }
+
+.scrolly[data-on] .scrolly-stage {
+  position: sticky; top: 0;
+  height: 100svh;
+  display: block;
+  overflow: hidden;
+}
+.scrolly[data-on] img { will-change: transform; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 18px 50px rgb(0 0 0 / 0.12); }
+
+/* Day 15, the pile: prints land on one another in the middle of the screen, each at its own slight tilt */
+.pile[data-on] { height: 260svh; }
+.pile[data-on] .print {
+  position: absolute; left: 50%; top: 50%;
+  width: min(100%, (100svh - 200px) * 1.5);
+  translate: -50% -50%;
+}
+
+/* Day 16, stage and audience: the two rise and fall past each other, side by side halfway through */
+.diptych[data-on] { height: 220svh; }
+.diptych[data-on] .scrolly-stage { display: flex; align-items: center; justify-content: center; gap: var(--space-4); }
+.diptych[data-on] .dip { flex: none; width: min(calc(50% - var(--space-2)), calc((100svh - 140px) / 1.5)); }
+
+/* Day 17, the prize wheel: each photo on a spoke of one big wheel whose hub sits far below the screen. The wheel turns
+   with the scroll and stops on each photo under the pointer. Full width, so the next photo peeks in from the side. */
+.wheel[data-on] {
+  --R: 115svh;
+  --ph: 58svh; /* the tallest a photo gets; each one is also kept within the page's width by its own shape */
+  height: 300svh;
+  margin-inline: calc(-1 * var(--gutter));
+}
+.wheel[data-on] .spoke { position: absolute; left: 50%; top: calc(50svh + var(--R)); width: 0; height: 0; will-change: transform; }
+.wheel[data-on] .spoke img {
+  position: absolute; left: 0; top: calc(-1 * var(--R));
+  width: auto; max-width: none; height: min(var(--ph), (100vw - 2 * var(--gutter)) / var(--ar));
+  translate: -50% -50%;
+}
+.wheel[data-on] .wheel-pointer {
+  display: block;
+  position: absolute; left: 50%; top: calc(50svh - var(--ph) / 2 - 26px);
+  width: 0; height: 0;
+  translate: -50% 0;
+  border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 11px solid var(--ink);
+}
+@media (min-width: 1100px) {
+  .wheel[data-on] .scrolly-stage { clip-path: inset(0 0 0 calc(var(--gutter) - 40px)); }
+}
+
+html[data-bands] .scrolly[data-on] .scrolly-stage { z-index: 61; }
+html[data-bands] .scrolly:not([data-on]) img { position: relative; z-index: 61; }
