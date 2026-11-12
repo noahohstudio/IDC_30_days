@@ -1644,7 +1644,9 @@ canvas.wc { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-m
   if (fromRail && !wc.still()) requestAnimationFrame(() => requestAnimationFrame(() => mark.classList.add('in'))); else mark.classList.add('in');
   back.onclick = (e) => {
     e.stopPropagation(); mark.classList.remove('in');
-    setTimeout(() => { if (fromRail && history.length > 1) history.back(); else location.href = '../v15/03-watch.html?agents=' + Math.min(3, AGENTS.length); }, wc.still() ? 0 : 340);
+    // 30 days copy: the way back is always the working sidebar, and it replaces this page rather than adding to the
+    // history, so the 30 days page around it never moves (screen 3 isn't part of this copy)
+    setTimeout(() => { location.replace('../flow/demo.html?agents=' + Math.min(3, AGENTS.length)); }, wc.still() ? 0 : 340);
   };
   addEventListener('pageshow', (e) => { if (e.persisted) mark.classList.add('in'); });
 

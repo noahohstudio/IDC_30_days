@@ -84,7 +84,7 @@
 <aside id="rail"></aside>
 <div class="overlay"></div>
 <div class="aid" role="group" aria-label="Workshop aid"><i>For judging</i><button id="play" aria-pressed="false">Play</button><label><button class="sw" id="slow" aria-pressed="false" aria-label="Slow: half speed"></button>Slow</label><span id="count"></span></div>
-<script>if (window.top !== window || new URLSearchParams(location.search).get('film')) document.documentElement.classList.add('film');</script>
+<script>/* 30 days copy: the judging strip stays in view inside the frame, so a visitor can press Play */ if (new URLSearchParams(location.search).get('film')) document.documentElement.classList.add('film');</script>
 <script src="../site.js"></script>
 <script src="../v2/ask.js"></script>
 <script src="../wc/wc.js"></script>
@@ -378,6 +378,8 @@
   playBtn.onclick = play;
   slowBtn.onclick = () => { slow = !slow; slowBtn.setAttribute('aria-pressed', slow); };
   document.getElementById('count').innerHTML = ['One', 'Two', 'Three'].map((w, i) => `<a href="?agents=${i + 1}${Q.get('still') ? '&still=1' : ''}" ${i + 1 === N ? 'aria-current="true"' : ''}>${w}</a>`).join(' · ') + ' agents';
+  // 30 days copy: changing the number of agents replaces this page in the frame, so it never adds to the history around it
+  document.getElementById('count').addEventListener('click', (e) => { const a = e.target.closest('a'); if (a) { e.preventDefault(); location.replace(a.href); } });
 </script>
 </body>
 </html>

@@ -130,7 +130,8 @@ window.rail = (function () {
     // out button? ... I'm interested in how icons that are consistent in both the rail and here could be morphed into
     // eachother during the transition"
     const homeBtn = host.querySelector('.rail-home');
-    homeBtn.onclick = typeof o.home === 'string' ? () => { homeBtn.firstElementChild.classList.add('in'); setTimeout(() => { location.href = o.home; }, topo.still ? 0 : 340); } : o.home || null;
+    // 30 days copy: replace, not push, so the page around the frame keeps its own history
+    homeBtn.onclick = typeof o.home === 'string' ? () => { homeBtn.firstElementChild.classList.add('in'); setTimeout(() => { location.replace(o.home); }, topo.still ? 0 : 340); } : o.home || null;
     addEventListener('pageshow', () => homeBtn.firstElementChild.classList.remove('in'));
     if (o.agents) {      // a real field that names its agent; without o.agents the field is a played scene, as before
       // what you send becomes a pile you pull up (sys/pile.js), when that file and sys/note.js are on the page
