@@ -463,11 +463,6 @@ run("scrolly", () => {
         img.style.transform = `translate(calc(${t} * var(--x)), ${fall}px) rotate(${r * (4 - 3 * t)}deg) scale(${sink})`;
       });
     },
-    // Day 16: the presenters rise as the room falls, side by side at the halfway point
-    diptych(box, p) {
-      const D = innerHeight * 0.32;
-      for (const img of box.querySelectorAll(".dip")) img.style.transform = `translateY(${Number(img.dataset.dir) * (p - 0.5) * 2 * D}px)`;
-    },
     // Day 17: the wheel turns from one photo to the next, resting on each for a moment as a prize wheel would
     wheel(box, p) {
       const n = box.querySelectorAll(".spoke").length;
@@ -499,6 +494,73 @@ run("scrolly", () => {
   addEventListener("scroll", () => (frame ||= requestAnimationFrame(update)), { passive: true });
   addEventListener("resize", update);
   calm.addEventListener("change", layout);
+});
+
+/* ---------- Day 16: photos that slide up into place, and open large when clicked ---------- */
+
+run("rise", () => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.dataset.shown = "";
+        observer.unobserve(entry.target);
+      }
+    },
+    { rootMargin: "0px 0px -12% 0px" },
+  );
+  document.querySelectorAll("[data-rise]").forEach((el) => observer.observe(el));
+});
+
+run("lightbox", () => {
+  const box = document.createElement("dialog");
+  box.className = "lightbox";
+  box.setAttribute("aria-label", "Photo");
+  box.innerHTML = '<img alt=""><button type="button" class="lightbox-close">Close</button>';
+  document.body.append(box);
+  const big = box.querySelector("img");
+  let from = null; // the photo it opened from, which it grows out of and goes back into
+
+  // From the small photo's place and size to the large one's, so it reads as the same picture coming closer
+  const fly = (reverse) => {
+    if (calm.matches || !from) return null;
+    const a = from.getBoundingClientRect();
+    const b = big.getBoundingClientRect();
+    if (!b.width) return null;
+    const there = `translate(${a.left + a.width / 2 - (b.left + b.width / 2)}px, ${a.top + a.height / 2 - (b.top + b.height / 2)}px) scale(${a.width / b.width})`;
+    const frames = [{ transform: there }, { transform: "none" }];
+    return big.animate(reverse ? frames.reverse() : frames, { duration: reverse ? 320 : 480, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+  };
+
+  const open = (button) => {
+    const img = button.querySelector("img");
+    from = img;
+    big.src = img.currentSrc || img.src;
+    big.alt = img.alt;
+    box.showModal();
+    const go = () => fly(false);
+    if (big.complete) go();
+    else big.addEventListener("load", go, { once: true });
+  };
+  const close = () => {
+    if (!box.open) return;
+    const back = fly(true);
+    box.classList.add("lightbox-fading");
+    const done = () => {
+      box.classList.remove("lightbox-fading");
+      box.close();
+      from?.closest("[data-zoom]")?.focus({ preventScroll: true });
+    };
+    if (back) back.finished.then(done, done);
+    else setTimeout(done, calm.matches ? 0 : 200);
+  };
+
+  document.querySelectorAll("[data-zoom]").forEach((button) => button.addEventListener("click", () => open(button)));
+  box.addEventListener("click", close);
+  box.addEventListener("cancel", (event) => {
+    event.preventDefault(); // Escape: close with the same motion as a click
+    close();
+  });
 });
 
 /* ---------- Day 19: the features, each film in turn, the dot under the one playing ---------- */

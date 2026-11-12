@@ -607,12 +607,14 @@
         <h2 class="day-n" data-flip>Day 16</h2>
         <p class="day-date">Sat, Nov 7</p>
       </header>
-      <!-- Stage and audience: the two slide past each other, side by side halfway through -->
-      <div class="piece scrolly diptych" data-scrolly="diptych">
-        <div class="scrolly-stage">
-          <img class="dip" data-dir="-1" src="assets/week3/photos/d16-presenting.jpg" alt="Daeun and Noah presenting Palit at a podium against a brick wall" style="--ar: 0.6665" loading="lazy">
-          <img class="dip" data-dir="1" src="assets/week3/photos/d16-crowd.jpg" alt="The room watching the Palit presentation from sofas and chairs" style="--ar: 0.6665" loading="lazy">
-        </div>
+      <!-- The two slide up into place as they come into view; click either to see it large -->
+      <div class="piece photo-pair">
+        <button type="button" class="zoomable" data-zoom data-rise style="--k: 0" aria-label="Open the photo: Daeun and Noah presenting Palit">
+          <img src="assets/week3/photos/d16-presenting.jpg" alt="Daeun and Noah presenting Palit at a podium against a brick wall" style="--ar: 0.6665" loading="lazy">
+        </button>
+        <button type="button" class="zoomable" data-zoom data-rise style="--k: 1" aria-label="Open the photo: the room watching">
+          <img src="assets/week3/photos/d16-crowd.jpg" alt="The room watching the Palit presentation from sofas and chairs" style="--ar: 0.6665" loading="lazy">
+        </button>
       </div>
       <div class="words" data-reveal>
         <p class="label">SVSD finals · Palit</p>
