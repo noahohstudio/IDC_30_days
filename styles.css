@@ -1162,7 +1162,7 @@ html[data-bands] :is(.photos img, .feat-frames) { position: relative; z-index: 6
 
 /* Day 15, the pile: prints land on one another in the middle of the screen, each at its own slight tilt. The stage
    runs the full width so a tilted print is never cut at the sides, and the prints keep well inside it. */
-.pile[data-on] { height: 400svh; margin-inline: calc(-1 * var(--gutter)); }  /* room for a stop on each print */
+.pile[data-on] { height: 300svh; margin-inline: calc(-1 * var(--gutter)); }  /* a stop for each print */
 .pile[data-on] .print {
   position: absolute; left: 50%; top: 50%;
   width: min((100vw - 2 * var(--gutter)) * 0.76, (100svh - 260px) * 1.5);

@@ -420,7 +420,7 @@ run("scrolly", () => {
   // Both follow the scroll with a little weight, so they ease into each stop rather than snapping to the page. Each
   // frame closes part of the gap between where a piece is (`box.at`) and where the scroll says it should be
   // (`box.goal`), and the frames stop once it's there.
-  const follow = (box, draw) => {
+  const follow = (box, draw, tau = 160) => {
     if (box.at === undefined || calm.matches) {
       box.at = box.goal;
       return draw(box.at);
@@ -430,7 +430,7 @@ run("scrolly", () => {
     box.moving = true;
     let then = performance.now();
     const step = (now) => {
-      box.at += (box.goal - box.at) * (1 - Math.exp(-(now - then) / 160));
+      box.at += (box.goal - box.at) * (1 - Math.exp(-(now - then) / tau));
       then = now;
       if (Math.abs(box.goal - box.at) < 0.0008) box.at = box.goal;
       box.draw(box.at);
@@ -440,20 +440,13 @@ run("scrolly", () => {
     requestAnimationFrame(step);
   };
 
-  // Where a run of photos is: the scroll is shared evenly between a stop on each photo and the moves between them,
-  // so `n` photos get `n` stops and `n - 1` moves. Returns 0 to n - 1, resting on whole numbers through each stop.
-  const stops = (p, n) => {
-    const q = p * (2 * n - 1);
-    const j = Math.min(2 * n - 2, Math.floor(q));
-    return j % 2 === 0 ? j / 2 : (j - 1) / 2 + easeInOut(q - j);
-  };
-
   const kinds = {
     // Day 15: the first print is down already; each next one drops in from below, tilting more while it flies and
-    // settling at its own slight angle, and every print it lands on sinks back a little. Each one stops a while.
+    // settling at its own slight angle, and every print it lands on sinks back a little. Each print is a stop of its
+    // own: past its share of the scroll the next one drops in by itself, rather than following the scroll partway.
     pile(box, p) {
       const prints = [...box.querySelectorAll(".print")];
-      box.goal = stops(p, prints.length);
+      box.goal = Math.min(prints.length - 1, Math.floor(p * prints.length));
       follow(box, (at) => {
         const landed = prints.map((_, i) => (i === 0 ? 1 : clamp01(at - (i - 1))));
         prints.forEach((img, i) => {
@@ -463,7 +456,7 @@ run("scrolly", () => {
           const sink = 1 - 0.035 * landed.slice(i + 1).reduce((a, b) => a + b, 0);
           img.style.transform = `translate(calc(${t} * var(--x)), ${fall}px) rotate(${r * (4 - 3 * t)}deg) scale(${sink})`;
         });
-      });
+      }, 190);
     },
     // Day 17: the wheel turns from one photo to the next, resting on each for a moment as a prize wheel would; the ones
     // to either side sit a little smaller and softer
