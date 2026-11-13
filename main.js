@@ -358,9 +358,9 @@ run("sequences", () => {
     const frames = [...seq.querySelectorAll(".seq-frames img")];
     const steps = [...seq.querySelectorAll(".seq-steps li:not(.seq-dot)")];
     const dot = seq.querySelector(".seq-dot");
-    const list = seq.querySelector(".seq-steps");
+    const list = seq.querySelector(".seq-steps"); // a small one may have no steps under it
     const every = Number(seq.dataset.every) || 2000;
-    list.style.setProperty("--n", steps.length);
+    list?.style.setProperty("--n", steps.length);
     let i = 0;
     let timer = 0;
     let seen = false;
