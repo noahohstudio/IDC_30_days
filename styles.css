@@ -1250,11 +1250,11 @@ html[data-bands] .scrolly:not([data-on]) img { position: relative; z-index: 61; 
 
 /* ---------- A small piece beside its words: Day 18's photos with Kaya, flipping through like a photo booth ---------- */
 
-.beside { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: var(--space-6); align-items: end; }
+.beside { display: grid; grid-template-columns: minmax(0, clamp(240px, 35vw, 560px)) minmax(0, 1fr); gap: var(--space-6); align-items: end; }  /* about a third of the screen */
 .beside .words { padding-top: 0; }
 .beside + .piece { margin-top: var(--space-9); }
 .seq-mini { --seq-ar: 1.5; }
 @media (max-width: 719px) {
   .beside { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
-  .seq-mini { max-width: 280px; }
+  .seq-mini { max-width: 60vw; }
 }
