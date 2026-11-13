@@ -414,62 +414,73 @@ run("scrolly", () => {
   const boxes = [...document.querySelectorAll("[data-scrolly]")];
   if (!boxes.length) return;
   const clamp01 = (t) => Math.min(1, Math.max(0, t));
-  const smooth = (t) => t * t * (3 - 2 * t);
   const easeInOut = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
   const STEP = 30; // degrees between the wheel's photos
 
-  // The wheel follows the scroll with a little weight, so it eases into each stop rather than snapping to the page.
-  // Each frame it closes part of the gap to where the scroll says it should be, and stops once it's there.
-  const turn = (box) => {
-    const spokes = [...box.querySelectorAll(".spoke")];
-    const draw = () =>
-      spokes.forEach((spoke, i) => {
-        const d = Math.min(1, Math.abs(i - box.spun));
-        spoke.style.transform = `rotate(${(i - box.spun) * STEP}deg)`;
-        const img = spoke.firstElementChild;
-        img.style.scale = String(1 - 0.12 * d); // the one on top is the nearest
-        img.style.opacity = String(1 - 0.3 * d);
-      });
-    if (box.spun === undefined || calm.matches) {
-      box.spun = box.goal;
-      return draw();
+  // Both follow the scroll with a little weight, so they ease into each stop rather than snapping to the page. Each
+  // frame closes part of the gap between where a piece is (`box.at`) and where the scroll says it should be
+  // (`box.goal`), and the frames stop once it's there.
+  const follow = (box, draw) => {
+    if (box.at === undefined || calm.matches) {
+      box.at = box.goal;
+      return draw(box.at);
     }
-    if (box.turning) return;
-    box.turning = true;
+    box.draw = draw;
+    if (box.moving) return;
+    box.moving = true;
     let then = performance.now();
     const step = (now) => {
-      box.spun += (box.goal - box.spun) * (1 - Math.exp(-(now - then) / 160));
+      box.at += (box.goal - box.at) * (1 - Math.exp(-(now - then) / 160));
       then = now;
-      if (Math.abs(box.goal - box.spun) < 0.0008) box.spun = box.goal;
-      draw();
-      if (box.spun !== box.goal) requestAnimationFrame(step);
-      else box.turning = false;
+      if (Math.abs(box.goal - box.at) < 0.0008) box.at = box.goal;
+      box.draw(box.at);
+      if (box.at !== box.goal) requestAnimationFrame(step);
+      else box.moving = false;
     };
     requestAnimationFrame(step);
   };
 
+  // Where a run of photos is: the scroll is shared evenly between a stop on each photo and the moves between them,
+  // so `n` photos get `n` stops and `n - 1` moves. Returns 0 to n - 1, resting on whole numbers through each stop.
+  const stops = (p, n) => {
+    const q = p * (2 * n - 1);
+    const j = Math.min(2 * n - 2, Math.floor(q));
+    return j % 2 === 0 ? j / 2 : (j - 1) / 2 + easeInOut(q - j);
+  };
+
   const kinds = {
     // Day 15: the first print is down already; each next one drops in from below, tilting more while it flies and
-    // settling at its own slight angle, and every print it lands on sinks back a little
+    // settling at its own slight angle, and every print it lands on sinks back a little. Each one stops a while.
     pile(box, p) {
       const prints = [...box.querySelectorAll(".print")];
-      const span = 0.84 / (prints.length - 1);
-      const landed = prints.map((_, i) => (i === 0 ? 1 : smooth(clamp01((p - 0.06 - (i - 1) * span) / (span * 0.85)))));
-      prints.forEach((img, i) => {
-        const t = landed[i];
-        const r = parseFloat(img.style.getPropertyValue("--r")) || 0;
-        const fall = (1 - t) * (innerHeight / 2 + img.offsetHeight / 2 + 60);
-        const sink = 1 - 0.035 * landed.slice(i + 1).reduce((a, b) => a + b, 0);
-        img.style.transform = `translate(calc(${t} * var(--x)), ${fall}px) rotate(${r * (4 - 3 * t)}deg) scale(${sink})`;
+      box.goal = stops(p, prints.length);
+      follow(box, (at) => {
+        const landed = prints.map((_, i) => (i === 0 ? 1 : clamp01(at - (i - 1))));
+        prints.forEach((img, i) => {
+          const t = landed[i];
+          const r = parseFloat(img.style.getPropertyValue("--r")) || 0;
+          const fall = (1 - t) * (innerHeight / 2 + img.offsetHeight / 2 + 60);
+          const sink = 1 - 0.035 * landed.slice(i + 1).reduce((a, b) => a + b, 0);
+          img.style.transform = `translate(calc(${t} * var(--x)), ${fall}px) rotate(${r * (4 - 3 * t)}deg) scale(${sink})`;
+        });
       });
     },
-    // Day 17: the wheel turns from one photo to the next, resting on each for a moment as a prize wheel would
+    // Day 17: the wheel turns from one photo to the next, resting on each for a moment as a prize wheel would; the ones
+    // to either side sit a little smaller and softer
     wheel(box, p) {
-      const n = box.querySelectorAll(".spoke").length;
-      const q = p * (n - 1);
-      const k = Math.min(n - 2, Math.floor(q));
+      const spokes = [...box.querySelectorAll(".spoke")];
+      const q = p * (spokes.length - 1);
+      const k = Math.min(spokes.length - 2, Math.floor(q));
       box.goal = k + easeInOut(clamp01((q - k - 0.12) / 0.76));
-      turn(box);
+      follow(box, (at) =>
+        spokes.forEach((spoke, i) => {
+          const d = Math.min(1, Math.abs(i - at));
+          spoke.style.transform = `rotate(${(i - at) * STEP}deg)`;
+          const img = spoke.firstElementChild;
+          img.style.scale = String(1 - 0.12 * d); // the one on top is the nearest
+          img.style.opacity = String(1 - 0.3 * d);
+        }),
+      );
     },
   };
 
@@ -516,43 +527,55 @@ run("lightbox", () => {
   const box = document.createElement("dialog");
   box.className = "lightbox";
   box.setAttribute("aria-label", "Photo");
-  box.innerHTML = '<img alt=""><button type="button" class="lightbox-close">Close</button>';
+  box.innerHTML = '<div class="lightbox-veil"></div><img alt=""><button type="button" class="lightbox-close">Close</button>';
   document.body.append(box);
   const big = box.querySelector("img");
-  let from = null; // the photo it opened from, which it grows out of and goes back into
+  const chrome = [box.querySelector(".lightbox-veil"), box.querySelector(".lightbox-close")];
+  const MOTION = { duration: 440, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" };
+  let from = null; // the small photo it opened from: hidden while it's large, so there's only ever one of it
+  let busy = false;
 
-  // From the small photo's place and size to the large one's, so it reads as the same picture coming closer
-  const fly = (reverse) => {
-    if (calm.matches || !from) return null;
+  // One photo travelling: from the small one's place and size to the large one's, and back. The frost and Close fade
+  // around it; the photo never does.
+  const move = (out) => {
+    if (calm.matches) return [];
     const a = from.getBoundingClientRect();
     const b = big.getBoundingClientRect();
-    if (!b.width) return null;
-    const there = `translate(${a.left + a.width / 2 - (b.left + b.width / 2)}px, ${a.top + a.height / 2 - (b.top + b.height / 2)}px) scale(${a.width / b.width})`;
-    const frames = [{ transform: there }, { transform: "none" }];
-    return big.animate(reverse ? frames.reverse() : frames, { duration: reverse ? 320 : 480, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+    const there = { transform: `translate(${a.left + a.width / 2 - (b.left + b.width / 2)}px, ${a.top + a.height / 2 - (b.top + b.height / 2)}px) scale(${a.width / b.width})` };
+    const here = { transform: "none" };
+    return [
+      big.animate(out ? [here, there] : [there, here], MOTION),
+      ...chrome.map((el) => el.animate(out ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 0 }, { opacity: 1 }], MOTION)),
+    ];
   };
+  const settle = (animations) => Promise.all(animations.map((x) => x.finished.catch(() => {})));
 
-  const open = (button) => {
-    const img = button.querySelector("img");
-    from = img;
-    big.src = img.currentSrc || img.src;
-    big.alt = img.alt;
+  const open = async (button) => {
+    if (busy || box.open) return;
+    busy = true;
+    from = button.querySelector("img");
+    big.src = from.currentSrc || from.src;
+    big.alt = from.alt;
+    try {
+      await big.decode(); // ready before it shows, so it never appears first and moves after
+    } catch {}
     box.showModal();
-    const go = () => fly(false);
-    if (big.complete) go();
-    else big.addEventListener("load", go, { once: true });
+    const animations = move(false);
+    from.style.visibility = "hidden";
+    await settle(animations);
+    animations.forEach((x) => x.cancel());
+    busy = false;
   };
-  const close = () => {
-    if (!box.open) return;
-    const back = fly(true);
-    box.classList.add("lightbox-fading");
-    const done = () => {
-      box.classList.remove("lightbox-fading");
-      box.close();
-      from?.closest("[data-zoom]")?.focus({ preventScroll: true });
-    };
-    if (back) back.finished.then(done, done);
-    else setTimeout(done, calm.matches ? 0 : 200);
+  const close = async () => {
+    if (busy || !box.open) return;
+    busy = true;
+    const animations = move(true);
+    await settle(animations);
+    from.style.visibility = "";
+    box.close();
+    animations.forEach((x) => x.cancel());
+    from.closest("[data-zoom]")?.focus({ preventScroll: true });
+    busy = false;
   };
 
   document.querySelectorAll("[data-zoom]").forEach((button) => button.addEventListener("click", () => open(button)));
