@@ -629,6 +629,43 @@ run("features", () => {
   });
 });
 
+/* ---------- Day 18: photos that pile up, each new one landing on top of the last ---------- */
+
+run("stacks", () => {
+  document.querySelectorAll("[data-stack]").forEach((stack) => {
+    const photos = [...stack.querySelectorAll("img")];
+    const every = Number(stack.dataset.every) || 1100;
+    let shown = 0; // how many are down
+    let timer = 0;
+    let seen = false;
+    const set = (n) => {
+      shown = n;
+      photos.forEach((img, i) => img.toggleAttribute("data-on", i < n));
+    };
+    // Down one at a time; once all are down, a longer pause, then the pile lifts away and starts over
+    const tick = () => {
+      clearTimeout(timer);
+      if (!seen || calm.matches) return;
+      const full = shown === photos.length;
+      timer = setTimeout(() => {
+        set(full ? 0 : shown + 1);
+        if (full) timer = setTimeout(() => (set(1), tick()), 380);
+        else tick();
+      }, full ? every * 2 : every);
+    };
+    stack.addEventListener("click", () => {
+      set(shown === photos.length ? 1 : shown + 1);
+      tick();
+    });
+    if (calm.matches) set(photos.length);
+    else set(1);
+    new IntersectionObserver(([entry]) => {
+      seen = entry.isIntersecting;
+      tick();
+    }, { threshold: 0.3 }).observe(stack);
+  });
+});
+
 /* ---------- Before and after: drag, or just move across it ---------- */
 
 run("compare", () => {
