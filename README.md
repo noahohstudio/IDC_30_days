@@ -8,7 +8,9 @@ Plain HTML, CSS and JavaScript, no build step. Run it:
 node serve.mjs
 ```
 
-Then open http://localhost:8030. (Any static server works; this one sends byte ranges, so Safari plays the loops.)
+Then open http://localhost:8030.
+After changing `styles.css` or `main.js`, run `node stamp.mjs` before committing: it fingerprints their links in `index.html`, so visitors never get a new page with an old stylesheet.
+ (Any static server works; this one sends byte ranges, so Safari plays the loops.)
 
 - `index.html`: the page, one section per day
 - `styles.css`: noaoh.com's tokens and pieces
