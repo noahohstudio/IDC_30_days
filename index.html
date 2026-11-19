@@ -10,10 +10,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="styles.css?v=e64041ea">
+<link rel="stylesheet" href="styles.css?v=3ac68dbd">
 <script>document.documentElement.classList.add("js");setTimeout(function(){var r=document.documentElement;if(!("ready" in r.dataset))r.classList.remove("js")},4000)</script>
 <script type="importmap">{ "imports": { "three": "./vendor/three.module.js", "opentype.js": "./vendor/opentype.module.js" } }</script>
-<script type="module" src="main.js?v=1b060ac5"></script>
+<script type="module" src="main.js?v=93b68d4b"></script>
 </head>
 <body>
 
@@ -71,7 +71,18 @@
           <li style="--i: 6"><a href="#d21" data-flip data-link>the dashboard</a></li>
         </ul>
       </li>
-      <li data-soon><span>week four</span></li>
+      <li data-week="week-four">
+        <a href="#week-four" data-flip data-link>week four</a>
+        <ul class="days drop" style="--rows: 7">
+          <li style="--i: 0"><a href="#d22" data-flip data-link>greenchip</a></li>
+          <li style="--i: 1"><a href="#d23" data-flip data-link>flipbook scroll</a></li>
+          <li style="--i: 2"><a href="#d24" data-flip data-link>palit reviews</a></li>
+          <li style="--i: 3"><a href="#d25" data-flip data-link>unmute</a></li>
+          <li style="--i: 4"><a href="#d26" data-flip data-link>the module</a></li>
+          <li style="--i: 5"><a href="#d27" data-flip data-link>selected work</a></li>
+          <li style="--i: 6"><a href="#d28" data-flip data-link>gouache research</a></li>
+        </ul>
+      </li>
     </ul>
   </nav>
 </div>
@@ -80,12 +91,12 @@
 
   <section class="lander" id="top">
     <h1 class="name" data-flip data-link data-exact data-fit>30 days</h1>
-    <p class="sentence" data-flip data-link>of making, one thing a day. Week one: two case studies and the tools behind them. Week two: Palit, from a new mark to its deck. Week three: the SVSD finals, then Gouache.</p>
+    <p class="sentence" data-flip data-link>of making, one thing a day. Week one: two case studies and the tools behind them. Week two: Palit, from a new mark to its deck. Week three: the SVSD finals, then Gouache. Week four: the lab, Greenchip, and the case studies.</p>
     <dl class="facts">
       <div><dt>Course</dt><dd>Interactive Design Concepts</dd></div>
-      <div><dt>So far</dt><dd>Oct 23 to Nov 12</dd></div>
-      <div><dt>Weeks</dt><dd>Three of four</dd></div>
-      <div><dt>Today</dt><dd>Day 21 of 30</dd></div>
+      <div><dt>So far</dt><dd>Oct 23 to Nov 19</dd></div>
+      <div><dt>Weeks</dt><dd>Four of four</dd></div>
+      <div><dt>Today</dt><dd>Day 28 of 30</dd></div>
     </dl>
   </section>
 
@@ -743,12 +754,243 @@
     </section>
   </section>
 
+  <!-- Week four: each day a main piece, then a row of what else was made or tried that day -->
+  <section class="week" id="week-four">
+    <header class="week-head" data-reveal>
+      <h2 class="week-n" data-flip>Week four</h2>
+      <p class="week-dates">Nov 13 to Nov 19</p>
+    </header>
+
+    <!-- Day 22 -->
+    <section class="day" id="d22" data-day="d22, greenchip">
+      <header class="day-head" data-reveal>
+        <h2 class="day-n" data-flip>Day 22</h2>
+        <p class="day-date">Fri, Nov 13</p>
+      </header>
+      <div class="piece" data-reveal>
+        <div class="frame" data-frame data-w="1440" data-h="900">
+          <div class="frame-inner">
+            <iframe src="assets/week4/greenchip/index.html" title="Greenchip's sign-up site, the restrained version, working" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">Greenchip · The sign-up site, two ways</p>
+        <h3 class="headline"><span data-flip>Two versions for the call: one decorated, one restrained.</span><span class="mark" data-mark="The restrained version, live. Click the circle at the top to step back, then pick a page."></span></h3>
+        <p class="body">The nav became one hairline circle: click it and the page steps back into a library of every page. The decorated version hangs them on a wall of the community's art. The restrained one keeps a straight row and slides the others aside as you step in.</p>
+      </div>
+      <div class="tried" data-tiles data-reveal>
+        <p class="label">Also that day</p>
+        <ul class="tried-row" style="--count: 3">
+          <li><figure class="tile"><img src="assets/week4/tiles/gc-a-wall.jpg" alt="Version A: the pages hung on a dark wall of blurred art" loading="lazy"></figure><p class="tried-t">A, decorated</p><p class="tried-b">Every page hung on a wall of art.</p></li>
+          <li><figure class="tile"><img src="assets/week4/tiles/gc-a-step.jpg" alt="Version A mid-move: the page shrinking into a card on the wall" loading="lazy"></figure><p class="tried-t">Stepping back</p><p class="tried-b">The page becomes a card on the wall.</p></li>
+          <li><figure class="tile"><img src="assets/week4/tiles/gc-b-library.jpg" alt="Version B's library: four green pages in a straight row over one blurred artwork" loading="lazy"></figure><p class="tried-t">B, restrained</p><p class="tried-b">One artwork behind a straight row.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Day 23 -->
+    <section class="day" id="d23" data-day="d23, flipbook scroll">
+      <header class="day-head" data-reveal>
+        <h2 class="day-n" data-flip>Day 23</h2>
+        <p class="day-date">Sat, Nov 14</p>
+      </header>
+      <div class="piece" data-reveal>
+        <figure class="loop loop-wide" data-loop>
+          <video muted loop playsinline preload="none" poster="assets/week4/films/flipbook-poster.jpg" data-mp4="assets/week4/films/flipbook.mp4"
+            aria-label="Flipbook Scroll: a strip of photos from one moment, scrolled slowly, then faster and faster until the moment plays like a flipbook, then coasting to a stop"></video>
+        </figure>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">Lab · Flipbook Scroll</p>
+        <h3 class="headline"><span data-flip>An endless strip of photos that plays like a flipbook the faster you scroll.</span></h3>
+        <p class="body">Scroll slowly and they're single frames of a moment from my life; scroll fast and the moment plays. There's no trick to it, only a weighted scroll with inertia and a cap on its speed. It's public on its own page, <a class="inline" href="https://noahohstudio.github.io/flipbook-scroll/" target="_blank" rel="noopener">Flipbook Scroll</a>.</p>
+      </div>
+      <div class="tried lab" data-tiles data-reveal>
+        <p class="label">noaoh.com · The lab, trimmed to four, each name fading in on hover</p>
+        <ul class="tried-row" style="--count: 4">
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/flipbook-window-poster.jpg" data-mp4="assets/week4/tiles/flipbook-window.mp4" aria-label="Flipbook Scroll's lab card: the strip in a quiet desktop window"></video></figure><p class="tried-t">Flipbook Scroll</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/outcome-poster.jpg" data-mp4="assets/week4/tiles/outcome.mp4" aria-label="Outcome Web Tool: fluid logos morphing and changing color"></video></figure><p class="tried-t">Outcome Web Tool</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/monograms-poster.jpg" data-mp4="assets/week4/tiles/monograms.mp4" aria-label="Script monograms drawing themselves"></video></figure><p class="tried-t">Monograms</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/dels-bridge-poster.jpg" data-mp4="assets/week4/tiles/dels-bridge.mp4" aria-label="Del's Bridge in motion"></video></figure><p class="tried-t">Del's Bridge</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Day 24 -->
+    <section class="day" id="d24" data-day="d24, palit reviews">
+      <header class="day-head" data-reveal>
+        <h2 class="day-n" data-flip>Day 24</h2>
+        <p class="day-date">Sun, Nov 15</p>
+      </header>
+      <div class="piece" data-reveal>
+        <div class="features" data-features>
+          <div class="feat-frames">
+            <video muted playsinline preload="none" poster="assets/week4/films/palit-dial-poster.jpg" data-mp4="assets/week4/films/palit-dial.mp4" aria-label="The dial: every palette you've kept, day by day, as rows of color"></video>
+            <video muted playsinline preload="none" poster="assets/week4/films/palit-deck-poster.jpg" data-mp4="assets/week4/films/palit-deck.mp4" aria-label="The deck: all 128 slides laid out, and the 14 that were cut"></video>
+            <video muted playsinline preload="none" poster="assets/week4/films/palit-cards-poster.jpg" data-mp4="assets/week4/films/palit-cards.mp4" aria-label="The cards: each color with where it was found, Hyacinth red, Prussian blue, Majorelle blue"></video>
+            <video muted playsinline preload="none" poster="assets/week4/films/palit-pick-poster.jpg" data-mp4="assets/week4/films/palit-pick.mp4" aria-label="Picking: a color lifted from a photo of crocoite, straight into a palette"></video>
+          </div>
+          <ol class="seq-steps"><li>Dial</li><li>Deck</li><li>Cards</li><li>Picking</li><li class="seq-dot" aria-hidden="true"></li></ol>
+        </div>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">Palit · A review screen for every visual</p>
+        <h3 class="headline"><span data-flip>Every visual for the case study on a screen of its own, so each could be judged alone.</span><span class="mark" data-mark="Each plays in turn; click one to go to it."></span></h3>
+        <p class="body">The dial, the deck, the color cards and the picking film each went through their own rounds. The wave dial and the slide deck came out ahead.</p>
+      </div>
+      <div class="tried" data-tiles data-reveal>
+        <p class="label">Gouache · The story's order set, then the first motion sketches</p>
+        <ul class="tried-row" style="--count: 4">
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/g-hero-sketch-poster.jpg" data-mp4="assets/week4/tiles/g-hero-sketch.mp4" aria-label="A sketch of the hero: agents at work on a sign-up page"></video></figure><p class="tried-t">Hero</p><p class="tried-b">Agents at work on a real page.</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/g-real-vs-soft-poster.jpg" data-mp4="assets/week4/tiles/g-real-vs-soft.mp4" aria-label="A watercolor droplet, from real to soft"></video></figure><p class="tried-t">Real or soft</p><p class="tried-b">How wet the paint should look.</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/g-droplet-life-poster.jpg" data-mp4="assets/week4/tiles/g-droplet-life.mp4" aria-label="A droplet blooming wet, then drying"></video></figure><p class="tried-t">A droplet's life</p><p class="tried-b">Wet while it works, dry when done.</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/g-families-poster.jpg" data-mp4="assets/week4/tiles/g-families.mp4" aria-label="Three droplets in three families of color, overlapping"></video></figure><p class="tried-t">Families</p><p class="tried-b">Each agent in its own colors.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Day 25 -->
+    <section class="day" id="d25" data-day="d25, unmute">
+      <header class="day-head" data-reveal>
+        <h2 class="day-n" data-flip>Day 25</h2>
+        <p class="day-date">Mon, Nov 16</p>
+      </header>
+      <div class="piece" data-reveal>
+        <figure class="loop loop-screen" data-loop>
+          <video muted loop playsinline preload="none" poster="assets/week4/films/unmute-poster.jpg" data-mp4="assets/week4/films/unmute.mp4"
+            aria-label="A large, dull gray unmute button. Pressed, it builds, cuts out for a beat, then floods with pink, orange and yellow light, a speaker module showing through the plastic"></video>
+        </figure>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">Lab · Unmute</p>
+        <h3 class="headline"><span data-flip>A big, dull gray unmute that bursts into a speaker module when you press it.</span></h3>
+        <p class="body">The start of a visual language for a producer who works across dance music. Under thin plastic sits a speaker module; on the drops, heat-colored light floods up through it, pink with the lows, orange with the middles and yellow with the highs. Recorded here without sound.</p>
+      </div>
+
+      <div class="piece" data-reveal>
+        <figure class="loop loop-wide" data-loop>
+          <video muted loop playsinline preload="none" poster="assets/week4/films/opacity-study-poster.jpg" data-mp4="assets/week4/films/opacity-study.mp4"
+            aria-label="Speaker Module Opacity Study: a soft light drifts under the module's plastic, across the board, the chip and the speaker, then over the shield can and the speaker wires alone"></video>
+        </figure>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">Lab · Speaker Module Opacity Study</p>
+        <h3 class="headline"><span data-flip>Testing how see-through each part should be, with a light that follows underneath.</span></h3>
+        <p class="body">Every part is a soft silhouette, darker where it's lit, like an x-ray. Moving the light across the board showed which parts read and which disappeared. It joined the lab at noaoh.com that night.</p>
+      </div>
+      <div class="tried" data-tiles data-reveal>
+        <p class="label">Also tried · Parts in 2.5D and 3D, to go with the button</p>
+        <ul class="tried-row" style="--count: 3">
+          <li><figure class="tile"><img src="assets/week4/tiles/parts-shapes.jpg" alt="Forty-eight light gray shapes on one surface: pills, rings, knobs, fans, pebbles" loading="lazy"></figure><p class="tried-t">Shapes</p><p class="tried-b">Forty-eight to choose from.</p></li>
+          <li><figure class="tile"><img src="assets/week4/tiles/parts-movements.jpg" alt="Nine molded parts, each moving its own way with the music" loading="lazy"></figure><p class="tried-t">Movements</p><p class="tried-b">Nine ways a part answers the music.</p></li>
+          <li><figure class="tile"><img src="assets/week4/tiles/exploded.jpg" alt="The unmute lit, its module's layers apart beneath the plastic" loading="lazy"></figure><p class="tried-t">Exploded</p><p class="tried-b">The layers come apart on the drops.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Day 26 -->
+    <section class="day" id="d26" data-day="d26, the module">
+      <header class="day-head" data-reveal>
+        <h2 class="day-n" data-flip>Day 26</h2>
+        <p class="day-date">Tue, Nov 17</p>
+      </header>
+      <div class="piece" data-reveal>
+        <div class="seq" data-seq data-every="2000" style="--seq-ar: 1.6; --fade: 450ms">
+          <div class="seq-frames">
+            <img src="assets/week4/stills/module-effects.jpg" alt="Two white VST panels side by side over the glow, Grain and Ether, each with its knobs" data-label="0">
+            <img src="assets/week4/stills/module-grain.jpg" alt="Grain alone: drive, grain and punch" data-label="1" loading="lazy">
+            <img src="assets/week4/stills/module-ether.jpg" alt="Ether alone: size, mix, tone and clip" data-label="2" loading="lazy">
+            <img src="assets/week4/stills/module-effects-lifted.jpg" alt="The VSTs seen through: the boards beneath them, chips, connectors and traces" data-label="3" loading="lazy">
+            <img src="assets/week4/stills/module-about-lifted.jpg" alt="The backplane: a board with a screen-sized cutout, chips at its edges" data-label="4" loading="lazy">
+          </div>
+          <ol class="seq-steps"><li>Two VSTs</li><li>Grain</li><li>Ether</li><li>The boards beneath</li><li>The backplane</li><li class="seq-dot" aria-hidden="true"></li></ol>
+        </div>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">Lab · Unmute, refined</p>
+        <h3 class="headline"><span data-flip>The VSTs placed, the knobs simplified, and every board made see-through like the rest.</span><span class="mark" data-mark="Click a step to go to it."></span></h3>
+        <p class="body">Two placeholder effects sit below the button: Grain for drive and punch, Ether for a soft-clipped reverb. On a strong beat you can see through them to the boards beneath, and a backplane now sits behind the About.</p>
+      </div>
+      <div class="tried" data-tiles data-reveal>
+        <p class="label">Also that day</p>
+        <ul class="tried-row" style="--count: 4">
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/palit-deck-click-poster.jpg" data-mp4="assets/week4/tiles/palit-deck-click.mp4" aria-label="Palit's deck, clicked through slide by slide"></video></figure><p class="tried-t">Palit's deck</p><p class="tried-b">Now something you click through.</p></li>
+          <li><figure class="tile"><img src="assets/week4/tiles/gc-skeleton.jpg" alt="Greenchip's new skeleton in grays: a nav, and a phone blocked out as the hero" loading="lazy"></figure><p class="tried-t">Greenchip, again</p><p class="tried-b">Rethought from a gray skeleton.</p></li>
+          <li><figure class="tile"><img src="assets/week4/tiles/gc-chip.jpg" alt="A green wait-list pop-up over a gray page" loading="lazy"></figure><p class="tried-t">The green chip</p><p class="tried-b">A wait list that folds into a chip.</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/g-paint-poster.jpg" data-mp4="assets/week4/tiles/g-paint.mp4" aria-label="Gouache's paint, one droplet blooming"></video></figure><p class="tried-t">Gouache, round 4</p><p class="tried-b">Films for the case study.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Day 27 -->
+    <section class="day" id="d27" data-day="d27, selected work">
+      <header class="day-head" data-reveal>
+        <h2 class="day-n" data-flip>Day 27</h2>
+        <p class="day-date">Wed, Nov 18</p>
+      </header>
+      <!-- The home page's Selected work, in its new order, each card's cover playing -->
+      <div class="piece" data-reveal>
+        <ol class="work-grid" data-tiles>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/sel-palit-poster.jpg" data-mp4="assets/week4/tiles/sel-palit.mp4" aria-label="Palit's card: the wordmark slides into a fan of colors and back"></video></figure><p class="tried-t">Palit</p><p class="tried-b">Product design, designathon</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/sel-kino-poster.jpg" data-mp4="assets/week4/tiles/sel-kino.mp4" aria-label="Kino's card: the splash, then four versions of Home"></video></figure><p class="tried-t">Kino</p><p class="tried-b">Product designer, front-end dev</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/sel-gouache-poster.jpg" data-mp4="assets/week4/tiles/sel-gouache.mp4" aria-label="Gouache's card: the rail inside a MacBook, opening into the full dashboard as the laptop moves around it"></video></figure><p class="tried-t">Gouache</p><p class="tried-b">Product designer, designathon</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/sel-boomloom-poster.jpg" data-mp4="assets/week4/tiles/sel-boomloom.mp4" aria-label="BoomLoom's card: the wordmark drawn over its construction lines, then filled white on blue"></video></figure><p class="tried-t">BoomLoom Looms</p><p class="tried-b">Packaging + visual designer, product strategy</p></li>
+        </ol>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">noaoh.com · Selected work</p>
+        <h3 class="headline"><span data-flip>Palit ready to ship, Gouache in a MacBook, and the work in a new order.</span></h3>
+        <p class="body">Palit, Kino, Gouache, then BoomLoom. Gouache's hero became the MacBook: its rail stays in the middle as the laptop moves around it and opens into the dashboard. Both case studies' reviews moved onto their own pages.</p>
+      </div>
+      <div class="tried" data-tiles data-reveal>
+        <p class="label">Also that day</p>
+        <ul class="tried-row" style="--count: 4">
+          <li><figure class="tile"><img src="assets/week4/tiles/page-palit.jpg" alt="The top of Palit's case study: its title, then the wordmark card" loading="lazy"></figure><p class="tried-t">Palit's page</p><p class="tried-b">Marked ready to ship.</p></li>
+          <li><figure class="tile"><img src="assets/week4/tiles/page-gouache.jpg" alt="The top of Gouache's case study: its title, then the dashboard in a MacBook" loading="lazy"></figure><p class="tried-t">Gouache's page</p><p class="tried-b">The MacBook as its hero.</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/g-board-poster.jpg" data-mp4="assets/week4/tiles/g-board.mp4" aria-label="The icon board: dots, heat maps, pebbles, ink, watercolor and pastel"></video></figure><p class="tried-t">The icon board</p><p class="tried-b">Every take, on one board.</p></li>
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/tiles/g-journey-poster.jpg" data-mp4="assets/week4/tiles/g-journey.mp4" aria-label="The journey: asking, watching, answering and seeing what changed, in one film"></video></figure><p class="tried-t">The journey</p><p class="tried-b">Ask, watch, answer, in one film.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Day 28 -->
+    <section class="day" id="d28" data-day="d28, gouache research">
+      <header class="day-head" data-reveal>
+        <h2 class="day-n" data-flip>Day 28</h2>
+        <p class="day-date">Thu, Nov 19</p>
+      </header>
+      <div class="piece" data-reveal>
+        <div class="seq" data-seq data-every="3200" style="--seq-ar: 16 / 9; --fade: 450ms">
+          <div class="seq-frames">
+            <img src="assets/week4/stills/fig-juniors.jpg" alt="Juniors are squeezed, and expected to know AI: 19% below trend for jobs at 22 to 25, 25% of hiring managers see rising demand for juniors, 73% of them see a growing need for skill with AI tools" data-label="0">
+            <img src="assets/week4/stills/fig-learning.jpg" alt="Juniors who kept asking why learned almost as much as by hand: quiz scores of 67% by hand, 50% with AI, 65% with AI asking only conceptual questions" data-label="1" loading="lazy">
+          </div>
+          <ol class="seq-steps"><li>Who it's for</li><li>Why asking why</li><li class="seq-dot" aria-hidden="true"></li></ol>
+        </div>
+      </div>
+      <div class="words" data-reveal>
+        <p class="label">Gouache · A research-led plan</p>
+        <h3 class="headline"><span data-flip>Gouache's story, rebuilt on the research: who it's for, and why it teaches as it works.</span><span class="mark" data-mark="Click a step to go to it."></span></h3>
+        <p class="body">Junior designers are squeezed and expected to know AI, and the ones who kept asking why learned almost as much as by hand. Two figures carry that, ahead of the hero.</p>
+        <p class="credit">Also: a quick swipe to change pages in the lab pieces, a second brain started from a talk, and the BoomLoom zine inserts tried in Canva with the new header face, Bowl.</p>
+      </div>
+      <div class="tried" data-tiles data-reveal>
+        <p class="label">Also that day</p>
+        <ul class="tried-row" style="--count: 2">
+          <li><figure class="tile"><video muted loop playsinline preload="none" poster="assets/week4/films/gouache-hero-poster.jpg" data-mp4="assets/week4/films/gouache-hero.mp4" aria-label="Gouache's hero, round 4: the MacBook a little smaller, its base and feet in view"></video></figure><p class="tried-t">The hero, round 4</p><p class="tried-b">Zoomed out so the MacBook's base shows.</p></li>
+          <li><figure class="tile tile-fit"><img src="assets/week4/tiles/g-first-takes.jpg" alt="The first takes: a visualizer apart from your page, which could only watch, then a rail beside your page, chosen Nov 9" loading="lazy"></figure><p class="tried-t">The first takes</p><p class="tried-b">From a visualizer to a rail.</p></li>
+        </ul>
+      </div>
+    </section>
+  </section>
+
 </main>
 
 <footer class="footer">
   <div class="count" data-count>
-    <p class="number" aria-hidden="true" data-exact data-count-number><span class="zeros" data-flip></span><span data-flip data-count-digits>21</span></p>
-    <p class="caption"><span class="visually-hidden">21 </span>days of 30 so far.</p>
+    <p class="number" aria-hidden="true" data-exact data-count-number><span class="zeros" data-flip></span><span data-flip data-count-digits>28</span></p>
+    <p class="caption"><span class="visually-hidden">28 </span>days of 30 so far.</p>
   </div>
   <div class="small">
     <p class="since"><span data-flip>© 2026 Noah Oh</span></p>

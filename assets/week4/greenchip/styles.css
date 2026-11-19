@@ -1,0 +1,162 @@
+/* Greenchip sign-up site, prototype 1: the wall.
+   Values from design-system/figma-tokens.css (the Marketing Site Figma, 9/14/26 Update).
+   Fonts are stand-ins: Inter Tight for PP Neue Montreal and PP Neue Corp Compact. */
+
+:root {
+  --green: #C8FF8A;
+  --ink: #000;
+  --muted: rgba(0, 0, 0, .5);
+  --wall: #1A1A1A;
+  --placeholder: #D9D9D9;
+
+  --font-text: "PP Neue Montreal", "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "PP Neue Corp Compact", "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --col: 310px;
+  --margin: 40px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--wall);
+  color: var(--ink);
+  font: 400 16px/1.4 var(--font-text);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button, input, textarea { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; }
+button { cursor: pointer; }
+b, strong { font-weight: 700; }
+::selection { background: var(--ink); color: var(--green); }
+:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+
+/* ---- The wall: everything lives in one world the camera moves over ---------- */
+.stage { position: fixed; inset: 0; overflow: hidden; background: var(--wall); }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.world.is-moving { will-change: transform; }
+
+.slot { position: absolute; overflow: hidden; background: var(--wall); }
+.slot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* Kyle's ethos, typeset until the photo of the handwriting is in. */
+.slot--ethos { background: var(--ink); color: var(--green); display: flex; flex-direction: column; justify-content: center; padding: 0 12%; }
+.slot--ethos p { font-size: var(--ethos-size, 40px); line-height: 1.25; letter-spacing: .02em; }
+.slot--ethos p + p { margin-top: 1.25em; }
+.slot--placeholder { background: var(--placeholder); }
+.slot__note { position: absolute; left: 6%; right: 6%; bottom: 4%; font-size: var(--note-size, 26px); line-height: 1.3; color: rgba(0, 0, 0, .55); }
+.slot--ethos .slot__note { color: rgba(200, 255, 138, .5); }
+
+/* ---- Pages: each is a green sheet the size of the window, its own scroller --- */
+.page {
+  position: absolute;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--green);
+  overscroll-behavior: contain;
+}
+.page:not(.is-active) { overflow-y: hidden; }
+
+.col { width: var(--col); max-width: calc(100% - 2 * 24px); margin: 0 auto; }
+
+/* The ring: the one way around, in place of the nav (Noah, Nov 13). A hairline circle, no fill,
+   top center where the nav sat. Pointing at it, it grows a little; clicking steps back into the library. */
+.ring { position: fixed; top: 18px; left: 50%; width: 44px; height: 44px; margin-left: -22px; z-index: 12;
+  display: flex; align-items: center; justify-content: center; color: var(--ink); transition: color 400ms ease; }
+.ring__o { display: block; width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%;
+  transition: width 420ms cubic-bezier(0.2, 0, 0, 1), height 420ms cubic-bezier(0.2, 0, 0, 1); }
+.ring:hover .ring__o { width: 17px; height: 17px; }
+.ring:focus-visible { outline: none; }
+.ring:focus-visible .ring__o { outline: 1px solid currentColor; outline-offset: 4px; }
+.is-library .ring { color: #fff; }
+
+/* The library: a link over each card, its name in the card's empty top corner, where the nav was. */
+.index { position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0; transition: opacity 300ms ease; }
+.index.is-open { opacity: 1; }
+.card { position: absolute; display: block; pointer-events: auto; color: var(--ink); }
+.card:focus-visible { outline: 1px solid #fff; outline-offset: 4px; }
+.card__label { position: absolute; left: 10px; top: 8px; font-size: 13px; font-weight: 500; line-height: normal; white-space: nowrap; opacity: .5; transition: opacity 300ms ease; }
+.card:hover .card__label, .card:focus-visible .card__label { opacity: 1; }
+
+/* A: the card you point at lifts a little; the rest of the wall dims. */
+.slot { transition: opacity 400ms ease; }
+/* Pages dim by brightness, not opacity: opacity is the engine's, to show only the page you're in close up. */
+.page { transition: transform 500ms cubic-bezier(0.2, 0, 0, 1), filter 400ms ease; }
+.page.is-lifted { transform: scale(1.04); z-index: 3 !important; }
+.stage.is-dim .slot { opacity: .3; }
+.stage.is-dim .page:not(.is-lifted) { filter: brightness(.4); }
+
+/* The lander: the question, the about, and Kyle's ethos in his format. One screen, no scroll. */
+.lander p + p, .lander .ethos { margin-top: 1.4em; }
+.ethos p + p { margin-top: 1.4em; }
+.ethos span { display: block; }
+
+/* The link: 1px line, 1px under the text, shown on hover. */
+.link { display: inline-flex; flex-direction: column; gap: 1px; line-height: normal; }
+.link::after { content: ""; height: 1px; background: var(--ink); opacity: 0; transition: opacity 150ms ease; }
+.link:hover::after, .link:focus-visible::after { opacity: 1; }
+.link:focus-visible { outline: none; }
+
+/* Screens: the page is laid out in window-height screens, as in the Figma. */
+.screen { min-height: var(--vh, 100vh); position: relative; display: flex; flex-direction: column; justify-content: center; }
+.statement { line-height: 1.4; }
+
+/* The drawn down-arrow: 14px, 1px, centered. */
+.down { position: absolute; left: 50%; bottom: 100px; width: 14px; height: 14px; margin-left: -7px; display: block; }
+.down svg { display: block; width: 14px; height: 14px; overflow: visible; }
+.down path { fill: none; stroke: var(--ink); stroke-width: 1; }
+
+/* Forms */
+.form { display: flex; flex-direction: column; gap: 30px; align-items: flex-start; transition: opacity 600ms ease; }
+.form__head { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+.fields { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+.field { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.field input, .field textarea {
+  width: 100%; line-height: normal; padding: 0 0 4px; border-bottom: 1px solid var(--ink);
+  outline: none; resize: none; display: block; overflow: hidden;
+}
+.field input:focus, .field textarea:focus { box-shadow: inset 0 -1px 0 var(--ink); }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); opacity: 1; }
+.field textarea { height: calc(1.2em + 5px); min-height: calc(1.2em + 5px); }
+.helper { font-size: 13px; font-weight: 500; line-height: normal; }
+.helper--error { display: none; }
+.field.is-invalid .helper--error { display: block; }
+.submit { line-height: normal; }
+
+.swap { position: relative; }
+.content .swap { width: 100%; }
+.confirm { position: absolute; left: 0; top: 0; width: 100%; opacity: 0; pointer-events: none; transition: opacity 600ms ease; }
+.swap.is-sent .form { opacity: 0; pointer-events: none; }
+.swap.is-sent .confirm { opacity: 1; pointer-events: auto; }
+
+/* Radios */
+.radios { display: flex; flex-direction: column; }
+.radio { display: flex; align-items: center; gap: 6px; line-height: 1.4; cursor: pointer; }
+.radio input { appearance: none; -webkit-appearance: none; width: 10px; height: 10px; border: 1px solid var(--ink); border-radius: 50%; margin: 0; flex: none; cursor: pointer; }
+.radio input:checked { background: var(--ink); }
+.radio input:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+
+/* Content pages: a bold title and copy. No back arrow: the circle is the one way around (Noah, Nov 13). */
+.content { display: flex; flex-direction: column; gap: 10px; }
+.prose p { line-height: 1.4; }
+.prose p + p { margin-top: 1.4em; }
+.blocks { display: flex; flex-direction: column; gap: 22px; }
+
+/* Wordmark and footer */
+.end { min-height: auto; justify-content: flex-end; padding: 160px var(--margin) var(--margin); }
+.wordmark { font-family: var(--font-display); font-weight: 800; letter-spacing: -.035em; line-height: 1; white-space: nowrap; font-size: 20vw; margin-bottom: .12em; }
+.footer { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px 60px; flex-wrap: wrap; }
+.footer__line { max-width: 330px; line-height: 1.4; }
+.footer__cols { display: flex; gap: 60px; flex-wrap: wrap; }
+.footer__col { display: flex; flex-direction: column; gap: 5px; }
+.footer__head { color: var(--muted); line-height: 1.6; }
+
+/* While the camera moves, nothing on the pages answers the pointer. */
+.veil { position: fixed; inset: 0; z-index: 10; display: none; cursor: default; }
+.veil.is-on { display: block; }
+
+@media (max-width: 600px) {
+  .end { padding: 120px 24px 32px; }
+  .footer__cols { gap: 32px; }
+}

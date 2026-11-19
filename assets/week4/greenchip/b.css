@@ -1,0 +1,14 @@
+/* Version B, restrained. The same system as A (../styles.css), with less of everything:
+   no wall of art, no stagger, nothing lifts or dims. Values from design-system/figma-tokens.css. */
+
+/* One blurred artwork behind the library, a different one each time it opens. */
+.ground { position: absolute; inset: 0; background: var(--wall); }
+.ground img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ground img:not([src]) { display: none; }
+.ground::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .2); }
+
+/* The card's name is a Figma link: black, and a 1px line under it on hover. */
+.card__label { opacity: 1; display: flex; flex-direction: column; gap: 1px; }
+.card__label::after { content: ""; height: 1px; background: currentColor; opacity: 0; transition: opacity 150ms ease; }
+.card:hover .card__label::after, .card:focus-visible .card__label::after { opacity: 1; }
+.card:focus-visible { outline: none; }

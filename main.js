@@ -136,7 +136,7 @@ run("fit", () => {
   const number = document.querySelector("[data-count-number]");
   if (number) {
     // The day of 30: two places, any it hasn't reached barely there
-    const digits = "21";
+    const digits = "28";
     setFlip(number.querySelector(".zeros"), "0".repeat(2 - digits.length));
     setFlip(number.querySelector("[data-count-digits]"), digits);
     fit(number, number.parentElement);
@@ -858,6 +858,23 @@ run("loops", () => {
     const dot = row.querySelector(".turn-dot");
     const times = row.dataset.turns.split(";").map((pair) => pair.split(",").map(Number));
     if (dot) turnDot(row, dot, times);
+  });
+});
+
+/* ---------- Week four: rows of small loops that play while they're on screen, and rest on their first frame ---------- */
+
+run("tiles", () => {
+  document.querySelectorAll("[data-tiles]").forEach((group) => {
+    const videos = [...group.querySelectorAll("video")];
+    if (!videos.length) return;
+    videos.forEach(sources);
+    new IntersectionObserver(
+      ([entry]) => {
+        const go = entry.isIntersecting && !calm.matches;
+        videos.forEach((v) => (go ? v.play().catch(() => {}) : v.pause()));
+      },
+      { threshold: 0.25 },
+    ).observe(group);
   });
 });
 

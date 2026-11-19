@@ -1267,5 +1267,49 @@ html:not(.js) .stack img { opacity: 1; transform: translate(var(--x), var(--y)) 
 @media (max-width: 719px) {
   .stack { width: 60vw; }
 }
+
+/* ---------- Week four: each day's main piece, then a row of what else was made or tried that day ---------- */
+
+.loop-screen { aspect-ratio: 16 / 10; } /* Day 25's recording, at the piece's own 1440 by 900 */
+.body a.inline { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.body a.inline:hover { color: var(--muted); }
+
+.words + .tried { margin-top: var(--space-8); }
+.tried > .label { padding-bottom: var(--space-4); }
+.tried-row, .work-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--count, 3), minmax(0, 1fr));
+  gap: var(--space-6) var(--space-4);
+  margin: 0; padding: 0;
+  list-style: none;
 }
+.work-grid { --count: 2; gap: var(--space-7) var(--space-5); }
+.tile {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #f4f4f4;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+}
+.work-grid .tile { aspect-ratio: 16 / 9; }
+.tile img, .tile video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tile-fit { background: #fff; }
+.tile-fit img { object-fit: contain; }
+.tried-t { padding-top: var(--space-3); font-size: var(--size-small); font-weight: var(--weight-medium); }
+.tried-b { color: var(--muted); font-size: var(--size-small); }
+
+/* Day 23: the lab as noaoh.com shows it, each piece's name fading in when you point at it */
+.lab .tile { background: #ececec; }
+.lab .tile video { object-fit: contain; }
+.lab .tried-t { opacity: 0; translate: 0 4px; transition: opacity var(--dur-fast) ease, translate var(--dur-fast) var(--ease); }
+.lab li:hover .tried-t, .lab li:focus-within .tried-t { opacity: 1; translate: 0 0; }
+@media (hover: none) { .lab .tried-t { opacity: 1; translate: 0 0; } }
+
+html[data-bands] .tile { z-index: 61; }
+
+@media (max-width: 719px) {
+  .tried-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5) var(--space-3); }
+  .work-grid { grid-template-columns: 1fr; gap: var(--space-6); }
+  .words + .tried { margin-top: var(--space-7); }
 }

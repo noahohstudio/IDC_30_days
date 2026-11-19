@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>greenchip</title>
+  <link rel="icon" href="favicon.png">
+  <link rel="stylesheet" href="fonts/inter-tight.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="b.css">
+</head>
+<body>
+  <!-- Version B, restrained: the same pages and the same circle, with less of everything. Nothing here is sent anywhere. -->
+  <div class="stage">
+    <!-- One blurred artwork behind the library, a different one each time. -->
+    <div class="ground" aria-hidden="true"><img alt=""></div>
+    <div class="world" id="world">
+
+      <section class="page" data-page="" aria-label="Welcome">
+        <div class="screen">
+          <div class="col lander" tabindex="-1" data-focus>
+            <p><b>How long do you want to make art for?</b></p>
+            <p>Today an artist runs their career across a dozen broken tools: one app for exposure, one to host a portfolio, one to ask for money, another to find gigs, a doc for the resume, a separate thread to get feedback. <b>greenchip</b> replaces that fragmented toolkit with a singular platform where dialogue, presentation, income, and opportunity coalesce.</p>
+            <p>Only a fraction of artists make a living from their art practice due to how the system functions today. <b>greenchip</b> is here to nurture community and challenge the idea of what a lasting art career looks like.</p>
+            <!-- Kyle's ethos, word for word, in his format (notes/2026-11-12-kyle-ethos.md). -->
+            <div class="ethos">
+              <p><span>WELCOME</span></p>
+              <p><span>WE</span><span>ENJOY</span><span>LISTENING</span><span>CONNECTING</span><span>OBSERVING</span><span>MAKING</span><span>EXCHANGING</span></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="join" aria-label="Join the wait list">
+        <div class="screen">
+          <div class="col swap" data-swap>
+            <form class="form" novalidate data-form>
+              <div class="form__head">
+                <p tabindex="-1" data-focus>Sign up to join the wait list.</p>
+                <div class="fields">
+                  <label class="field" data-required="name"><input type="text" name="fullName" placeholder="Full Name*" autocomplete="name" aria-label="Full name"><span class="helper helper--error">Add your name.</span></label>
+                  <label class="field" data-required="email"><input type="email" name="email" placeholder="Email Address*" autocomplete="email" aria-label="Email address"><span class="helper helper--error">That email doesn’t look right.</span></label>
+                  <label class="field"><input type="tel" name="phone" placeholder="Phone Number" autocomplete="tel" aria-label="Phone number"></label>
+                  <label class="field"><input type="text" name="disciplines" placeholder="Disciplines" aria-label="Disciplines"></label>
+                </div>
+              </div>
+              <button class="link submit" type="submit">Submit</button>
+            </form>
+            <p class="confirm" role="status">Confirmation and thank you.</p>
+          </div>
+          <button class="down" type="button" data-scroll="next" aria-label="Down to the end"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 0V13.5M2.5 9L7 13.5L11.5 9"/></svg></button>
+        </div>
+        <div data-footer></div>
+      </section>
+
+      <section class="page" data-page="contact" aria-label="Contact">
+        <div class="screen">
+          <div class="col content">
+            <div class="swap" data-swap>
+              <form class="form" novalidate data-form>
+                <div class="form__head">
+                  <p tabindex="-1" data-focus><b>Contact</b></p>
+                  <div class="fields">
+                    <label class="field" data-required="name"><input type="text" name="fullName" placeholder="Full Name*" autocomplete="name" aria-label="Full name"><span class="helper helper--error">Add your name.</span></label>
+                    <label class="field" data-required="email"><input type="email" name="email" placeholder="Email Address*" autocomplete="email" aria-label="Email address"><span class="helper helper--error">That email doesn’t look right.</span></label>
+                    <label class="field" data-required="text"><textarea name="message" rows="1" placeholder="Message*" aria-label="Message" data-grow></textarea><span class="helper helper--error">Add a message.</span></label>
+                  </div>
+                </div>
+                <button class="link submit" type="submit">Submit</button>
+              </form>
+              <p class="confirm" role="status">Confirmation and thank you.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="feedback" aria-label="Send feedback">
+        <div class="screen">
+          <div class="col content">
+            <div class="swap" data-swap>
+              <form class="form" novalidate data-form>
+                <div class="blocks">
+                  <div class="prose" tabindex="-1" data-focus>
+                    <p><b>Send feedback</b></p>
+                    <p>Message about feedback lorem ipsum dolor sit amet consectetur. At facilisi a in vitae diam interdum convallis viverra velit. Egestas viverra turpis fames vitae ornare adipiscing fermentum tellus sed.</p>
+                  </div>
+                  <fieldset class="radios" style="border:0">
+                    <legend><b>Type of feedback</b></legend>
+                    <label class="radio"><input type="radio" name="kind" value="Feature request" checked>Feature request</label>
+                    <label class="radio"><input type="radio" name="kind" value="Improvement/Suggestion">Improvement/Suggestion</label>
+                    <label class="radio"><input type="radio" name="kind" value="General feedback">General feedback</label>
+                  </fieldset>
+                  <div class="fields">
+                    <label class="field" data-required="text"><textarea name="description" rows="1" placeholder="Description*" aria-label="Description" data-grow></textarea><span class="helper helper--error">Add a description.</span></label>
+                    <label class="field"><input type="email" name="email" placeholder="Email" autocomplete="email" aria-label="Email, optional"><span class="helper">Leave this blank if you don’t wish to be contacted</span></label>
+                  </div>
+                </div>
+                <button class="link submit" type="submit">Submit</button>
+              </form>
+              <p class="confirm" role="status">Confirmation and thank you.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- The library: every page as a card. Shown only while stepped back. -->
+  <nav class="index" id="index" aria-label="Pages" hidden></nav>
+  <div class="veil" id="veil" aria-hidden="true"></div>
+  <!-- The one way around: a hairline circle. It steps back into the library and in again. -->
+  <button class="ring" id="ring" type="button" aria-label="All pages" aria-expanded="false"><span class="ring__o"></span></button>
+
+  <template id="footer">
+    <footer class="screen end">
+      <p class="wordmark" aria-hidden="true">greenchip</p>
+      <div class="footer">
+        <p class="footer__line">greenchip is a platform for artists to support their peers, share feedback, and build community.</p>
+        <div class="footer__cols">
+          <div class="footer__col"><span class="footer__head">Company</span><a class="link" href="#/">About</a><a class="link" href="https://www.instagram.com/greenchip.human/" target="_blank" rel="noopener">Instagram</a></div>
+          <div class="footer__col"><span class="footer__head">Support</span><a class="link" href="#/contact">Contact</a><a class="link" href="#/feedback">Send feedback</a></div>
+        </div>
+      </div>
+    </footer>
+  </template>
+
+  <script>
+    // Version B: no wall of art, no stagger, no lift; the other pages slide aside; one artwork behind the library; page to page passes through the library.
+    window.GC = { base: "", wall: false, stagger: false, ground: true, lift: false, pan: false, ethosArrives: false, leave: "slide", open: 760, close: 760, out: 560, in: 600 };
+  </script>
+  <script src="wall.js"></script>
+</body>
+</html>
