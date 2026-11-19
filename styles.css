@@ -1313,3 +1313,67 @@ html[data-bands] .tile { z-index: 61; }
   .work-grid { grid-template-columns: 1fr; gap: var(--space-6); }
   .words + .tried { margin-top: var(--space-7); }
 }
+
+/* Day 24: three haikus, each set the way it was written; their lines come in one after another */
+.haikus {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0; padding: 0;
+  list-style: none;
+}
+.haiku {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-5);
+  aspect-ratio: 4 / 3;
+  padding: var(--space-6) var(--space-5);
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+}
+.haiku p { margin: 0; }
+.haiku span { display: block; }
+.haiku-lines { line-height: 1.75; white-space: nowrap; } /* a haiku's lines never wrap */
+@media (min-width: 860px) { .haiku-lines { font-size: clamp(12px, 1.25vw, 16px); } }
+.haiku-by { font-size: var(--size-small); }
+
+/* Red pen on lined paper */
+.haiku-pen {
+  background: repeating-linear-gradient(to bottom, transparent 0 27px, rgb(118 140 170 / 0.16) 27px 28px), #fbfbf9;
+  background-position: 0 6px;
+  color: #c9302c;
+}
+.haiku-pen .haiku-by { align-self: flex-end; margin-right: 8%; }
+/* Chalk on a board */
+.haiku-chalk {
+  background: radial-gradient(ellipse 80% 70% at 72% 18%, rgb(120 112 96 / 0.35), transparent 70%), radial-gradient(ellipse 60% 50% at 20% 85%, rgb(255 255 255 / 0.04), transparent 70%), #262622;
+  color: rgb(240 239 230 / 0.86);
+  text-shadow: 0 0 1px rgb(255 255 255 / 0.4), 0 0 6px rgb(255 255 255 / 0.08);
+  letter-spacing: 0.02em;
+}
+.haiku-chalk .haiku-by { align-self: flex-end; margin-right: 10%; }
+/* In print, on a gray-green card */
+.haiku-print {
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, #c6c8bc, #a8aa9e);
+  color: #1f201d;
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js .haikus .haiku span { opacity: 0; translate: 0 6px; filter: blur(2px); }
+  .piece[data-shown] .haikus .haiku span {
+    opacity: 1; translate: 0 0; filter: blur(0);
+    transition: opacity 700ms var(--ease), translate 700ms var(--ease), filter 700ms var(--ease);
+    transition-delay: calc(300ms + var(--h) * 450ms + var(--l) * 320ms);
+  }
+}
+html[data-bands] .haiku { z-index: 61; }
+
+/* Day 26: a still at its own shape */
+.still { margin: 0; aspect-ratio: var(--ar, 16 / 10); overflow: hidden; background: #f4f4f4; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 40px rgb(0 0 0 / 0.07); }
+.still img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+@media (max-width: 859px) {
+  .haikus { grid-template-columns: 1fr; gap: var(--space-3); }
+  .haiku { aspect-ratio: auto; min-height: 240px; }
+}
