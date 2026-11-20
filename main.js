@@ -520,11 +520,9 @@ run("lightbox", () => {
   const box = document.createElement("dialog");
   box.className = "lightbox";
   box.setAttribute("aria-label", "Photo");
-  box.innerHTML = '<div class="lightbox-veil"></div><img alt=""><div class="lightbox-card" hidden></div><button type="button" class="lightbox-close">Close</button>';
+  box.innerHTML = '<div class="lightbox-veil"></div><img alt=""><button type="button" class="lightbox-close">Close</button>';
   document.body.append(box);
   const big = box.querySelector("img");
-  const holder = box.querySelector(".lightbox-card"); // Day 24's haikus open here: a copy of the card, drawn large
-  let shown = big; // whichever is large: the photo, or the card
   const chrome = [box.querySelector(".lightbox-veil"), box.querySelector(".lightbox-close")];
   const MOTION = { duration: 440, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" };
   let from = null; // the small photo it opened from: hidden while it's large, so there's only ever one of it
@@ -535,11 +533,11 @@ run("lightbox", () => {
   const move = (out) => {
     if (calm.matches) return [];
     const a = from.getBoundingClientRect();
-    const b = shown.getBoundingClientRect();
+    const b = big.getBoundingClientRect();
     const there = { transform: `translate(${a.left + a.width / 2 - (b.left + b.width / 2)}px, ${a.top + a.height / 2 - (b.top + b.height / 2)}px) scale(${a.width / b.width})` };
     const here = { transform: "none" };
     return [
-      shown.animate(out ? [here, there] : [there, here], MOTION),
+      big.animate(out ? [here, there] : [there, here], MOTION),
       ...chrome.map((el) => el.animate(out ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 0 }, { opacity: 1 }], MOTION)),
     ];
   };
@@ -548,28 +546,12 @@ run("lightbox", () => {
   const open = async (button) => {
     if (busy || box.open) return;
     busy = true;
-    const photo = button.querySelector("img");
-    if (photo) {
-      from = photo;
-      shown = big;
-      big.src = photo.currentSrc || photo.src;
-      big.alt = photo.alt;
-      box.setAttribute("aria-label", "Photo");
-      try {
-        await big.decode(); // ready before it shows, so it never appears first and moves after
-      } catch {}
-    } else {
-      // A card, not a photo: the large one is a copy of it, sized by its own width, so it's the same card scaled up
-      from = button;
-      const card = document.createElement("div");
-      card.className = button.className;
-      card.innerHTML = button.innerHTML;
-      holder.replaceChildren(card);
-      shown = card;
-      box.setAttribute("aria-label", "Haiku");
-    }
-    big.hidden = shown !== big;
-    holder.hidden = shown === big;
+    from = button.querySelector("img");
+    big.src = from.currentSrc || from.src;
+    big.alt = from.alt;
+    try {
+      await big.decode(); // ready before it shows, so it never appears first and moves after
+    } catch {}
     box.showModal();
     const animations = move(false);
     from.style.visibility = "hidden";

@@ -10,10 +10,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="styles.css?v=d06fce25">
+<link rel="stylesheet" href="styles.css?v=a6d07b98">
 <script>document.documentElement.classList.add("js");setTimeout(function(){var r=document.documentElement;if(!("ready" in r.dataset))r.classList.remove("js")},4000)</script>
 <script type="importmap">{ "imports": { "three": "./vendor/three.module.js", "opentype.js": "./vendor/opentype.module.js" } }</script>
-<script type="module" src="main.js?v=d881477d"></script>
+<script type="module" src="main.js?v=93b68d4b"></script>
 </head>
 <body>
 
@@ -842,26 +842,15 @@
         <p class="body">The idea, the pick, the cards, the dial, the table and the versions each went through their rounds alone, so each could be judged on its own. These are where they landed.</p>
       </div>
 
-      <!-- Three haikus, each set the way it was written: red pen on lined paper, chalk on a board, and in print -->
-      <div class="piece" data-reveal>
-        <ul class="haikus">
-          <li style="--h: 0"><button type="button" class="haiku haiku-pen" data-zoom aria-label="Open the haiku: my name rings at dawn">
-            <span class="haiku-lines"><span style="--l: 0">my name rings at dawn.</span><span style="--l: 1">I look to my left, then right.</span><span style="--l: 2">my name rings again.</span></span>
-            <span class="haiku-by"><span style="--l: 3">– a haiku by noah oh</span></span>
-          </button></li>
-          <li style="--h: 1"><button type="button" class="haiku haiku-chalk" data-zoom aria-label="Open the haiku: mike's class is at 2">
-            <span class="haiku-lines"><span style="--l: 0">mike's class is at 2</span><span style="--l: 1">everyone gather around</span><span style="--l: 2">lets learn about shapes.</span></span>
-            <span class="haiku-by"><span style="--l: 3">a haiku by Noah</span></span>
-          </button></li>
-          <li style="--h: 2"><button type="button" class="haiku haiku-print" data-zoom aria-label="Open the haiku: Thank you for the time">
-            <span class="haiku-lines"><span style="--l: 0">Thank you for the time,</span><span style="--l: 1">I appreciated it.</span><span style="--l: 2">Goodbye fellow friends</span></span>
-            <span class="haiku-by"><span style="--l: 3">A haiku by</span><span style="--l: 3">noah oh</span></span>
-          </button></li>
-        </ul>
+      <!-- Three haikus, as they were written: they slide up into place, and open large when clicked, like Day 16's photos -->
+      <div class="piece haikus">
+        <button type="button" class="zoomable" data-zoom data-rise style="--k: 0" aria-label="Open the haiku: my name rings at dawn"><img src="assets/week4/haiku/haiku-pen.jpg" alt="A haiku in red pen on lined paper: my name rings at dawn. I look to my left, then right. my name rings again. A haiku by noah oh" style="--ar: 4 / 3" loading="lazy"></button>
+        <button type="button" class="zoomable" data-zoom data-rise style="--k: 1" aria-label="Open the haiku: mike's class is at 2"><img src="assets/week4/haiku/haiku-chalk.jpg" alt="A haiku in chalk on a blackboard: mike's class is at 2, everyone gather around, lets learn about shapes. A haiku by Noah" style="--ar: 4 / 3" loading="lazy"></button>
+        <button type="button" class="zoomable" data-zoom data-rise style="--k: 2" aria-label="Open the haiku: Thank you for the time"><img src="assets/week4/haiku/haiku-print.jpg" alt="A haiku in print, in italics on gray: Thank you for the time, I appreciated it. Goodbye fellow friends. A haiku by noah oh" style="--ar: 4 / 3" loading="lazy"></button>
       </div>
       <div class="words" data-reveal>
         <p class="label">Haikus</p>
-        <h3 class="headline"><span data-flip>Three haikus: one in red pen, one in chalk, one in print.</span></h3>
+        <h3 class="headline"><span data-flip>Three haikus: one in red pen, one in chalk, one in print.</span><span class="mark" data-mark="Click one to open it."></span></h3>
       </div>
 
       <div class="piece" data-reveal>
