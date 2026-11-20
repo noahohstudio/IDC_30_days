@@ -1314,7 +1314,8 @@ html[data-bands] .tile { z-index: 61; }
   .words + .tried { margin-top: var(--space-7); }
 }
 
-/* Day 24: three haikus, each set the way it was written; their lines come in one after another */
+/* Day 24: three haikus, each set the way it was written; their lines come in one after another. Everything in a card is
+   sized by the card's own width, so opened large (main.js, the lightbox) it's the same card, only bigger. */
 .haikus {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1322,25 +1323,28 @@ html[data-bands] .tile { z-index: 61; }
   margin: 0; padding: 0;
   list-style: none;
 }
+.haikus li { container-type: inline-size; }
 .haiku {
   position: relative;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-5);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7cqw;
+  width: 100%;
   aspect-ratio: 4 / 3;
-  padding: var(--space-6) var(--space-5);
+  padding: 8cqw 7cqw;
   overflow: hidden;
+  border: 0;
+  font: inherit;
   text-align: center;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
 }
-.haiku p { margin: 0; }
 .haiku span { display: block; }
-.haiku-lines { line-height: 1.75; white-space: nowrap; } /* a haiku's lines never wrap */
-@media (min-width: 860px) { .haiku-lines { font-size: clamp(12px, 1.25vw, 16px); } }
-.haiku-by { font-size: var(--size-small); }
+.haiku-lines { font-size: 4.7cqw; line-height: 1.75; white-space: nowrap; } /* a haiku's lines never wrap */
+.haiku-by { font-size: 3.8cqw; line-height: 1.5; }
+button.haiku { cursor: zoom-in; transition: translate 300ms var(--ease), box-shadow 300ms var(--ease); }
+button.haiku:hover, button.haiku:focus-visible { translate: 0 -3px; box-shadow: 0 2px 4px rgb(0 0 0 / 0.05), 0 20px 50px rgb(0 0 0 / 0.12); }
 
-/* Red pen on lined paper */
+/* Red pen on lined paper: eleven rules down the card, at any size */
 .haiku-pen {
-  background: repeating-linear-gradient(to bottom, transparent 0 27px, rgb(118 140 170 / 0.16) 27px 28px), #fbfbf9;
-  background-position: 0 6px;
+  background: linear-gradient(to bottom, transparent calc(100% - 1px), rgb(118 140 170 / 0.18) calc(100% - 1px)) 0 0 / 100% 9.09% repeat-y, #fbfbf9;
   color: #c9302c;
 }
 .haiku-pen .haiku-by { align-self: flex-end; margin-right: 8%; }
@@ -1360,8 +1364,8 @@ html[data-bands] .tile { z-index: 61; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html.js .haikus .haiku span { opacity: 0; translate: 0 6px; filter: blur(2px); }
-  .piece[data-shown] .haikus .haiku span {
+  html.js .haikus .haiku span span { opacity: 0; translate: 0 6px; filter: blur(2px); }
+  .piece[data-shown] .haikus .haiku span span {
     opacity: 1; translate: 0 0; filter: blur(0);
     transition: opacity 700ms var(--ease), translate 700ms var(--ease), filter 700ms var(--ease);
     transition-delay: calc(300ms + var(--h) * 450ms + var(--l) * 320ms);
@@ -1369,11 +1373,15 @@ html[data-bands] .tile { z-index: 61; }
 }
 html[data-bands] .haiku { z-index: 61; }
 
+/* Opened large: the same card, as wide as the screen allows at its 4 by 3 */
+.lightbox-card { position: relative; z-index: 1; container-type: inline-size; width: min(calc(100vw - 2 * var(--gutter)), calc((100svh - 120px) * 4 / 3), 880px); }
+.lightbox-card[hidden], .lightbox img[hidden] { display: none; }
+.lightbox-card .haiku { box-shadow: 0 2px 6px rgb(0 0 0 / 0.06), 0 30px 90px rgb(0 0 0 / 0.18); }
+
 /* Day 26: a still at its own shape */
 .still { margin: 0; aspect-ratio: var(--ar, 16 / 10); overflow: hidden; background: #f4f4f4; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 40px rgb(0 0 0 / 0.07); }
 .still img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 @media (max-width: 859px) {
   .haikus { grid-template-columns: 1fr; gap: var(--space-3); }
-  .haiku { aspect-ratio: auto; min-height: 240px; }
 }
